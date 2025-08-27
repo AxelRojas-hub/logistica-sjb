@@ -48,7 +48,7 @@ export default function AdminPage() {
     return (
         <TooltipProvider>
             <div className="min-h-screen bg-background pt-4 flex flex-col">
-                <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+                <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8">
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-foreground">Panel de Administración</h1>
                         <p className="mt-2 text-muted-foreground">Selecciona una opción para continuar</p>
@@ -217,10 +217,8 @@ export default function AdminPage() {
                                     <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
                                         <h2 className="text-2xl font-semibold text-foreground">Gestión de Comercios</h2>
                                         <div className="flex gap-2 w-full sm:w-auto">
-                                            <Input placeholder="Buscar comercio..." className="flex-1 sm:w-64" />
-                                            <Button variant="outline" size="sm" className="shrink-0">
-                                                <Search className="h-4 w-4" />
-                                            </Button>
+                                            <Input placeholder="Buscar comercio..." className="w-full sm:w-64" />
+
                                         </div>
                                     </div>
 
@@ -238,93 +236,95 @@ export default function AdminPage() {
                                         </div>
                                     </div>
 
-                                    <Card className="overflow-hidden">
-                                        <Table>
-                                            <TableHeader>
-                                                <TableRow>
-                                                    <TableHead className="w-[200px]">Nombre</TableHead>
-                                                    <TableHead className="w-[180px]">Contacto</TableHead>
-                                                    <TableHead className="w-[150px]">Contrato</TableHead>
-                                                    <TableHead className="w-[180px]">Estado Financiero</TableHead>
-                                                    <TableHead className="w-[120px]">Acciones</TableHead>
-                                                </TableRow>
-                                            </TableHeader>
-                                            <TableBody>
-                                                {mockBusinesses.map((business) => (
-                                                    <TableRow key={business.id} className="hover:bg-accent/50">
-                                                        <TableCell>
-                                                            <div>
-                                                                <p className="font-medium text-sm truncate max-w-[180px]" title={business.name}>
-                                                                    {business.name}
-                                                                </p>
-                                                                <div className="flex items-center gap-2 mt-1">
-                                                                    <Badge className={getStatusColor(business.status)} variant="outline">
-                                                                        {business.status}
-                                                                    </Badge>
-                                                                </div>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <div>
-                                                                <p className="text-sm truncate max-w-[160px]" title={business.email}>
-                                                                    {business.email}
-                                                                </p>
-                                                                <p className="text-xs text-muted-foreground truncate max-w-[160px]" title={business.fiscalAddress}>
-                                                                    {business.fiscalAddress}
-                                                                </p>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <div>
-                                                                <p className="text-sm font-medium">{business.contractDuration}</p>
-                                                                <p className="text-xs text-muted-foreground">
-                                                                    {business.services.length} servicios
-                                                                </p>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <div>
-                                                                <p className="text-sm font-medium">
-                                                                    ${business.totalDebt.toLocaleString()}
-                                                                </p>
-                                                                <div className="flex items-center gap-1 mt-1">
-                                                                    {business.pendingInvoices > 0 && (
-                                                                        <Badge variant="destructive" className="text-xs">
-                                                                            <AlertTriangle className="h-3 w-3 mr-1" />
-                                                                            {business.pendingInvoices} pendientes
-                                                                        </Badge>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        </TableCell>
-                                                        <TableCell>
-                                                            <div className="flex gap-1">
-                                                                <Tooltip>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Button variant="outline" size="sm">
-                                                                            <Eye className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p>Ver detalles del comercio</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                                <Tooltip>
-                                                                    <TooltipTrigger asChild>
-                                                                        <Button variant="outline" size="sm">
-                                                                            <FileText className="h-4 w-4" />
-                                                                        </Button>
-                                                                    </TooltipTrigger>
-                                                                    <TooltipContent>
-                                                                        <p>Historial de pedidos</p>
-                                                                    </TooltipContent>
-                                                                </Tooltip>
-                                                            </div>
-                                                        </TableCell>
+                                    <Card className="overflow-hidden w-full">
+                                        <div className="overflow-x-auto">
+                                            <Table className="w-full">
+                                                <TableHeader>
+                                                    <TableRow>
+                                                        <TableHead >Nombre</TableHead>
+                                                        <TableHead >Contacto</TableHead>
+                                                        <TableHead >Contrato</TableHead>
+                                                        <TableHead >Estado</TableHead>
+                                                        <TableHead >Acciones</TableHead>
                                                     </TableRow>
-                                                ))}
-                                            </TableBody>
-                                        </Table>
+                                                </TableHeader>
+                                                <TableBody>
+                                                    {mockBusinesses.map((business) => (
+                                                        <TableRow key={business.id} className="hover:bg-accent/50">
+                                                            <TableCell>
+                                                                <div>
+                                                                    <p className="font-medium text-sm truncate max-w-[180px]" title={business.name}>
+                                                                        {business.name}
+                                                                    </p>
+                                                                    <div className="flex items-center gap-2 mt-1">
+                                                                        <Badge className={getStatusColor(business.status)} variant="outline">
+                                                                            {business.status}
+                                                                        </Badge>
+                                                                    </div>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div>
+                                                                    <p className="text-sm truncate max-w-[160px]" title={business.email}>
+                                                                        {business.email}
+                                                                    </p>
+                                                                    <p className="text-xs text-muted-foreground truncate max-w-[160px]" title={business.fiscalAddress}>
+                                                                        {business.fiscalAddress}
+                                                                    </p>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div>
+                                                                    <p className="text-sm font-medium">{business.contractDuration}</p>
+                                                                    <p className="text-xs text-muted-foreground">
+                                                                        {business.services.length} servicios
+                                                                    </p>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div>
+                                                                    <p className="text-sm font-medium">
+                                                                        ${business.totalDebt.toLocaleString()}
+                                                                    </p>
+                                                                    <div className="flex items-center gap-1 mt-1">
+                                                                        {business.pendingInvoices > 0 && (
+                                                                            <Badge variant="destructive" className="text-xs">
+                                                                                <AlertTriangle className="h-3 w-3 mr-1" />
+                                                                                {business.pendingInvoices}
+                                                                            </Badge>
+                                                                        )}
+                                                                    </div>
+                                                                </div>
+                                                            </TableCell>
+                                                            <TableCell>
+                                                                <div className="flex gap-1">
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button variant="outline" size="sm">
+                                                                                <Eye className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <p>Ver detalles del comercio</p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                    <Tooltip>
+                                                                        <TooltipTrigger asChild>
+                                                                            <Button variant="outline" size="sm">
+                                                                                <FileText className="h-4 w-4" />
+                                                                            </Button>
+                                                                        </TooltipTrigger>
+                                                                        <TooltipContent>
+                                                                            <p>Historial de pedidos</p>
+                                                                        </TooltipContent>
+                                                                    </Tooltip>
+                                                                </div>
+                                                            </TableCell>
+                                                        </TableRow>
+                                                    ))}
+                                                </TableBody>
+                                            </Table>
+                                        </div>
                                     </Card>
                                 </div>
                             )}
