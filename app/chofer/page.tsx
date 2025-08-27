@@ -112,7 +112,7 @@ export default function ChoferPage() {
 
     return (
         <TooltipProvider>
-            <div className="min-h-[80dvh] bg-background flex flex-col">
+            <div className="h-screen bg-background flex flex-col">
                 {!activeDriverSection ? (
                     // Menu Inicial - Pantalla completa centrada
                     <div className="flex-1 flex flex-col items-center justify-center px-4">

@@ -279,24 +279,24 @@ export default function ComercioPage() {
                                     </Dialog>
                                 </div>
 
-                                <Card>
+                                <Card className="overflow-hidden">
                                     <Table>
                                         <TableHeader>
                                             <TableRow>
-                                                <TableHead>Destinatario</TableHead>
-                                                <TableHead>Estado</TableHead>
-                                                <TableHead>Entrega Estimada</TableHead>
-                                                <TableHead>Monto</TableHead>
-                                                <TableHead>Acciones</TableHead>
+                                                <TableHead className="w-[200px]">Destinatario</TableHead>
+                                                <TableHead className="w-[120px]">Estado</TableHead>
+                                                <TableHead className="w-[150px]">Entrega Estimada</TableHead>
+                                                <TableHead className="w-[120px]">Monto</TableHead>
+                                                <TableHead className="w-[120px]">Acciones</TableHead>
                                             </TableRow>
                                         </TableHeader>
                                         <TableBody>
                                             {orders.map((order) => (
                                                 <TableRow key={order.id} className="hover:bg-accent/50">
-                                                    <TableCell>
+                                                    <TableCell className="font-medium">
                                                         <div>
                                                             <p className="font-medium">{order.recipient}</p>
-                                                            <p className="text-sm text-gray-500">{order.phone}</p>
+                                                            <p className="text-sm text-muted-foreground">{order.phone}</p>
                                                         </div>
                                                     </TableCell>
                                                     <TableCell>
@@ -305,7 +305,7 @@ export default function ComercioPage() {
                                                         </Badge>
                                                     </TableCell>
                                                     <TableCell>{order.estimatedDelivery}</TableCell>
-                                                    <TableCell className="font-medium">
+                                                    <TableCell className="font-bold text-lg">
                                                         ${order.totalAmount.toLocaleString()}
                                                     </TableCell>
                                                     <TableCell>
@@ -595,7 +595,7 @@ export default function ComercioPage() {
                                         </div>
 
                                         <div className="flex gap-2 pt-4 border-t">
-                                            <Button className="bg-blue-600 hover:bg-blue-700">
+                                            <Button className="dark:text-white bg-blue-600 hover:bg-blue-700">
                                                 Renovar Contrato
                                             </Button>
                                             <Button variant="outline">
