@@ -207,11 +207,11 @@ export default function AdminPage() {
                         {/* Comercios Section */}
                         {activeSection === "comercios" && (
                             <div className="space-y-6">
-                                <div className="flex justify-between items-center">
+                                <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
                                     <h2 className="text-2xl font-semibold text-foreground">Gestión de Comercios</h2>
-                                    <div className="flex gap-2">
-                                        <Input placeholder="Buscar comercio..." className="w-64" />
-                                        <Button variant="outline" size="sm">
+                                    <div className="flex gap-2 w-full sm:w-auto">
+                                        <Input placeholder="Buscar comercio..." className="flex-1 sm:w-64" />
+                                        <Button variant="outline" size="sm" className="shrink-0">
                                             <Search className="h-4 w-4" />
                                         </Button>
                                     </div>
@@ -221,34 +221,35 @@ export default function AdminPage() {
                                     {mockBusinesses.map((business) => (
                                         <Card key={business.id} className="hover:shadow-md transition-shadow">
                                             <CardHeader>
-                                                <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <CardTitle className="text-xl">{business.name}</CardTitle>
-                                                        <CardDescription>{business.email}</CardDescription>
+                                                <div className="flex flex-col gap-3 sm:flex-row sm:justify-between sm:items-start">
+                                                    <div className="min-w-0 flex-1">
+                                                        <CardTitle className="text-xl truncate">{business.name}</CardTitle>
+                                                        <CardDescription className="truncate">{business.email}</CardDescription>
                                                     </div>
-                                                    <div className="flex items-center gap-2">
+                                                    <div className="flex flex-wrap items-center gap-2 shrink-0">
                                                         <Badge className={getStatusColor(business.status)}>{business.status}</Badge>
                                                         {business.pendingInvoices > 0 && (
-                                                            <Badge variant="destructive">
+                                                            <Badge variant="destructive" className="text-xs">
                                                                 <AlertTriangle className="h-3 w-3 mr-1" />
-                                                                {business.pendingInvoices} facturas pendientes
+                                                                <span className="hidden sm:inline">{business.pendingInvoices} facturas pendientes</span>
+                                                                <span className="sm:hidden">{business.pendingInvoices} pendientes</span>
                                                             </Badge>
                                                         )}
                                                     </div>
                                                 </div>
                                             </CardHeader>
                                             <CardContent className="space-y-4">
-                                                <div className="grid md:grid-cols-2 gap-4">
+                                                <div className="grid gap-4 lg:grid-cols-2">
                                                     <div>
                                                         <h4 className="font-medium mb-2">Información General</h4>
                                                         <div className="space-y-1 text-sm">
-                                                            <p>
+                                                            <p className="break-words">
                                                                 <span className="text-gray-500">Dirección:</span> {business.fiscalAddress}
                                                             </p>
                                                             <p>
                                                                 <span className="text-gray-500">Contrato:</span> {business.contractDuration}
                                                             </p>
-                                                            <p>
+                                                            <p className="break-words">
                                                                 <span className="text-gray-500">Servicios:</span> {business.services.join(", ")}
                                                             </p>
                                                         </div>
@@ -266,18 +267,20 @@ export default function AdminPage() {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="flex gap-2 pt-2 border-t">
-                                                    <Button variant="outline" size="sm">
+                                                <div className="flex flex-col gap-2 pt-2 border-t sm:flex-row">
+                                                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
                                                         <Eye className="h-4 w-4 mr-2" />
                                                         Ver Detalles
                                                     </Button>
-                                                    <Button variant="outline" size="sm">
+                                                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
                                                         <FileText className="h-4 w-4 mr-2" />
-                                                        Historial Pedidos
+                                                        <span className="hidden sm:inline">Historial Pedidos</span>
+                                                        <span className="sm:hidden">Pedidos</span>
                                                     </Button>
-                                                    <Button variant="outline" size="sm">
+                                                    <Button variant="outline" size="sm" className="w-full sm:w-auto">
                                                         <DollarSign className="h-4 w-4 mr-2" />
-                                                        Historial Facturación
+                                                        <span className="hidden sm:inline">Historial Facturación</span>
+                                                        <span className="sm:hidden">Facturación</span>
                                                     </Button>
                                                 </div>
                                             </CardContent>
