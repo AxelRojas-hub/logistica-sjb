@@ -190,7 +190,7 @@ export default function ComercioPage() {
                                                 Crear Nuevo Pedido
                                             </Button>
                                         </DialogTrigger>
-                                        <DialogContent className="max-w-2xl">
+                                        <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                                             <DialogHeader>
                                                 <DialogTitle>Crear Nuevo Pedido</DialogTitle>
                                                 <DialogDescription>
@@ -316,7 +316,7 @@ export default function ComercioPage() {
                                                                         <Eye className="h-4 w-4" />
                                                                     </Button>
                                                                 </DialogTrigger>
-                                                                <DialogContent>
+                                                                <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                                                                     <DialogHeader>
                                                                         <DialogTitle>Detalles del Pedido {selectedOrder?.id}</DialogTitle>
                                                                     </DialogHeader>
