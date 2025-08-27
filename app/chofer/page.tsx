@@ -112,7 +112,7 @@ export default function ChoferPage() {
 
     return (
         <TooltipProvider>
-            <div className="h-screen bg-background flex flex-col overflow-hidden">
+            <div className="min-h-[80dvh] bg-background flex flex-col">
                 {!activeDriverSection ? (
                     // Menu Inicial - Pantalla completa centrada
                     <div className="flex-1 flex flex-col items-center justify-center px-4">
@@ -178,21 +178,18 @@ export default function ChoferPage() {
 
                             {/* Pedidos Section */}
                             {activeDriverSection === "pedidos" && (
-                                <div className="space-y-6">
-                                    <div className="flex justify-between items-center">
+                                <div className="flex-1">
+                                    <div className="flex justify-between items-center mb-4">
                                         <h2 className="text-2xl font-semibold text-foreground">Pedidos Asignados</h2>
-                                        <Badge variant="outline" className="text-lg px-3 py-1">
-                                            {getFilteredOrders().filter((order) => order.status === "pendiente").length} pedidos pendientes
-                                        </Badge>
                                     </div>
 
-                                    <Card>
+                                    <Card className="overflow-hidden">
                                         <CardHeader>
-                                            <div className="flex justify-between items-center">
+                                            <div className="flex flex-col gap-4 lg:flex-row lg:justify-between lg:items-center">
                                                 <div>
                                                     <CardTitle>Lista de Pedidos a Domicilio</CardTitle>
                                                     <CardDescription>
-                                                        Pedidos ordenados alfabéticamente por barrio - Sucursal actual:{" "}
+                                                        Sucursal actual:{" "}
                                                         {mockCurrentRoute.currentBranch}
                                                     </CardDescription>
                                                 </div>
@@ -201,14 +198,14 @@ export default function ChoferPage() {
                                                         placeholder="Buscar por barrio..."
                                                         value={neighborhoodFilter}
                                                         onChange={(e) => setNeighborhoodFilter(e.target.value)}
-                                                        className="w-48"
+                                                        className="w-full max-w-xs lg:w-48"
                                                     />
-                                                    <Search className="h-4 w-4 text-gray-400" />
+                                                    <Search className="h-4 w-4 text-gray-400 flex-shrink-0" />
                                                 </div>
                                             </div>
                                             <div className="bg-accent/50 p-3 rounded-lg">
                                                 <h4 className="text-sm font-medium text-muted-foreground mb-2">Glosario de Acciones:</h4>
-                                                <div className="flex items-center gap-4 text-xs text-gray-600">
+                                                <div className="dark:text-gray-300 flex flex-wrap items-center gap-2 lg:gap-4 text-xs text-gray-600">
                                                     <div className="flex items-center gap-1">
                                                         <Eye className="h-3 w-3" />
                                                         <span>Ver pedido</span>
@@ -224,26 +221,26 @@ export default function ChoferPage() {
                                                 </div>
                                             </div>
                                         </CardHeader>
-                                        <CardContent>
-                                            <div>
-                                                <table className="w-full">
+                                        <CardContent className="p-0">
+                                            <div className="overflow-x-auto">
+                                                <table className="w-full min-w-[800px]">
                                                     <thead>
-                                                        <tr className="border-b">
-                                                            <th className="text-left py-3 px-2 font-medium text-foreground">Pedido</th>
-                                                            <th className="text-left py-3 px-2 font-medium text-foreground">Estado</th>
-                                                            <th className="text-left py-3 px-2 font-medium text-foreground">Barrio</th>
-                                                            <th className="text-left py-3 px-2 font-medium text-foreground">Destinatario</th>
-                                                            <th className="text-left py-3 px-2 font-medium text-foreground">Ubicación</th>
-                                                            <th className="text-left py-3 px-2 font-medium text-foreground">Acciones</th>
+                                                        <tr className="border-b bg-muted/30">
+                                                            <th className="text-left py-3 px-3 font-medium text-foreground w-[100px]">Pedido</th>
+                                                            <th className="text-left py-3 px-3 font-medium text-foreground w-[110px]">Estado</th>
+                                                            <th className="text-left py-3 px-3 font-medium text-foreground w-[120px]">Barrio</th>
+                                                            <th className="text-left py-3 px-3 font-medium text-foreground min-w-[150px]">Destinatario</th>
+                                                            <th className="text-left py-3 px-3 font-medium text-foreground min-w-[200px]">Ubicación</th>
+                                                            <th className="text-left py-3 px-3 font-medium text-foreground w-[120px]">Acciones</th>
                                                         </tr>
                                                     </thead>
                                                     <tbody>
                                                         {getFilteredOrders().map((order, index) => (
                                                             <tr key={order.id} className="border-b hover:bg-accent/50">
-                                                                <td className="py-4 px-4">
+                                                                <td className="py-3 px-3">
                                                                     <span className="font-mono text-sm">{order.id}</span>
                                                                 </td>
-                                                                <td className="py-4 px-4">
+                                                                <td className="py-3 px-3">
                                                                     <Badge className={getStatusColor(order.status)}>
                                                                         {order.status === "pendiente"
                                                                             ? "Pendiente"
@@ -254,21 +251,21 @@ export default function ChoferPage() {
                                                                                     : order.status}
                                                                     </Badge>
                                                                 </td>
-                                                                <td className="py-4 px-4">
+                                                                <td className="py-3 px-3">
                                                                     <Badge variant="outline" className="text-sm">
                                                                         {order.neighborhood}
                                                                     </Badge>
                                                                 </td>
-                                                                <td className="py-4 px-4">
+                                                                <td className="py-3 px-3">
                                                                     <div>
-                                                                        <p className="font-medium text-sm">{order.recipient}</p>
-                                                                        <p className="text-xs text-gray-500">{order.phone}</p>
+                                                                        <p className="font-medium text-sm truncate max-w-[140px]">{order.recipient}</p>
+                                                                        <p className="text-xs text-gray-500 truncate max-w-[140px]">{order.phone}</p>
                                                                     </div>
                                                                 </td>
-                                                                <td className="py-4 px-4">
-                                                                    <p className="text-sm text-foreground">{order.address}</p>
+                                                                <td className="py-3 px-3">
+                                                                    <p className="text-sm text-foreground truncate max-w-[180px]" title={order.address}>{order.address}</p>
                                                                 </td>
-                                                                <td className="py-4 px-4">
+                                                                <td className="py-3 px-3">
                                                                     <div className="flex gap-1">
                                                                         <Dialog>
                                                                             <DialogTrigger asChild>
@@ -290,7 +287,7 @@ export default function ChoferPage() {
                                                                                     </Tooltip>
                                                                                 </div>
                                                                             </DialogTrigger>
-                                                                            <DialogContent className="backdrop-blur-sm bg-white/95">
+                                                                            <DialogContent className="backdrop-blur-sm bg-background/95 border max-h-[90vh] overflow-y-auto">
                                                                                 <DialogHeader>
                                                                                     <DialogTitle>Detalles del Pedido {selectedOrder?.id}</DialogTitle>
                                                                                     <DialogDescription>
@@ -299,39 +296,39 @@ export default function ChoferPage() {
                                                                                 </DialogHeader>
                                                                                 {selectedOrder && (
                                                                                     <div className="grid gap-4">
-                                                                                        <div className="grid grid-cols-2 gap-4">
+                                                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                                                                             <div>
-                                                                                                <h4 className="font-medium mb-1">Destinatario</h4>
-                                                                                                <p className="text-sm">{selectedOrder.recipient}</p>
-                                                                                                <p className="text-xs text-gray-500">{selectedOrder.phone}</p>
+                                                                                                <h4 className="font-medium mb-1 text-foreground">Destinatario</h4>
+                                                                                                <p className="text-sm text-foreground">{selectedOrder.recipient}</p>
+                                                                                                <p className="text-xs text-muted-foreground">{selectedOrder.phone}</p>
                                                                                             </div>
                                                                                             <div>
-                                                                                                <h4 className="font-medium mb-1">Ubicación</h4>
-                                                                                                <p className="text-sm">{selectedOrder.address}</p>
-                                                                                                <p className="text-xs text-gray-500">{selectedOrder.neighborhood}</p>
-                                                                                            </div>
-                                                                                        </div>
-                                                                                        <div>
-                                                                                            <h4 className="font-medium mb-1">Comercio</h4>
-                                                                                            <p className="text-sm">{selectedOrder.business}</p>
-                                                                                        </div>
-                                                                                        <div>
-                                                                                            <h4 className="font-medium mb-1">Tiempo Estimado</h4>
-                                                                                            <p className="text-sm">{selectedOrder.estimatedTime}</p>
-                                                                                        </div>
-                                                                                        <div>
-                                                                                            <h4 className="font-medium mb-1">Descripción del Producto</h4>
-                                                                                            <p className="text-sm">{selectedOrder.description}</p>
-                                                                                        </div>
-                                                                                        <div className="grid grid-cols-2 gap-4">
-                                                                                            <div>
-                                                                                                <h4 className="font-medium mb-1">Peso</h4>
-                                                                                                <p className="text-sm">{selectedOrder.weight}</p>
+                                                                                                <h4 className="font-medium mb-1 text-foreground">Ubicación</h4>
+                                                                                                <p className="text-sm text-foreground">{selectedOrder.address}</p>
+                                                                                                <p className="text-xs text-muted-foreground">{selectedOrder.neighborhood}</p>
                                                                                             </div>
                                                                                         </div>
                                                                                         <div>
-                                                                                            <h4 className="font-medium mb-1">Instrucciones Especiales</h4>
-                                                                                            <p className="text-sm">{selectedOrder.specialInstructions}</p>
+                                                                                            <h4 className="font-medium mb-1 text-foreground">Comercio</h4>
+                                                                                            <p className="text-sm text-foreground">{selectedOrder.business}</p>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <h4 className="font-medium mb-1 text-foreground">Tiempo Estimado</h4>
+                                                                                            <p className="text-sm text-foreground">{selectedOrder.estimatedTime}</p>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <h4 className="font-medium mb-1 text-foreground">Descripción del Producto</h4>
+                                                                                            <p className="text-sm text-foreground">{selectedOrder.description}</p>
+                                                                                        </div>
+                                                                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                                                                                            <div>
+                                                                                                <h4 className="font-medium mb-1 text-foreground">Peso</h4>
+                                                                                                <p className="text-sm text-foreground">{selectedOrder.weight}</p>
+                                                                                            </div>
+                                                                                        </div>
+                                                                                        <div>
+                                                                                            <h4 className="font-medium mb-1 text-foreground">Instrucciones Especiales</h4>
+                                                                                            <p className="text-sm text-foreground">{selectedOrder.specialInstructions}</p>
                                                                                         </div>
                                                                                     </div>
                                                                                 )}
@@ -370,7 +367,7 @@ export default function ChoferPage() {
                                                                                         </Tooltip>
                                                                                     </div>
                                                                                 </DialogTrigger>
-                                                                                <DialogContent className="backdrop-blur-sm bg-white/95">
+                                                                                <DialogContent className="backdrop-blur-sm bg-background/95 border max-h-[90vh] overflow-y-auto">
                                                                                     <DialogHeader>
                                                                                         <DialogTitle>Confirmar Entrega - {deliveryOrder?.id}</DialogTitle>
                                                                                         <DialogDescription>
@@ -379,7 +376,7 @@ export default function ChoferPage() {
                                                                                     </DialogHeader>
                                                                                     <div className="grid gap-4">
                                                                                         <div className="space-y-2">
-                                                                                            <label className="text-sm font-medium">
+                                                                                            <label className="text-sm font-medium text-foreground">
                                                                                                 DNI de quien recibe *
                                                                                             </label>
                                                                                             <Input
@@ -391,7 +388,7 @@ export default function ChoferPage() {
                                                                                             />
                                                                                         </div>
                                                                                         <div className="space-y-2">
-                                                                                            <label className="text-sm font-medium">
+                                                                                            <label className="text-sm font-medium text-foreground">
                                                                                                 Nombre de quien recibe *
                                                                                             </label>
                                                                                             <Input
