@@ -2,8 +2,8 @@
 
 import { useRouter, usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
+import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Badge } from "@/components/ui/badge"
 import { User, Truck, Building2, Home, Sun, Moon, Monitor } from "lucide-react"
 import {
     DropdownMenu,
@@ -11,11 +11,23 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    Select,
+    SelectTrigger,
+    SelectValue,
+    SelectContent,
+    SelectItem,
+} from "@/components/ui/select"
 
 export function Header() {
     const router = useRouter()
     const pathname = usePathname()
     const { theme, setTheme } = useTheme()
+    const [mounted, setMounted] = useState(false)
+
+    useEffect(() => {
+        setMounted(true)
+    }, [])
 
     const getActiveActor = () => {
         if (pathname.startsWith("/admin")) return "admin"
@@ -77,42 +89,40 @@ export function Header() {
                             <Home className="h-5 w-5" />
                             <h1 className="text-xl font-bold text-foreground">Logística SJB</h1>
                         </Button>
-
-                        {activeActor !== "home" && (
-                            <Badge variant="outline" className="text-sm">
-                                {actors.find(actor => actor.id === activeActor)?.name}
-                            </Badge>
-                        )}
                     </div>
 
-                    {/* Botones de cambio de actor y toggle de tema */}
+                    {/* Select de cambio de actor y toggle de tema */}
                     <div className="flex items-center gap-2">
-                        {actors.map((actor) => {
-                            const IconComponent = actor.icon
-                            const isActive = activeActor === actor.id
-
-                            return (
-                                <Button
-                                    key={actor.id}
-                                    variant={isActive ? "default" : "outline"}
-                                    size="sm"
-                                    onClick={() => handleActorChange(actor.path)}
-                                    className={`flex items-center gap-2 ${isActive
-                                        ? actor.color + " text-white"
-                                        : "hover:bg-accent"
-                                        }`}
-                                >
-                                    <IconComponent className="h-4 w-4" />
-                                    {actor.name}
-                                </Button>
-                            )
-                        })}
+                        <Select
+                            value={activeActor}
+                            onValueChange={(val) => {
+                                const actor = actors.find((a) => a.id === val)
+                                if (actor) handleActorChange(actor.path)
+                            }}
+                        >
+                            <SelectTrigger size="sm" className="min-w-[10rem]">
+                                <SelectValue />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {actors.map((actor) => {
+                                    const IconComponent = actor.icon
+                                    return (
+                                        <SelectItem key={actor.id} value={actor.id} className="flex items-center gap-2">
+                                            <IconComponent className="h-4 w-4" />
+                                            <span>{actor.name}</span>
+                                        </SelectItem>
+                                    )
+                                })}
+                            </SelectContent>
+                        </Select>
 
                         {/* Toggle de tema */}
                         <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                                 <Button variant="outline" size="sm" className="flex items-center gap-2">
-                                    {theme === "light" ? (
+                                    {!mounted ? (
+                                        <Monitor className="h-4 w-4" />
+                                    ) : theme === "light" ? (
                                         <Sun className="h-4 w-4" />
                                     ) : theme === "dark" ? (
                                         <Moon className="h-4 w-4" />

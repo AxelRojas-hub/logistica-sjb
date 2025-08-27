@@ -176,7 +176,7 @@ export default function AdminPage() {
                                                         <span className="text-sm text-gray-500">{route.estimatedTime}</span>
                                                     </div>
                                                     <p className="text-sm text-gray-600 mb-2">{route.branches.join(" → ")}</p>
-                                                    <span className="text-xs bg-gray-100 px-2 py-1 rounded">{route.segments} segmentos</span>
+                                                    <span className="dark:text-black dark:bg-gray-100 text-xs bg-gray-100 px-2 py-1 rounded">{route.segments} segmentos</span>
                                                 </div>
                                             ))}
                                         </CardContent>
