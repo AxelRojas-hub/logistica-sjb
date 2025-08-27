@@ -4,7 +4,7 @@ export const mockShipments: Shipment[] = [
     {
         id: "ENV-001",
         orders: 12,
-        currentBranch: "Sucursal Centro",
+        currentBranch: "Sucursal Rosario",
         lastUpdate: "14:30",
         estimatedDuration: "4h 30m",
         totalDistance: "145 km",
@@ -14,7 +14,7 @@ export const mockShipments: Shipment[] = [
     {
         id: "ENV-002",
         orders: 8,
-        currentBranch: "Sucursal Norte",
+        currentBranch: "Sucursal Buenos Aires",
         lastUpdate: "13:45",
         estimatedDuration: "2h 15m",
         totalDistance: "89 km",
@@ -24,7 +24,7 @@ export const mockShipments: Shipment[] = [
     {
         id: "ENV-003",
         orders: 15,
-        currentBranch: "Sucursal Sur",
+        currentBranch: "Sucursal Córdoba",
         lastUpdate: "15:20",
         estimatedDuration: "6h 10m",
         totalDistance: "203 km",
@@ -72,7 +72,7 @@ export const mockBusinesses: Business[] = [
 export const mockRoutes: Route[] = [
     {
         id: "RUT-001",
-        name: "Ruta Buenos Aires - Córdoba",
+        name: "Buenos Aires - Córdoba",
         branches: ["Buenos Aires", "Rosario", "Villa María", "Córdoba"],
         estimatedTime: "8h 30m",
         segments: 4,
@@ -87,9 +87,9 @@ export const mockRoutes: Route[] = [
     {
         id: "RUT-003",
         name: "Ruta Litoral",
-        branches: ["Buenos Aires", "Santa Fe", "Paraná", "Corrientes"],
-        estimatedTime: "10h 15m",
-        segments: 4,
+        branches: ["Buenos Aires", "Rosario", "Santa Fe", "Paraná", "Corrientes"],
+        estimatedTime: "11h 00m",
+        segments: 5,
     },
     {
         id: "RUT-004",
@@ -105,30 +105,67 @@ export const mockRoutes: Route[] = [
         estimatedTime: "16h 30m",
         segments: 4,
     },
+    // ➕ Nuevas rutas
+    {
+        id: "RUT-006",
+        name: "Ruta Cuyo",
+        branches: ["Buenos Aires", "San Luis", "Mendoza", "San Juan"],
+        estimatedTime: "13h 20m",
+        segments: 4,
+    },
+    {
+        id: "RUT-007",
+        name: "Ruta Atlántica",
+        branches: ["Buenos Aires", "La Plata", "Dolores", "Mar del Plata"],
+        estimatedTime: "6h 40m",
+        segments: 4,
+    },
+    {
+        id: "RUT-008",
+        name: "Ruta NEA",
+        branches: ["Santa Fe", "Reconquista", "Resistencia", "Formosa"],
+        estimatedTime: "10h 50m",
+        segments: 4,
+    },
+    {
+        id: "RUT-009",
+        name: "Ruta Andina Sur",
+        branches: ["Neuquén", "General Roca", "San Carlos de Bariloche", "Esquel"],
+        estimatedTime: "12h 10m",
+        segments: 4,
+    },
 ];
 
 export const mockBranches: Branch[] = [
-    {
-        id: "SUC-001",
-        name: "Sucursal Centro",
-        location: "Av. 9 de Julio 1500, CABA",
-        phone: "+54 11 4567-8901",
-        email: "centro@logisticasjb.com",
-    },
-    {
-        id: "SUC-002",
-        name: "Sucursal Norte",
-        location: "Av. Cabildo 2300, CABA",
-        phone: "+54 11 4567-8902",
-        email: "norte@logisticasjb.com",
-    },
-    {
-        id: "SUC-003",
-        name: "Sucursal Sur",
-        location: "Av. Rivadavia 8900, CABA",
-        phone: "+54 11 4567-8903",
-        email: "sur@logisticasjb.com",
-    },
+    { id: "SUC-BA", name: "Sucursal Buenos Aires", location: "Av. 9 de Julio 1500, CABA", phone: "+54 11 4567-8900", email: "buenosaires@logisticasjb.com" },
+    { id: "SUC-ROS", name: "Sucursal Rosario", location: "Bv. Oroño 800, Rosario, Santa Fe", phone: "+54 341 456-7890", email: "rosario@logisticasjb.com" },
+    { id: "SUC-VM", name: "Sucursal Villa María", location: "Av. Sabattini 1200, Villa María", phone: "+54 353 461-1111", email: "villamaria@logisticasjb.com" },
+    { id: "SUC-CBA", name: "Sucursal Córdoba", location: "Av. Colón 1000, Córdoba", phone: "+54 351 468-0000", email: "cordoba@logisticasjb.com" },
+    { id: "SUC-BB", name: "Sucursal Bahía Blanca", location: "Av. Alem 900, Bahía Blanca", phone: "+54 291 455-0000", email: "bahiablanca@logisticasjb.com" },
+    { id: "SUC-VID", name: "Sucursal Viedma", location: "Av. 25 de Mayo 300, Viedma", phone: "+54 2920 423-000", email: "viedma@logisticasjb.com" },
+    { id: "SUC-TR", name: "Sucursal Trelew", location: "Av. Fontana 400, Trelew", phone: "+54 280 443-0000", email: "trelew@logisticasjb.com" },
+    { id: "SUC-CMD", name: "Sucursal Comodoro Rivadavia", location: "Rivadavia 1200, Comodoro", phone: "+54 297 447-0000", email: "comodoro@logisticasjb.com" },
+    { id: "SUC-RG", name: "Sucursal Río Gallegos", location: "Av. Kirchner 700, Río Gallegos", phone: "+54 2966 442-000", email: "riogallegos@logisticasjb.com" },
+    { id: "SUC-USH", name: "Sucursal Ushuaia", location: "San Martín 500, Ushuaia", phone: "+54 2901 422-000", email: "ushuaia@logisticasjb.com" },
+    { id: "SUC-SF", name: "Sucursal Santa Fe", location: "Bv. Gálvez 1500, Santa Fe", phone: "+54 342 455-0000", email: "santafe@logisticasjb.com" },
+    { id: "SUC-PNA", name: "Sucursal Paraná", location: "Av. Almafuerte 1200, Paraná", phone: "+54 343 420-0000", email: "parana@logisticasjb.com" },
+    { id: "SUC-CRR", name: "Sucursal Corrientes", location: "Av. 3 de Abril 800, Corrientes", phone: "+54 379 443-0000", email: "corrientes@logisticasjb.com" },
+    { id: "SUC-SDE", name: "Sucursal Santiago del Estero", location: "Av. Belgrano 900, Sgo. del Estero", phone: "+54 385 421-0000", email: "santiago@logisticasjb.com" },
+    { id: "SUC-TUC", name: "Sucursal Tucumán", location: "Av. Sarmiento 700, S. M. de Tucumán", phone: "+54 381 430-0000", email: "tucuman@logisticasjb.com" },
+    { id: "SUC-SAL", name: "Sucursal Salta", location: "Av. San Martín 900, Salta", phone: "+54 387 421-0000", email: "salta@logisticasjb.com" },
+    { id: "SUC-JUY", name: "Sucursal Jujuy", location: "Av. Hipólito Yrigoyen 600, S. S. de Jujuy", phone: "+54 388 423-0000", email: "jujuy@logisticasjb.com" },
+    { id: "SUC-SLU", name: "Sucursal San Luis", location: "Av. Illia 500, San Luis", phone: "+54 266 442-0000", email: "sanluis@logisticasjb.com" },
+    { id: "SUC-MZA", name: "Sucursal Mendoza", location: "Av. San Martín 1200, Mendoza", phone: "+54 261 423-0000", email: "mendoza@logisticasjb.com" },
+    { id: "SUC-SJ", name: "Sucursal San Juan", location: "Av. Libertador 900, San Juan", phone: "+54 264 422-0000", email: "sanjuan@logisticasjb.com" },
+    { id: "SUC-LP", name: "Sucursal La Plata", location: "Av. 7 800, La Plata", phone: "+54 221 422-0000", email: "laplata@logisticasjb.com" },
+    { id: "SUC-MDP", name: "Sucursal Mar del Plata", location: "Av. Luro 2300, Mar del Plata", phone: "+54 223 493-0000", email: "mdp@logisticasjb.com" },
+    { id: "SUC-RES", name: "Sucursal Resistencia", location: "Av. 9 de Julio 500, Resistencia", phone: "+54 362 442-0000", email: "resistencia@logisticasjb.com" },
+    { id: "SUC-FOR", name: "Sucursal Formosa", location: "Av. 25 de Mayo 600, Formosa", phone: "+54 370 442-0000", email: "formosa@logisticasjb.com" },
+    { id: "SUC-NQN", name: "Sucursal Neuquén", location: "Av. Argentina 200, Neuquén", phone: "+54 299 442-0000", email: "neuquen@logisticasjb.com" },
+    { id: "SUC-GRO", name: "Sucursal General Roca", location: "Av. Roca 400, General Roca", phone: "+54 298 443-0000", email: "gralroca@logisticasjb.com" },
+    { id: "SUC-BRC", name: "Sucursal San Carlos de Bariloche", location: "Mitre 600, Bariloche", phone: "+54 294 442-0000", email: "bariloche@logisticasjb.com" },
+    { id: "SUC-ESQ", name: "Sucursal Esquel", location: "Av. Ameghino 700, Esquel", phone: "+54 2945 452-000", email: "esquel@logisticasjb.com" },
+    { id: "SUC-REC", name: "Sucursal Reconquista", location: "Bv. Hipólito Yrigoyen 600, Reconquista", phone: "+54 3482 422-000", email: "reconquista@logisticasjb.com" },
 ];
 
 export const mockDriverOrders: Order[] = [
@@ -137,6 +174,7 @@ export const mockDriverOrders: Order[] = [
         recipient: "Juan Pérez",
         address: "Av. Corrientes 1234",
         neighborhood: "Balvanera",
+        locality: "Buenos Aires (CABA)",
         phone: "+54 11 1234-5678",
         estimatedTime: "30 min",
         status: "pendiente",
@@ -150,6 +188,7 @@ export const mockDriverOrders: Order[] = [
         recipient: "Ana Martínez",
         address: "Av. Rivadavia 2345",
         neighborhood: "Balvanera",
+        locality: "Buenos Aires (CABA)",
         phone: "+54 11 4567-8901",
         estimatedTime: "50 min",
         status: "pendiente",
@@ -163,6 +202,7 @@ export const mockDriverOrders: Order[] = [
         recipient: "María González",
         address: "Calle Florida 567",
         neighborhood: "Microcentro",
+        locality: "Buenos Aires (CABA)",
         phone: "+54 11 2345-6789",
         estimatedTime: "45 min",
         status: "pendiente",
@@ -176,6 +216,7 @@ export const mockDriverOrders: Order[] = [
         recipient: "Luis Rodríguez",
         address: "Av. Callao 1678",
         neighborhood: "Recoleta",
+        locality: "Buenos Aires (CABA)",
         phone: "+54 11 5678-9012",
         estimatedTime: "1h 5min",
         status: "pendiente",
@@ -189,6 +230,7 @@ export const mockDriverOrders: Order[] = [
         recipient: "Carlos López",
         address: "Av. Santa Fe 890",
         neighborhood: "Retiro",
+        locality: "Buenos Aires (CABA)",
         phone: "+54 11 3456-7890",
         estimatedTime: "1h 15min",
         status: "pendiente",
@@ -202,6 +244,7 @@ export const mockDriverOrders: Order[] = [
         recipient: "Pedro Fernández",
         address: "Av. Cabildo 3456",
         neighborhood: "Belgrano",
+        locality: "Buenos Aires (CABA)",
         phone: "+54 11 6789-0123",
         estimatedTime: "1h 30min",
         status: "entregado",
@@ -211,6 +254,7 @@ export const mockDriverOrders: Order[] = [
         specialInstructions: "Entregado a portería",
     },
 ];
+
 
 export const mockCurrentRoute: CurrentRoute = {
     name: "Ruta Buenos Aires - Córdoba",

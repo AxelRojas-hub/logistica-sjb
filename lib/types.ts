@@ -6,6 +6,7 @@ export interface Order {
     neighborhood: string;
     phone: string;
     estimatedTime: string;
+    locality: string;
     status: string;
     business: string;
     description: string;
