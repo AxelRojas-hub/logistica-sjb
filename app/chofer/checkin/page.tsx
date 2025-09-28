@@ -60,11 +60,6 @@ export default function ChoferCheckinPage() {
             <div className="h-screen bg-background flex flex-col">
                 <div className="flex-1">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        <div className="mb-8">
-                            <h1 className="text-3xl font-bold text-foreground">Check-in en Sucursal</h1>
-                            <p className="mt-2 text-muted-foreground">Realizar check-in en las sucursales de tu ruta</p>
-                        </div>
-
                         {/* Botón para volver al menú principal */}
                         <div className="flex items-center gap-4 mb-6">
                             <Link href="/chofer">
@@ -77,14 +72,16 @@ export default function ChoferCheckinPage() {
                                 </Button>
                             </Link>
                         </div>
+                        <div className="mb-8">
+                            <h1 className="text-3xl font-bold text-foreground">Check-in en Sucursal</h1>
+                            <p className="mt-2 text-muted-foreground">Marca la llegada a cada sucursal de tu ruta</p>
+                        </div>
+
 
                         <div className="space-y-6">
-                            <div className="flex justify-between items-center">
-                                <h2 className="text-2xl font-semibold text-foreground">Estado de la Ruta</h2>
-                                <Badge variant="outline" className="text-lg px-3 py-1">
-                                    Ruta: {currentRoute.name}
-                                </Badge>
-                            </div>
+                            <Badge variant="outline" className="text-lg px-3 py-1">
+                                Ruta: {currentRoute.name}
+                            </Badge>
 
                             <Card>
                                 <CardHeader>
