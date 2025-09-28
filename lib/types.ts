@@ -105,3 +105,22 @@ export interface Contract {
     pickupLimit: number;
     deliveryLimit: number;
 }
+
+export interface Driver {
+    id: string;
+    name: string;
+    branch: string;
+    branchId: string;
+    status: "available" | "busy" | "offline";
+    phone: string;
+    vehicleCapacity: string;
+    currentRoute: string | null;
+}
+
+export interface AdminContext {
+    id: string;
+    name: string;
+    branch: string;
+    branchId: string;
+    role: string;
+}

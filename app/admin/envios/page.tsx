@@ -55,6 +55,12 @@ export default function AdminEnviosPage() {
                         <div className="flex justify-between items-center">
                             <h2 className="text-2xl font-semibold text-foreground">Envíos Activos</h2>
                             <div className="flex gap-2">
+                                <Link href="/admin/envios/crear">
+                                    <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+                                        <Truck className="h-4 w-4 mr-2" />
+                                        + Crear envío
+                                    </Button>
+                                </Link>
                                 <Button variant="outline" size="sm">
                                     <Filter className="h-4 w-4 mr-2" />
                                     Filtrar
