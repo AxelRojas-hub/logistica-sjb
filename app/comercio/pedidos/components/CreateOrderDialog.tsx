@@ -1,6 +1,7 @@
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Textarea } from "@/components/ui/textarea"
+import { Checkbox } from "@/components/ui/checkbox"
 import {
     Dialog,
     DialogContent,
@@ -20,6 +21,8 @@ interface NewOrderForm {
     weight: string
     specialInstructions: string
     totalAmount: number
+    services: string[]
+    deadline: string
 }
 
 interface CreateOrderDialogProps {
@@ -30,7 +33,7 @@ interface CreateOrderDialogProps {
 
 export function CreateOrderDialog({ newOrder, setNewOrder, onCreateOrder }: CreateOrderDialogProps) {
     return (
-        <Dialog>
+        <Dialog >
             <DialogTrigger asChild>
                 <Button className="flex items-center gap-2">
                     <Plus className="h-4 w-4" />
@@ -40,9 +43,6 @@ export function CreateOrderDialog({ newOrder, setNewOrder, onCreateOrder }: Crea
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
                     <DialogTitle>Registrar nuevo Pedido</DialogTitle>
-                    <DialogDescription>
-                        Completa la información para crear un nuevo pedido de entrega
-                    </DialogDescription>
                 </DialogHeader>
                 <div className="grid gap-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -106,6 +106,50 @@ export function CreateOrderDialog({ newOrder, setNewOrder, onCreateOrder }: Crea
                                 value={newOrder.totalAmount}
                                 onChange={(e) => setNewOrder({ ...newOrder, totalAmount: Number(e.target.value) })}
                             />
+                        </div>
+                        <div className="space-y-2">
+                            <label className="text-sm font-medium">Fecha límite *</label>
+                            <Input
+                                type="date"
+                                value={newOrder.deadline}
+                                onChange={(e) => setNewOrder({ ...newOrder, deadline: e.target.value })}
+                            />
+                        </div>
+                    </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Servicios incluidos *</label>
+                        <div className="space-y-3">
+                            {[
+                                { id: 'retiro', label: 'Retiro en comercio' },
+                                { id: 'envio', label: 'Envío a domicilio' },
+                                { id: 'embalaje', label: 'Embalaje' }
+                            ].map((service) => (
+                                <div key={service.id} className="flex items-center space-x-2">
+                                    <Checkbox
+                                        id={service.id}
+                                        checked={newOrder.services.includes(service.label)}
+                                        onCheckedChange={(checked) => {
+                                            if (checked) {
+                                                setNewOrder({
+                                                    ...newOrder,
+                                                    services: [...newOrder.services, service.label]
+                                                })
+                                            } else {
+                                                setNewOrder({
+                                                    ...newOrder,
+                                                    services: newOrder.services.filter(s => s !== service.label)
+                                                })
+                                            }
+                                        }}
+                                    />
+                                    <label
+                                        htmlFor={service.id}
+                                        className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                                    >
+                                        {service.label}
+                                    </label>
+                                </div>
+                            ))}
                         </div>
                     </div>
                     <div className="space-y-2">

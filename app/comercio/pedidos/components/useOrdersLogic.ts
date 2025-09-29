@@ -11,6 +11,8 @@ interface NewOrderForm {
     weight: string
     specialInstructions: string
     totalAmount: number
+    services: string[]
+    deadline: string
 }
 
 export function useOrdersLogic() {
@@ -26,6 +28,8 @@ export function useOrdersLogic() {
         weight: "",
         specialInstructions: "",
         totalAmount: 0,
+        services: [],
+        deadline: "",
     })
 
     const handleCreateOrder = () => {
@@ -46,6 +50,8 @@ export function useOrdersLogic() {
             weight: "",
             specialInstructions: "",
             totalAmount: 0,
+            services: [],
+            deadline: "",
         })
     }
 

@@ -80,6 +80,8 @@ export interface BusinessOrder {
     createdAt: string;
     estimatedDelivery: string;
     totalAmount: number;
+    services: string[];
+    deadline: string;
 }
 
 export interface Invoice {

@@ -550,6 +550,8 @@ export const mockBusinessOrders: BusinessOrder[] = [
         createdAt: "2025-08-25",
         estimatedDelivery: "2025-08-28",
         totalAmount: 15000,
+        services: ["Retiro en comercio", "Envío a domicilio"],
+        deadline: "2025-08-28",
     },
     {
         id: "PED-COM-002",
@@ -564,6 +566,8 @@ export const mockBusinessOrders: BusinessOrder[] = [
         createdAt: "2025-08-20",
         estimatedDelivery: "2025-08-23",
         totalAmount: 8500,
+        services: ["Envío a domicilio", "Embalaje"],
+        deadline: "2025-08-23",
     },
     {
         id: "PED-COM-003",
@@ -578,6 +582,8 @@ export const mockBusinessOrders: BusinessOrder[] = [
         createdAt: "2025-08-27",
         estimatedDelivery: "2025-08-30",
         totalAmount: 25000,
+        services: ["Retiro en comercio", "Envío a domicilio", "Embalaje"],
+        deadline: "2025-08-30",
     },
     {
         id: "PED-COM-004",
@@ -592,6 +598,8 @@ export const mockBusinessOrders: BusinessOrder[] = [
         createdAt: "2025-08-15",
         estimatedDelivery: "2025-08-18",
         totalAmount: 18000,
+        services: ["Envío a domicilio"],
+        deadline: "2025-08-18",
     },
 ];
 
