@@ -3,7 +3,7 @@ import { FacturaPageHeader, FacturasTable } from "./components"
 
 export default function ComercioFacturasPage() {
     // TODO: Obtener facturas desde la API
-    const invoices: any[] = [];
+    const invoices: Factura[] = [];
 
     return (
         <div className="min-h-screen bg-background pt-4 flex flex-col">

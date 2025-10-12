@@ -1,4 +1,4 @@
-import { Pedido, Envio, Comercio, Ruta, Sucursal, RutaActual, PedidoComercio, Factura, Contrato, Chofer, ContextoAdmin, Servicio } from "./types";
+import { Ruta, Sucursal, ContextoAdmin, Servicio } from "./types";
 
 
 

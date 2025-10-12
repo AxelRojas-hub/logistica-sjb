@@ -17,7 +17,7 @@ import { Comercio } from "@/lib/types"
 
 export default function AdminComerciosPage() {
     // TODO: Obtener comercios desde la API
-    const mockComercios: any[] = [];
+    const mockComercios: Comercio[] = [];
     const getStatusColor = (status: string) => {
         switch (status) {
             case "En ruta":
