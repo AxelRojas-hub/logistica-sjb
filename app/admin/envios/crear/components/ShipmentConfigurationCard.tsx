@@ -2,21 +2,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Building, Users, Truck, Route } from "lucide-react"
-import { mockRoutes, mockDrivers } from "@/lib/mock-data"
-import type { Driver, Branch } from "@/lib/types"
+import type { Chofer, Sucursal, Ruta, Pedido } from "@/lib/types"
 
 interface ShipmentConfigurationCardProps {
-    adminBranch: Branch | undefined
-    suggestedRoute: typeof mockRoutes[0] | null | undefined
+    adminBranch: Sucursal | undefined
+    suggestedRoute: Ruta | null | undefined
     routeSegments: string[]
-    ordersForDestination: any[]
-    pendingOrders: any[]
-    availableDrivers: Driver[]
+    ordersForDestination: Pedido[]
+    pendingOrders: Pedido[]
+    availableDrivers: Chofer[]
     selectedDriver: string
     setSelectedDriver: (value: string) => void
     canCreateShipment: boolean
-    selectedRouteInfo: typeof mockRoutes[0] | undefined
-    selectedDriverInfo: Driver | undefined
+    selectedRouteInfo: Ruta | undefined
+    selectedDriverInfo: Chofer | undefined
 }
 
 export function ShipmentConfigurationCard({
@@ -40,7 +39,7 @@ export function ShipmentConfigurationCard({
                     Configuración de Envío
                 </CardTitle>
                 <CardDescription>
-                    {adminBranch?.name}
+                    {adminBranch?.nombre}
                 </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -48,13 +47,13 @@ export function ShipmentConfigurationCard({
                     {suggestedRoute && (
                         <div className="p-3 bg-green-50 rounded-lg">
                             <p className="text-sm font-medium mb-2 text-green-700 dark:text-green-800">Ruta sugerida:</p>
-                            <p className="text-sm text-green-800 mb-1">{suggestedRoute.name}</p>
+                            <p className="text-sm text-green-800 mb-1">{suggestedRoute.nombre}</p>
                             <div className="text-xs text-green-600 mb-2">
                                 <div className="flex items-center gap-1 mb-1">
                                     <Route className="h-3 w-3" />
                                     <span>Tramos: {routeSegments.join(' → ')}</span>
                                 </div>
-                                <div>Tiempo estimado: {suggestedRoute.estimatedTime}</div>
+                                <div>Tiempo estimado: {suggestedRoute.tiempoEstimado}</div>
                             </div>
                         </div>
                     )}
@@ -81,7 +80,7 @@ export function ShipmentConfigurationCard({
                     </h4>
 
                     <p className="text-sm text-muted-foreground">
-                        {availableDrivers.length} choferes disponibles en {adminBranch?.name}
+                        {availableDrivers.length} choferes disponibles en {adminBranch?.nombre}
                     </p>
 
                     <div>
@@ -93,7 +92,7 @@ export function ShipmentConfigurationCard({
                             <SelectContent>
                                 {availableDrivers.map((driver) => (
                                     <SelectItem key={driver.id} value={driver.id}>
-                                        {driver.name}
+                                        {driver.nombre}
                                     </SelectItem>
                                 ))}
                             </SelectContent>
@@ -105,7 +104,7 @@ export function ShipmentConfigurationCard({
                             className="w-full"
                             disabled={!canCreateShipment}
                             onClick={() => {
-                                alert(`Envío creado:\n- Ruta: ${selectedRouteInfo?.name}\n- Pedidos: ${ordersForDestination.length}\n- Chofer: ${selectedDriverInfo?.name}`)
+                                alert(`Envío creado:\n- Ruta: ${selectedRouteInfo?.nombre}\n- Pedidos: ${ordersForDestination.length}\n- Chofer: ${selectedDriverInfo?.nombre}`)
                             }}
                         >
                             <Truck className="h-4 w-4 mr-2" />

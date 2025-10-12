@@ -5,7 +5,6 @@ import { Checkbox } from "@/components/ui/checkbox"
 import {
     Dialog,
     DialogContent,
-    DialogDescription,
     DialogHeader,
     DialogTitle,
     DialogTrigger,
@@ -137,7 +136,7 @@ export function CreateOrderDialog({ newOrder, setNewOrder, onCreateOrder }: Crea
                                             } else {
                                                 setNewOrder({
                                                     ...newOrder,
-                                                    services: newOrder.services.filter(s => s !== service.label)
+                                                    services: newOrder.services.filter((s: string) => s !== service.label)
                                                 })
                                             }
                                         }}

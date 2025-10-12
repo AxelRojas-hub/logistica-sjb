@@ -1,6 +1,5 @@
 import { useState } from "react"
-import { mockBusinessOrders } from "@/lib/mock-data"
-import type { BusinessOrder } from "@/lib/types"
+import type { PedidoComercio } from "@/lib/types"
 
 interface NewOrderForm {
     recipient: string
@@ -16,8 +15,9 @@ interface NewOrderForm {
 }
 
 export function useOrdersLogic() {
-    const [selectedOrder, setSelectedOrder] = useState<BusinessOrder | null>(null)
-    const [orders, setOrders] = useState(mockBusinessOrders)
+    const [selectedOrder, setSelectedOrder] = useState<PedidoComercio | null>(null)
+    // TODO: Fetch orders from API
+    const [orders, setOrders] = useState<PedidoComercio[]>([])
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
     const [newOrder, setNewOrder] = useState<NewOrderForm>({
         recipient: "",
@@ -33,12 +33,21 @@ export function useOrdersLogic() {
     })
 
     const handleCreateOrder = () => {
-        const order: BusinessOrder = {
+        const order: PedidoComercio = {
             id: `PED-COM-${String(orders.length + 1).padStart(3, '0')}`,
-            ...newOrder,
-            status: "pendiente",
-            createdAt: new Date().toISOString().split('T')[0],
-            estimatedDelivery: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            destinatario: newOrder.recipient,
+            direccion: newOrder.address,
+            barrio: newOrder.neighborhood,
+            telefono: newOrder.phone,
+            estado: "pendiente",
+            descripcion: newOrder.description,
+            peso: newOrder.weight,
+            instruccionesEspeciales: newOrder.specialInstructions,
+            creadoEn: new Date().toISOString().split('T')[0],
+            entregaEstimada: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+            montoTotal: newOrder.totalAmount,
+            servicios: newOrder.services,
+            plazo: newOrder.deadline,
         }
         setOrders([...orders, order])
         setNewOrder({
@@ -61,7 +70,7 @@ export function useOrdersLogic() {
         ))
     }
 
-    const handleViewOrder = (order: BusinessOrder) => {
+    const handleViewOrder = (order: PedidoComercio) => {
         setSelectedOrder(order)
         setShowDetailsDialog(true)
     }

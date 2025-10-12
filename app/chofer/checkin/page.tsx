@@ -38,20 +38,25 @@ export default function ChoferCheckinPage() {
                             <p className="mt-2 text-muted-foreground">Marca la llegada a cada sucursal de tu ruta</p>
                         </div>
 
+                        {!currentRoute ? (
+                            <div className="text-center py-12 text-muted-foreground">
+                                No hay ruta asignada actualmente
+                            </div>
+                        ) : (
+                            <div className="space-y-6">
+                                <Badge variant="outline" className="text-lg px-3 py-1">
+                                    Ruta: {currentRoute.nombre}
+                                </Badge>
 
-                        <div className="space-y-6">
-                            <Badge variant="outline" className="text-lg px-3 py-1">
-                                Ruta: {currentRoute.name}
-                            </Badge>
-
-                            <RouteStatusCard
-                                currentRoute={currentRoute}
-                                onCheckIn={handleCheckIn}
-                                onFinishRoute={handleFinishRoute}
-                                getNextBranch={getNextBranch}
-                                isLastBranch={isLastBranch}
-                            />
-                        </div>
+                                <RouteStatusCard
+                                    currentRoute={currentRoute}
+                                    onCheckIn={handleCheckIn}
+                                    onFinishRoute={handleFinishRoute}
+                                    getNextBranch={getNextBranch}
+                                    isLastBranch={isLastBranch}
+                                />
+                            </div>
+                        )}
                     </div>
                 </div>
             </div>

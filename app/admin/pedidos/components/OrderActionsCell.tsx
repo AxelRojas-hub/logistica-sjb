@@ -1,13 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip"
 import { Truck, Eye, CheckCircle, Building } from "lucide-react"
-import type { BusinessOrder } from "@/lib/types"
+import type { PedidoComercio } from "@/lib/types"
 import OrderDetailsDialog from "./OrderDetailsDialog"
 
 interface OrderActionsCellProps {
-    order: BusinessOrder
+    order: PedidoComercio
     onUpdateStatus: (orderId: string, newStatus: "pendiente" | "en_transito" | "entregado" | "cancelado") => void
-    onSelectOrder: (order: BusinessOrder) => void
+    onSelectOrder: (order: PedidoComercio) => void
 }
 
 export default function OrderActionsCell({ order, onUpdateStatus, onSelectOrder }: OrderActionsCellProps) {
@@ -19,7 +19,7 @@ export default function OrderActionsCell({ order, onUpdateStatus, onSelectOrder 
                 </Button>
             </OrderDetailsDialog>
 
-            {order.status === "pendiente" && (
+            {order.estado === "pendiente" && (
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
@@ -36,7 +36,7 @@ export default function OrderActionsCell({ order, onUpdateStatus, onSelectOrder 
                 </Tooltip>
             )}
 
-            {order.status === "en_transito" && (
+            {order.estado === "en_transito" && (
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
@@ -54,7 +54,7 @@ export default function OrderActionsCell({ order, onUpdateStatus, onSelectOrder 
                 </Tooltip>
             )}
 
-            {order.status === "pendiente" && (
+            {order.estado === "pendiente" && (
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button

@@ -1,11 +1,13 @@
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ArrowLeft } from "lucide-react"
-import { mockCurrentRoute } from "@/lib/mock-data"
 import Link from "next/link"
 import { RouteInfoCard, RoutePageHeader } from "./components"
 
 export default function ChoferRutaPage() {
+    // TODO: Fetch route data from API
+    const currentRoute = null;
+
     return (
         <TooltipProvider>
             <div className="h-screen bg-background flex flex-col">
@@ -31,7 +33,7 @@ export default function ChoferRutaPage() {
 
                         <div className="space-y-6">
                             <RoutePageHeader />
-                            <RouteInfoCard currentRoute={mockCurrentRoute} />
+                            <RouteInfoCard currentRoute={currentRoute} />
                         </div>
                     </div>
                 </div>

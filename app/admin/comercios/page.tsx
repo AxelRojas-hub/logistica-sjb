@@ -12,10 +12,12 @@ import {
     AlertTriangle,
     ArrowLeft
 } from "lucide-react"
-import { mockBusinesses } from "@/lib/mock-data"
 import Link from "next/link"
+import { Comercio } from "@/lib/types"
 
 export default function AdminComerciosPage() {
+    // TODO: Fetch businesses from API
+    const mockComercios: Comercio[] = [];
     const getStatusColor = (status: string) => {
         switch (status) {
             case "En ruta":
@@ -96,16 +98,16 @@ export default function AdminComerciosPage() {
                                         </TableRow>
                                     </TableHeader>
                                     <TableBody>
-                                        {mockBusinesses.map((business) => (
+                                        {mockComercios.map((business) => (
                                             <TableRow key={business.id} className="hover:bg-accent/50">
                                                 <TableCell>
                                                     <div>
-                                                        <p className="font-medium text-sm truncate max-w-[180px]" title={business.name}>
-                                                            {business.name}
+                                                        <p className="font-medium text-sm truncate max-w-[180px]" title={business.nombre}>
+                                                            {business.nombre}
                                                         </p>
                                                         <div className="flex items-center gap-2 mt-1">
-                                                            <Badge className={getStatusColor(business.status)} variant="outline">
-                                                                {business.status}
+                                                            <Badge className={getStatusColor(business.estado)} variant="outline">
+                                                                {business.estado}
                                                             </Badge>
                                                         </div>
                                                     </div>
@@ -115,29 +117,29 @@ export default function AdminComerciosPage() {
                                                         <p className="text-sm truncate max-w-[160px]" title={business.email}>
                                                             {business.email}
                                                         </p>
-                                                        <p className="text-xs text-muted-foreground truncate max-w-[160px]" title={business.fiscalAddress}>
-                                                            {business.fiscalAddress}
+                                                        <p className="text-xs text-muted-foreground truncate max-w-[160px]" title={business.direccionFiscal}>
+                                                            {business.direccionFiscal}
                                                         </p>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div>
-                                                        <p className="text-sm font-medium">{business.contractDuration}</p>
+                                                        <p className="text-sm font-medium">{business.duracionContrato}</p>
                                                         <p className="text-xs text-muted-foreground">
-                                                            {business.services.length} servicios
+                                                            {business.servicios.length} servicios
                                                         </p>
                                                     </div>
                                                 </TableCell>
                                                 <TableCell>
                                                     <div>
                                                         <p className="text-sm font-medium">
-                                                            ${business.totalDebt.toLocaleString()}
+                                                            ${business.deudaTotal.toLocaleString()}
                                                         </p>
                                                         <div className="flex items-center gap-1 mt-1">
-                                                            {business.pendingInvoices > 0 && (
+                                                            {business.facturasVencidas > 0 && (
                                                                 <Badge variant="destructive" className="text-xs">
                                                                     <AlertTriangle className="h-3 w-3 mr-1" />
-                                                                    {business.pendingInvoices}
+                                                                    {business.facturasVencidas}
                                                                 </Badge>
                                                             )}
                                                         </div>

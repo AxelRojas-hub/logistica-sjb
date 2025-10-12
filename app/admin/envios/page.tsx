@@ -14,10 +14,14 @@ import {
     Eye,
     ArrowLeft
 } from "lucide-react"
-import { mockShipments, mockRoutes, mockBranches } from "@/lib/mock-data"
 import Link from "next/link"
+import { Envio, Ruta, Sucursal } from "@/lib/types"
 
 export default function AdminEnviosPage() {
+    // TODO: Fetch shipments, routes, and branches from API
+    const mockEnvios: Envio[] = [];
+    const mockRutas: Ruta[] = [];
+    const mockSucursales: Sucursal[] = [];
     const getStatusColor = (status: string) => {
         switch (status) {
             case "En ruta":
@@ -74,32 +78,32 @@ export default function AdminEnviosPage() {
 
                         {/* Shipments Grid */}
                         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {mockShipments.map((shipment) => (
+                            {mockEnvios.map((shipment) => (
                                 <Card key={shipment.id} className="hover:shadow-md transition-shadow">
                                     <CardHeader className="pb-3">
                                         <div className="flex justify-between items-start">
                                             <CardTitle className="text-lg">{shipment.id}</CardTitle>
-                                            <Badge className={getStatusColor(shipment.status)}>{shipment.status}</Badge>
+                                            <Badge className={getStatusColor(shipment.estado)}>{shipment.estado}</Badge>
                                         </div>
-                                        <CardDescription>Chofer: {shipment.driver}</CardDescription>
+                                        <CardDescription>Chofer: {shipment.chofer}</CardDescription>
                                     </CardHeader>
                                     <CardContent className="space-y-3">
                                         <div className="flex items-center gap-2 text-sm">
                                             <Package className="h-4 w-4 text-gray-500" />
-                                            <span>{shipment.orders} pedidos</span>
+                                            <span>{shipment.pedidos} pedidos</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm">
                                             <MapPin className="h-4 w-4 text-gray-500" />
-                                            <span>{shipment.currentBranch}</span>
+                                            <span>{shipment.sucursalActual}</span>
                                         </div>
                                         <div className="flex items-center gap-2 text-sm">
                                             <Clock className="h-4 w-4 text-gray-500" />
-                                            <span>Actualizado: {shipment.lastUpdate}</span>
+                                            <span>Actualizado: {shipment.ultimaActualizacion}</span>
                                         </div>
                                         <div className="pt-2 border-t">
                                             <div className="flex justify-between text-sm">
-                                                <span>Duración: {shipment.estimatedDuration}</span>
-                                                <span>Distancia: {shipment.totalDistance}</span>
+                                                <span>Duración: {shipment.duracionEstimada}</span>
+                                                <span>Distancia: {shipment.distanciaTotal}</span>
                                             </div>
                                         </div>
                                         <Button variant="outline" size="sm" className="w-full bg-transparent">
@@ -120,14 +124,14 @@ export default function AdminEnviosPage() {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="max-h-80 overflow-y-auto space-y-4">
-                                        {mockRoutes.map((route) => (
+                                        {mockRutas.map((route) => (
                                             <div key={route.id} className="border rounded-lg p-3">
                                                 <div className="flex justify-between items-start mb-2">
-                                                    <h4 className="font-medium">{route.name}</h4>
-                                                    <span className="text-sm text-muted-foreground">{route.estimatedTime}</span>
+                                                    <h4 className="font-medium">{route.nombre}</h4>
+                                                    <span className="text-sm text-muted-foreground">{route.tiempoEstimado}</span>
                                                 </div>
-                                                <p className="text-sm text-muted-foreground mb-2">{route.branches.join(" → ")}</p>
-                                                <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded">{route.segments} segmentos</span>
+                                                <p className="text-sm text-muted-foreground mb-2">{route.sucursales.join(" → ")}</p>
+                                                <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded">{route.segmentos} segmentos</span>
                                             </div>
                                         ))}
                                     </div>
@@ -141,12 +145,12 @@ export default function AdminEnviosPage() {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="max-h-80 overflow-y-auto space-y-4">
-                                        {mockBranches.map((branch) => (
+                                        {mockSucursales.map((branch) => (
                                             <div key={branch.id} className="border rounded-lg p-3">
-                                                <h4 className="font-medium mb-1">{branch.name}</h4>
-                                                <p className="text-sm text-muted-foreground mb-1">{branch.location}</p>
+                                                <h4 className="font-medium mb-1">{branch.nombre}</h4>
+                                                <p className="text-sm text-muted-foreground mb-1">{branch.ubicacion}</p>
                                                 <div className="flex justify-between text-xs text-muted-foreground">
-                                                    <span>{branch.phone}</span>
+                                                    <span>{branch.telefono}</span>
                                                     <span>{branch.email}</span>
                                                 </div>
                                             </div>

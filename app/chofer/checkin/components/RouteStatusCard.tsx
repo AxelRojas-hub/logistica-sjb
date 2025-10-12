@@ -1,13 +1,13 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { CurrentRoute } from "@/lib/types"
+import type { RutaActual } from "@/lib/types"
 import { BranchItem } from "./BranchItem"
 import { RouteCompletedView } from "./RouteCompletedView"
 
 interface RouteStatusCardProps {
-    currentRoute: CurrentRoute
+    currentRoute: RutaActual
     onCheckIn: (branchName: string) => void
     onFinishRoute: () => void
-    getNextBranch: () => { name: string; time: string; status: "completed" | "current" | "pending" } | null
+    getNextBranch: () => { nombre: string; hora: string; estado: "completado" | "actual" | "pendiente" } | null
     isLastBranch: () => boolean
 }
 
@@ -26,17 +26,17 @@ export function RouteStatusCard({
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-3">
-                    {currentRoute.branches.length === 0 ? (
+                    {currentRoute.sucursales.length === 0 ? (
                         <RouteCompletedView />
                     ) : (
-                        currentRoute.branches.map((branch, index) => {
+                        currentRoute.sucursales.map((branch, index) => {
                             const nextBranch = getNextBranch()
-                            const showCheckInButton = nextBranch?.name === branch.name
-                            const showFinishButton = branch.status === "current" && isLastBranch()
+                            const showCheckInButton = nextBranch?.nombre === branch.nombre
+                            const showFinishButton = branch.estado === "actual" && isLastBranch()
 
                             return (
                                 <BranchItem
-                                    key={branch.name}
+                                    key={branch.nombre}
                                     branch={branch}
                                     index={index}
                                     showCheckInButton={showCheckInButton}

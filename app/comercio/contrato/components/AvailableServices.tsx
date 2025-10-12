@@ -4,9 +4,9 @@ import { Plus } from "lucide-react"
 
 interface Service {
     id: string
-    name: string
-    description: string
-    monthlyFee: number
+    nombre: string
+    descripcion: string
+    cuotaMensual: number
 }
 
 interface AvailableServicesProps {
@@ -16,7 +16,7 @@ interface AvailableServicesProps {
 
 export function AvailableServices({ availableServices, includedServices }: AvailableServicesProps) {
     const filteredServices = availableServices.filter(
-        service => !includedServices.includes(service.name)
+        service => !includedServices.includes(service.nombre)
     )
 
     return (
@@ -28,11 +28,11 @@ export function AvailableServices({ availableServices, includedServices }: Avail
                         <CardContent className="p-4">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <h4 className="font-medium">{service.name}</h4>
-                                    <p className="text-sm text-gray-600 mt-1">{service.description}</p>
+                                    <h4 className="font-medium">{service.nombre}</h4>
+                                    <p className="text-sm text-gray-600 mt-1">{service.descripcion}</p>
                                 </div>
                                 <div className="text-right">
-                                    <p className="font-bold">${service.monthlyFee.toLocaleString()}</p>
+                                    <p className="font-bold">${service.cuotaMensual.toLocaleString()}</p>
                                     <p className="text-xs text-gray-500">por mes</p>
                                 </div>
                             </div>

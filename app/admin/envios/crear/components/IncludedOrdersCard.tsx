@@ -1,12 +1,12 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Package, MapPin } from "lucide-react"
-import { mockDriverOrders, mockRoutes } from "@/lib/mock-data"
+import type { Pedido, Ruta } from "@/lib/types"
 
 interface IncludedOrdersCardProps {
-    ordersForDestination: typeof mockDriverOrders
-    suggestedRoute: typeof mockRoutes[0] | null | undefined
+    ordersForDestination: Pedido[]
+    suggestedRoute: Ruta | null | undefined
     routeSegments: string[]
-    getOrderSegment: (order: typeof mockDriverOrders[0]) => {
+    getOrderSegment: (order: Pedido) => {
         segment: string
         index: number
         isIntermediate: boolean
@@ -16,8 +16,6 @@ interface IncludedOrdersCardProps {
 
 export function IncludedOrdersCard({
     ordersForDestination,
-    suggestedRoute,
-    routeSegments,
     getOrderSegment
 }: IncludedOrdersCardProps) {
     return (
@@ -48,13 +46,13 @@ export function IncludedOrdersCard({
                                         <tr key={order.id} className="border-b transition-colors hover:bg-muted/50">
                                             <td className="p-4 align-middle w-2/5">
                                                 <div className="font-medium text-sm">{order.id}</div>
-                                                <div className="text-xs text-muted-foreground">{order.description}</div>
+                                                <div className="text-xs text-muted-foreground">{order.descripcion}</div>
                                             </td>
                                             <td className="p-4 align-middle text-sm w-3/5 text-center">
                                                 <div className="flex items-center gap-1 justify-center">
                                                     <MapPin className="h-3 w-3 text-gray-500" />
                                                     <div className="flex flex-col">
-                                                        <span className="text-xs">{order.locality}</span>
+                                                        <span className="text-xs">{order.localidad}</span>
                                                         {(() => {
                                                             const segment = getOrderSegment(order);
                                                             if (segment) {

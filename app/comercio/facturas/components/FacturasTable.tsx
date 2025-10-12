@@ -4,20 +4,20 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Dialog } from "@/components/ui/dialog"
-import type { Invoice } from "@/lib/types"
-import { InvoiceStatusBadge } from "./InvoiceStatusBadge"
-import { InvoiceActionsCell } from "./InvoiceActionsCell"
-import { InvoiceDetailsDialog } from "./InvoiceDetailsDialog"
+import type { Factura } from "@/lib/types"
+import { FacturaStatusBadge } from "./FacturaStatusBadge"
+import { FacturaActionsCell } from "./FacturaActionsCell"
+import { FacturaDetailsDialog } from "./FacturaDetailsDialog"
 
-interface InvoicesTableProps {
-    invoices: Invoice[]
+interface FacturasTableProps {
+    invoices: Factura[]
 }
 
-export function InvoicesTable({ invoices }: InvoicesTableProps) {
-    const [selectedInvoice, setSelectedInvoice] = useState<Invoice | null>(null)
+export function FacturasTable({ invoices }: FacturasTableProps) {
+    const [selectedInvoice, setSelectedInvoice] = useState<Factura | null>(null)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
-    const handleViewInvoice = (invoice: Invoice) => {
+    const handleViewFactura = (invoice: Factura) => {
         setSelectedInvoice(invoice)
         setIsDialogOpen(true)
     }
@@ -39,30 +39,30 @@ export function InvoicesTable({ invoices }: InvoicesTableProps) {
                     <TableBody>
                         {invoices.map((invoice) => (
                             <TableRow key={invoice.id} className="hover:bg-accent/50">
-                                <TableCell>{invoice.issuedDate}</TableCell>
-                                <TableCell>{invoice.dueDate}</TableCell>
+                                <TableCell>{invoice.fechaEmision}</TableCell>
+                                <TableCell>{invoice.fechaVencimiento}</TableCell>
                                 <TableCell>
-                                    <p className="text-sm max-w-[150px] truncate" title={invoice.services.join(", ")}>
-                                        {invoice.services.join(", ")}
+                                    <p className="text-sm max-w-[150px] truncate" title={invoice.servicios.join(", ")}>
+                                        {invoice.servicios.join(", ")}
                                     </p>
                                 </TableCell>
                                 <TableCell>
-                                    <InvoiceStatusBadge status={invoice.status} />
+                                    <FacturaStatusBadge status={invoice.estado} />
                                 </TableCell>
                                 <TableCell className="font-bold text-lg">
-                                    ${invoice.amount.toLocaleString()}
+                                    ${invoice.monto.toLocaleString()}
                                 </TableCell>
                                 <TableCell>
-                                    <InvoiceActionsCell
+                                    <FacturaActionsCell
                                         invoice={invoice}
-                                        onViewInvoice={handleViewInvoice}
+                                        onViewInvoice={handleViewFactura}
                                     />
                                 </TableCell>
                             </TableRow>
                         ))}
                     </TableBody>
                 </Table>
-                <InvoiceDetailsDialog
+                <FacturaDetailsDialog
                     invoice={selectedInvoice}
                     open={isDialogOpen}
                     onOpenChange={setIsDialogOpen}

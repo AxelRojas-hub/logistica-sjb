@@ -1,14 +1,14 @@
 import { Button } from "@/components/ui/button"
 import { DialogTrigger } from "@/components/ui/dialog"
 import { Eye, Download, CreditCard } from "lucide-react"
-import type { Invoice } from "@/lib/types"
+import type { Factura } from "@/lib/types"
 
-interface InvoiceActionsCellProps {
-    invoice: Invoice
-    onViewInvoice: (invoice: Invoice) => void
+interface FacturaActionsCellProps {
+    invoice: Factura
+    onViewInvoice: (invoice: Factura) => void
 }
 
-export function InvoiceActionsCell({ invoice, onViewInvoice }: InvoiceActionsCellProps) {
+export function FacturaActionsCell({ invoice, onViewInvoice }: FacturaActionsCellProps) {
     return (
         <div className="flex gap-1">
             <DialogTrigger asChild>
@@ -23,7 +23,7 @@ export function InvoiceActionsCell({ invoice, onViewInvoice }: InvoiceActionsCel
             <Button variant="outline" size="sm">
                 <Download className="h-4 w-4" />
             </Button>
-            {invoice.status !== "pagada" && (
+            {invoice.estado !== "pagada" && (
                 <Button size="sm" className="bg-green-600 hover:bg-green-700">
                     <CreditCard className="h-4 w-4" />
                 </Button>

@@ -1,47 +1,46 @@
 import { useState } from "react"
-import { CurrentRoute } from "@/lib/types"
-import { mockCurrentRoute } from "@/lib/mock-data"
+import type { RutaActual } from "@/lib/types"
 
 export function useRouteLogic() {
-    const [currentRoute, setCurrentRoute] = useState<CurrentRoute>(mockCurrentRoute)
+    // TODO: Fetch current route from API
+    const [currentRoute, setCurrentRoute] = useState<RutaActual | null>(null)
 
     const handleCheckIn = (branchName: string) => {
         setCurrentRoute(prev => {
-            const branchIndex = prev.branches.findIndex(b => b.name === branchName)
+            if (!prev) return null;
+
+            const branchIndex = prev.sucursales.findIndex(b => b.nombre === branchName)
 
             return {
                 ...prev,
-                branches: prev.branches.map((branch, index) => {
-                    // La sucursal donde se hace check-in se marca como "current" (en progreso)
-                    if (branch.name === branchName) {
-                        return { ...branch, status: "current" as const }
+                sucursales: prev.sucursales.map((branch, index) => {
+                    if (branch.nombre === branchName) {
+                        return { ...branch, estado: "actual" as const }
                     }
-                    // La sucursal anterior (que estaba en progreso) se marca como completada
-                    if (index < branchIndex && branch.status === "current") {
-                        return { ...branch, status: "completed" as const }
+                    if (index < branchIndex && branch.estado === "actual") {
+                        return { ...branch, estado: "completado" as const }
                     }
                     return branch
                 }),
-                currentBranch: branchName
+                sucursalActual: branchName
             }
         })
     }
 
     const handleFinishRoute = () => {
-        setCurrentRoute(prev => ({
-            ...prev,
-            branches: [] // Limpiar la lista de sucursales
-        }))
+        setCurrentRoute(null)
     }
 
     const getNextBranch = () => {
-        const currentIndex = currentRoute.branches.findIndex(branch => branch.status === "current")
-        return currentRoute.branches[currentIndex + 1] || null
+        if (!currentRoute) return null;
+        const currentIndex = currentRoute.sucursales.findIndex(branch => branch.estado === "actual")
+        return currentRoute.sucursales[currentIndex + 1] || null
     }
 
     const isLastBranch = () => {
-        const currentIndex = currentRoute.branches.findIndex(branch => branch.status === "current")
-        return currentIndex === currentRoute.branches.length - 1
+        if (!currentRoute) return false;
+        const currentIndex = currentRoute.sucursales.findIndex(branch => branch.estado === "actual")
+        return currentIndex === currentRoute.sucursales.length - 1
     }
 
     return {

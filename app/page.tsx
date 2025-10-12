@@ -1,6 +1,4 @@
 "use client"
-
-import { useState } from "react"
 import { useRouter } from "next/navigation"
 import { Card, CardContent } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
@@ -10,7 +8,7 @@ import { useTheme } from "next-themes"
 
 export default function Home() {
   const router = useRouter()
-  const { setTheme, theme } = useTheme()
+  const { setTheme } = useTheme()
 
   const handleActorSelect = (actor: string) => {
     router.push(`/${actor}`)

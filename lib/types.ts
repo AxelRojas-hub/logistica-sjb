@@ -1,128 +1,132 @@
-// Tipos compartidos
-export interface Order {
+export interface Pedido {
     id: string;
-    recipient: string;
-    address: string;
-    neighborhood: string;
-    phone: string;
-    estimatedTime: string;
-    locality: string;
-    status: string;
-    business: string;
-    description: string;
-    weight: string;
-    specialInstructions: string;
+    destinatario: string;
+    direccion: string;
+    barrio: string;
+    telefono: string;
+    horaEstimada: string;
+    localidad: string;
+    estado: string;
+    comercio: string;
+    descripcion: string;
+    peso: string;
+    instruccionesEspeciales: string;
 }
 
-export interface Shipment {
+export interface Envio {
     id: string;
-    orders: number;
-    currentBranch: string;
-    lastUpdate: string;
-    estimatedDuration: string;
-    totalDistance: string;
-    status: string;
-    driver: string;
+    pedidos: number;
+    sucursalActual: string;
+    ultimaActualizacion: string;
+    duracionEstimada: string;
+    distanciaTotal: string;
+    estado: string;
+    chofer: string;
 }
 
-export interface Business {
+export interface Comercio {
     id: string;
-    name: string;
-    fiscalAddress: string;
+    nombre: string;
+    direccionFiscal: string;
     email: string;
-    status: string;
-    contractDuration: string;
-    services: string[];
-    pendingInvoices: number;
-    totalDebt: number;
+    estado: string;
+    duracionContrato: string;
+    servicios: string[];
+    facturasVencidas: number;
+    deudaTotal: number;
 }
 
-export interface Route {
+export interface Ruta {
     id: string;
-    name: string;
-    branches: string[];
-    estimatedTime: string;
-    segments: number;
+    nombre: string;
+    sucursales: string[];
+    tiempoEstimado: string;
+    segmentos: number;
 }
 
-export interface Branch {
+export interface Sucursal {
     id: string;
-    name: string;
-    location: string;
-    phone: string;
+    nombre: string;
+    ubicacion: string;
+    telefono: string;
     email: string;
 }
 
-export interface CurrentRoute {
-    name: string;
-    currentBranch: string;
-    nextBranch: string;
-    totalBranches: number;
-    branches: Array<{
-        name: string;
-        time: string;
-        status: "completed" | "current" | "pending";
+export interface RutaActual {
+    nombre: string;
+    sucursalActual: string;
+    sucursalSiguiente: string;
+    totalSucursales: number;
+    sucursales: Array<{
+        nombre: string;
+        hora: string;
+        estado: "completado" | "actual" | "pendiente";
     }>;
-    estimatedCompletion: string;
+    finalizacionEstimada: string;
 }
 
-// Tipos específicos para Comercio
-export interface BusinessOrder {
+export interface PedidoComercio {
     id: string;
-    recipient: string;
-    address: string;
-    neighborhood: string;
-    phone: string;
-    status: "pendiente" | "en_transito" | "entregado" | "cancelado";
-    description: string;
-    weight: string;
-    specialInstructions: string;
-    createdAt: string;
-    estimatedDelivery: string;
-    totalAmount: number;
-    services: string[];
-    deadline: string;
+    destinatario: string;
+    direccion: string;
+    barrio: string;
+    telefono: string;
+    estado: "pendiente" | "en_transito" | "entregado" | "cancelado";
+    descripcion: string;
+    peso: string;
+    instruccionesEspeciales: string;
+    creadoEn: string;
+    entregaEstimada: string;
+    montoTotal: number;
+    servicios: string[];
+    plazo: string;
 }
 
-export interface Invoice {
+export interface Factura {
     id: string;
-    businessId: string;
-    amount: number;
-    status: "pagada" | "pendiente" | "vencida";
-    issuedDate: string;
-    dueDate: string;
-    description: string;
-    orders: string[];
-    services: string[];
+    comercioId: string;
+    monto: number;
+    estado: "pagada" | "pendiente" | "vencida";
+    fechaEmision: string;
+    fechaVencimiento: string;
+    descripcion: string;
+    pedidos: string[];
+    servicios: string[];
 }
 
-export interface Contract {
+export interface Contrato {
     id: string;
-    businessId: string;
-    status: "activo" | "vencido" | "suspendido";
-    startDate: string;
-    endDate: string;
-    services: string[];
-    monthlyFee: number;
-    pickupLimit: number;
-    deliveryLimit: number;
+    comercioId: string;
+    estado: "activo" | "vencido" | "suspendido";
+    fechaInicio: string;
+    fechaFin: string;
+    servicios: string[];
+    cuotaMensual: number;
+    limiteRetiros: number;
+    limiteEntregas: number;
 }
 
-export interface Driver {
+export interface Chofer {
     id: string;
-    name: string;
-    branch: string;
-    branchId: string;
-    status: "available" | "busy" | "offline";
-    phone: string;
-    vehicleCapacity: string;
-    currentRoute: string | null;
+    nombre: string;
+    sucursal: string;
+    sucursalId: string;
+    estado: "disponible" | "ocupado" | "desconectado";
+    telefono: string;
+    capacidadVehiculo: string;
+    rutaActual: string | null;
 }
 
-export interface AdminContext {
+export interface ContextoAdmin {
     id: string;
-    name: string;
-    branch: string;
-    branchId: string;
-    role: string;
+    nombre: string;
+    sucursal: string;
+    sucursalId: string;
+    rol: string;
+}
+export interface Servicio {
+    id: string
+    nombre: string
+    descripcion: string
+    cuotaMensual: number
 }

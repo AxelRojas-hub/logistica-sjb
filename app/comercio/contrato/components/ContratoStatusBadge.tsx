@@ -1,10 +1,10 @@
 import { Badge } from "@/components/ui/badge"
 
-interface ContractStatusBadgeProps {
+interface ContratoStatusBadgeProps {
     status: string
 }
 
-export function ContractStatusBadge({ status }: ContractStatusBadgeProps) {
+export function ContratoStatusBadge({ status }: ContratoStatusBadgeProps) {
     const getStatusColor = (status: string) => {
         switch (status) {
             case "activo":

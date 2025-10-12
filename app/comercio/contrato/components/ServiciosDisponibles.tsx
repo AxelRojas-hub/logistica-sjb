@@ -1,10 +1,10 @@
 import { CheckCircle } from "lucide-react"
 
-interface IncludedServicesProps {
+interface ServiciosDisponiblesProps {
     services: string[]
 }
 
-export function IncludedServices({ services }: IncludedServicesProps) {
+export function ServiciosDisponibles({ services }: ServiciosDisponiblesProps) {
     return (
         <div>
             <p className="text-sm text-gray-500 mb-2">Servicios incluidos</p>

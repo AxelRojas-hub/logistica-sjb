@@ -1,13 +1,13 @@
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { BusinessOrder } from "@/lib/types"
+import type { PedidoComercio } from "@/lib/types"
 import OrderStatusBadge from "./OrderStatusBadge"
 import OrderActionsCell from "./OrderActionsCell"
 
 interface OrdersTableProps {
-    orders: BusinessOrder[]
+    orders: PedidoComercio[]
     onUpdateStatus: (orderId: string, newStatus: "pendiente" | "en_transito" | "entregado" | "cancelado") => void
-    onSelectOrder: (order: BusinessOrder) => void
+    onSelectOrder: (order: PedidoComercio) => void
 }
 
 export default function OrdersTable({ orders, onUpdateStatus, onSelectOrder }: OrdersTableProps) {
@@ -27,14 +27,14 @@ export default function OrdersTable({ orders, onUpdateStatus, onSelectOrder }: O
                         <TableRow key={order.id} className="hover:bg-accent/50">
                             <TableCell className="font-medium">
                                 <div>
-                                    <p className="font-medium">{order.recipient}</p>
-                                    <p className="text-sm text-muted-foreground">{order.phone}</p>
+                                    <p className="font-medium">{order.destinatario}</p>
+                                    <p className="text-sm text-muted-foreground">{order.telefono}</p>
                                 </div>
                             </TableCell>
                             <TableCell className="text-center">
-                                <OrderStatusBadge status={order.status} />
+                                <OrderStatusBadge status={order.estado} />
                             </TableCell>
-                            <TableCell className="text-center">{order.estimatedDelivery}</TableCell>
+                            <TableCell className="text-center">{order.entregaEstimada}</TableCell>
                             <TableCell className="text-center">
                                 <OrderActionsCell
                                     order={order}

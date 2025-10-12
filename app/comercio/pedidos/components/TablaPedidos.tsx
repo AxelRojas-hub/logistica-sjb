@@ -2,12 +2,12 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Eye, X } from "lucide-react"
-import { BusinessOrder } from "@/lib/types"
-import { OrderStatusBadge } from "./OrderStatusBadge"
+import type { PedidoComercio } from "@/lib/types"
+import { OrderStatusBadge } from "./PedidoStatusBadge"
 
 interface OrdersTableProps {
-    orders: BusinessOrder[]
-    onViewOrder: (order: BusinessOrder) => void
+    orders: PedidoComercio[]
+    onViewOrder: (order: PedidoComercio) => void
     onCancelOrder: (orderId: string) => void
 }
 
@@ -29,16 +29,16 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder }: OrdersTableP
                         <TableRow key={order.id} className="hover:bg-accent/50">
                             <TableCell className="font-medium">
                                 <div>
-                                    <p className="font-medium">{order.recipient}</p>
-                                    <p className="text-sm text-muted-foreground">{order.phone}</p>
+                                    <p className="font-medium">{order.destinatario}</p>
+                                    <p className="text-sm text-muted-foreground">{order.telefono}</p>
                                 </div>
                             </TableCell>
                             <TableCell>
-                                <OrderStatusBadge status={order.status} />
+                                <OrderStatusBadge status={order.estado} />
                             </TableCell>
-                            <TableCell>{order.estimatedDelivery}</TableCell>
+                            <TableCell>{order.entregaEstimada}</TableCell>
                             <TableCell className="font-bold text-lg">
-                                ${order.totalAmount.toLocaleString()}
+                                ${order.montoTotal.toLocaleString()}
                             </TableCell>
                             <TableCell>
                                 <div className="flex gap-1">
@@ -49,7 +49,7 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder }: OrdersTableP
                                     >
                                         <Eye className="h-4 w-4" />
                                     </Button>
-                                    {order.status === "pendiente" && (
+                                    {order.estado === "pendiente" && (
                                         <Button
                                             variant="destructive"
                                             size="sm"

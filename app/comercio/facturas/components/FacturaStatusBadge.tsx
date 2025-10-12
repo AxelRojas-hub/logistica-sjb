@@ -1,11 +1,11 @@
 import { Badge } from "@/components/ui/badge"
 import { AlertTriangle } from "lucide-react"
 
-interface InvoiceStatusBadgeProps {
+interface FacturaStatusBadgeProps {
     status: string
 }
 
-export function InvoiceStatusBadge({ status }: InvoiceStatusBadgeProps) {
+export function FacturaStatusBadge({ status }: FacturaStatusBadgeProps) {
     const getStatusColor = (status: string) => {
         switch (status) {
             case "pendiente":

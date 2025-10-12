@@ -2,7 +2,6 @@
 
 import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -871,7 +870,7 @@ export function AdminDashboard() {
                               </tr>
                             </thead>
                             <tbody>
-                              {getFilteredOrders().map((order, index) => (
+                              {getFilteredOrders().map((order) => (
                                 <tr key={order.id} className="border-b hover:bg-gray-50">
                                   <td className="py-4 px-4">
                                     <span className="font-mono text-sm">{order.id}</span>
