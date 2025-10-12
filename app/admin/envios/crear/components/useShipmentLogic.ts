@@ -13,7 +13,7 @@ export function useShipmentLogic() {
     const [selectedRoute, setSelectedRoute] = useState<string>("")
     const [selectedDriver, setSelectedDriver] = useState<string>("")
 
-    // TODO: Fetch data from API
+    // TODO: Obtener datos desde la API
     const mockRutas: Ruta[] = [];
     const mockDriverOrders: Pedido[] = [];
     const mockChoferes: Chofer[] = [];

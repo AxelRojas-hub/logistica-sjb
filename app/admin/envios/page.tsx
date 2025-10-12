@@ -18,10 +18,10 @@ import Link from "next/link"
 import { Envio, Ruta, Sucursal } from "@/lib/types"
 
 export default function AdminEnviosPage() {
-    // TODO: Fetch shipments, routes, and branches from API
-    const mockEnvios: Envio[] = [];
-    const mockRutas: Ruta[] = [];
-    const mockSucursales: Sucursal[] = [];
+    // TODO: Obtener envíos, rutas y sucursales desde la API
+    const mockEnvios: any[] = [];
+    const mockRutas: any[] = [];
+    const mockSucursales: any[] = [];
     const getStatusColor = (status: string) => {
         switch (status) {
             case "En ruta":

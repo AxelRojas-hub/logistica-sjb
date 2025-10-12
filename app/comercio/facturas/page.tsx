@@ -2,8 +2,8 @@ import { Factura } from "@/lib/types";
 import { FacturaPageHeader, FacturasTable } from "./components"
 
 export default function ComercioFacturasPage() {
-    // TODO: Fetch invoices from API
-    const invoices: Factura[] = [];
+    // TODO: Obtener facturas desde la API
+    const invoices: any[] = [];
 
     return (
         <div className="min-h-screen bg-background pt-4 flex flex-col">

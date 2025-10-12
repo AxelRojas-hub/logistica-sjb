@@ -2,9 +2,9 @@ import { Servicio } from "@/lib/types";
 import { ContractPageHeader, ContratoCard } from "./components"
 
 export default function ComercioContratoPage() {
-    // TODO: Fetch contract and available services from API
+    // TODO: Obtener contrato y servicios disponibles desde la API
     const contract = null;
-    const availableServices: Servicio[] = [];
+    const availableServices: any[] = [];
 
     return (
         <div className="min-h-screen bg-background pt-4 flex flex-col">

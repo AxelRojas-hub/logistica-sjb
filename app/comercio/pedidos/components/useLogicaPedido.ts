@@ -16,7 +16,7 @@ interface NewOrderForm {
 
 export function useOrdersLogic() {
     const [selectedOrder, setSelectedOrder] = useState<PedidoComercio | null>(null)
-    // TODO: Fetch orders from API
+    // TODO: Obtener pedidos desde la API
     const [orders, setOrders] = useState<PedidoComercio[]>([])
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
     const [newOrder, setNewOrder] = useState<NewOrderForm>({

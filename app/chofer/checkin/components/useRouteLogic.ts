@@ -2,7 +2,7 @@ import { useState } from "react"
 import type { RutaActual } from "@/lib/types"
 
 export function useRouteLogic() {
-    // TODO: Fetch current route from API
+    // TODO: Obtener ruta actual desde la API
     const [currentRoute, setCurrentRoute] = useState<RutaActual | null>(null)
 
     const handleCheckIn = (branchName: string) => {

@@ -16,8 +16,8 @@ import Link from "next/link"
 import { Comercio } from "@/lib/types"
 
 export default function AdminComerciosPage() {
-    // TODO: Fetch businesses from API
-    const mockComercios: Comercio[] = [];
+    // TODO: Obtener comercios desde la API
+    const mockComercios: any[] = [];
     const getStatusColor = (status: string) => {
         switch (status) {
             case "En ruta":

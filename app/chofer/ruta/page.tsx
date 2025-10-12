@@ -5,7 +5,7 @@ import Link from "next/link"
 import { RouteInfoCard, RoutePageHeader } from "./components"
 
 export default function ChoferRutaPage() {
-    // TODO: Fetch route data from API
+    // TODO: Obtener datos de ruta desde la API
     const currentRoute = null;
 
     return (
