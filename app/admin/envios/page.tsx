@@ -19,9 +19,9 @@ import { Envio, Ruta, Sucursal } from "@/lib/types"
 
 export default function AdminEnviosPage() {
     // TODO: Obtener envíos, rutas y sucursales desde la API
-    const mockEnvios: any[] = [];
-    const mockRutas: any[] = [];
-    const mockSucursales: any[] = [];
+    const mockEnvios: Envio[] = [];
+    const mockRutas: Ruta[] = [];
+    const mockSucursales: Sucursal[] = [];
     const getStatusColor = (status: string) => {
         switch (status) {
             case "En ruta":
