@@ -2,13 +2,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import type { Contrato } from "@/lib/types"
 import { ContratoStatusBadge } from "./ContratoStatusBadge"
 import { DetalleContrato } from "./DetalleContrato"
-import { ServiciosDisponibles } from "./ServiciosDisponibles"
 import { ContratoActions } from "./ContratoActions"
-import { Servicio } from "@/lib/types";
 
 interface ContratoCardProps {
     contract: Contrato | null
-    availableServices: Servicio[]
 }
 
 export function ContratoCard({ contract }: ContratoCardProps) {
@@ -27,19 +24,14 @@ export function ContratoCard({ contract }: ContratoCardProps) {
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div>
-                        <CardTitle className="text-xl">Contrato {contract.id}</CardTitle>
+                        <CardTitle className="text-xl">Contrato {contract.idContrato}</CardTitle>
                         <CardDescription>Plan de servicios logísticos</CardDescription>
                     </div>
-                    <ContratoStatusBadge status={contract.estado} />
+                    <ContratoStatusBadge status={contract.estadoContrato} />
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
                 <DetalleContrato contract={contract} />
-                <ServiciosDisponibles services={contract.servicios} />
-                {/* <AvailableServices
-                    availableServices={availableServices}
-                    includedServices={contract.servicios}
-                /> */}
                 <ContratoActions />
             </CardContent>
         </Card>

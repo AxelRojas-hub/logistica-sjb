@@ -2,13 +2,13 @@ import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Eye, X } from "lucide-react"
-import type { PedidoComercio } from "@/lib/types"
+import type { Pedido } from "@/lib/types"
 import { OrderStatusBadge } from "./PedidoStatusBadge"
 
 interface OrdersTableProps {
-    orders: PedidoComercio[]
-    onViewOrder: (order: PedidoComercio) => void
-    onCancelOrder: (orderId: string) => void
+    orders: Pedido[]
+    onViewOrder: (order: Pedido) => void
+    onCancelOrder: (orderId: number) => void
 }
 
 export function OrdersTable({ orders, onViewOrder, onCancelOrder }: OrdersTableProps) {
@@ -17,28 +17,27 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder }: OrdersTableP
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead className="w-[200px]">Destinatario</TableHead>
+                        <TableHead className="w-[150px]">Nro. Pedido</TableHead>
+                        <TableHead className="w-[120px]">DNI Cliente</TableHead>
                         <TableHead className="w-[120px]">Estado</TableHead>
-                        <TableHead className="w-[150px]">Entrega Estimada</TableHead>
-                        <TableHead className="w-[120px]">Monto</TableHead>
+                        <TableHead className="w-[150px]">Entrega Límite</TableHead>
+                        <TableHead className="w-[120px]">Precio</TableHead>
                         <TableHead className="w-[120px]">Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {orders.map((order) => (
-                        <TableRow key={order.id} className="hover:bg-accent/50">
-                            <TableCell className="font-medium">
-                                <div>
-                                    <p className="font-medium">{order.destinatario}</p>
-                                    <p className="text-sm text-muted-foreground">{order.telefono}</p>
-                                </div>
+                        <TableRow key={order.idPedido} className="hover:bg-accent/50">
+                            <TableCell className="font-medium">#{order.idPedido}</TableCell>
+                            <TableCell>{order.dniCliente}</TableCell>
+                            <TableCell>
+                                <OrderStatusBadge status={order.estadoPedido} />
                             </TableCell>
                             <TableCell>
-                                <OrderStatusBadge status={order.estado} />
+                                {order.fechaLimiteEntrega ? new Date(order.fechaLimiteEntrega).toLocaleDateString() : "—"}
                             </TableCell>
-                            <TableCell>{order.entregaEstimada}</TableCell>
-                            <TableCell className="font-bold text-lg">
-                                ${order.montoTotal.toLocaleString()}
+                            <TableCell className="font-bold">
+                                ${order.precio.toLocaleString()}
                             </TableCell>
                             <TableCell>
                                 <div className="flex gap-1">
@@ -49,11 +48,11 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder }: OrdersTableP
                                     >
                                         <Eye className="h-4 w-4" />
                                     </Button>
-                                    {order.estado === "pendiente" && (
+                                    {order.estadoPedido === "en_preparacion" && (
                                         <Button
                                             variant="destructive"
                                             size="sm"
-                                            onClick={() => onCancelOrder(order.id)}
+                                            onClick={() => onCancelOrder(order.idPedido)}
                                         >
                                             <X className="h-4 w-4" />
                                         </Button>

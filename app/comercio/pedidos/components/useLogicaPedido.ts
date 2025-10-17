@@ -1,76 +1,54 @@
 import { useState } from "react"
-import type { PedidoComercio } from "@/lib/types"
+import type { Pedido, EstadoPedido } from "@/lib/types"
 
 interface NewOrderForm {
-    recipient: string
-    address: string
-    neighborhood: string
-    phone: string
-    description: string
-    weight: string
-    specialInstructions: string
-    totalAmount: number
-    services: string[]
-    deadline: string
+    dniCliente: number
+    idSucursalDestino: number
+    precio: number
+    fechaLimiteEntrega: string
 }
 
 export function useOrdersLogic() {
-    const [selectedOrder, setSelectedOrder] = useState<PedidoComercio | null>(null)
+    const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null)
     // TODO: Obtener pedidos desde la API
-    const [orders, setOrders] = useState<PedidoComercio[]>([])
+    const [orders, setOrders] = useState<Pedido[]>([])
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
     const [newOrder, setNewOrder] = useState<NewOrderForm>({
-        recipient: "",
-        address: "",
-        neighborhood: "",
-        phone: "",
-        description: "",
-        weight: "",
-        specialInstructions: "",
-        totalAmount: 0,
-        services: [],
-        deadline: "",
+        dniCliente: 0,
+        idSucursalDestino: 0,
+        precio: 0,
+        fechaLimiteEntrega: "",
     })
 
     const handleCreateOrder = () => {
-        const order: PedidoComercio = {
-            id: `PED-COM-${String(orders.length + 1).padStart(3, '0')}`,
-            destinatario: newOrder.recipient,
-            direccion: newOrder.address,
-            barrio: newOrder.neighborhood,
-            telefono: newOrder.phone,
-            estado: "pendiente",
-            descripcion: newOrder.description,
-            peso: newOrder.weight,
-            instruccionesEspeciales: newOrder.specialInstructions,
-            creadoEn: new Date().toISOString().split('T')[0],
-            entregaEstimada: new Date(Date.now() + 3 * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
-            montoTotal: newOrder.totalAmount,
-            servicios: newOrder.services,
-            plazo: newOrder.deadline,
+        const order: Pedido = {
+            idPedido: orders.length + 1,
+            idEnvio: null,
+            idComercio: 0, // TODO: Obtener del contexto del comercio logueado
+            idFactura: null,
+            idSucursalDestino: newOrder.idSucursalDestino,
+            dniCliente: newOrder.dniCliente,
+            estadoPedido: "en_preparacion" as EstadoPedido,
+            precio: newOrder.precio,
+            fechaEntrega: null,
+            fechaLimiteEntrega: newOrder.fechaLimiteEntrega,
         }
         setOrders([...orders, order])
         setNewOrder({
-            recipient: "",
-            address: "",
-            neighborhood: "",
-            phone: "",
-            description: "",
-            weight: "",
-            specialInstructions: "",
-            totalAmount: 0,
-            services: [],
-            deadline: "",
+            dniCliente: 0,
+            idSucursalDestino: 0,
+            precio: 0,
+            fechaLimiteEntrega: "",
         })
     }
 
-    const handleCancelOrder = (orderId: string) => {
+    const handleCancelOrder = (orderId: number) => {
         setOrders(orders.map(order =>
-            order.id === orderId ? { ...order, status: "cancelado" } : order
+            order.idPedido === orderId ? { ...order, estadoPedido: "cancelado" as EstadoPedido } : order
         ))
     }
 
-    const handleViewOrder = (order: PedidoComercio) => {
+    const handleViewOrder = (order: Pedido) => {
         setSelectedOrder(order)
         setShowDetailsDialog(true)
     }

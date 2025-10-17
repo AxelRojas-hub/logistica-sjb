@@ -1,7 +1,7 @@
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Building, Users, Truck, Route } from "lucide-react"
+import { Building, Users, Truck } from "lucide-react"
 
 interface ShipmentConfigurationCardProps {
     selectedRoute: string

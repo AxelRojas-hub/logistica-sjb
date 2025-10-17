@@ -4,20 +4,20 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ArrowLeft } from "lucide-react"
-import type { PedidoComercio } from "@/lib/types"
+import type { Pedido, EstadoPedido } from "@/lib/types"
 import Link from "next/link"
 import { ActionGlossary, OrdersTable } from "./components"
 
 export default function AdminPedidosPage() {
-    const [orders, setOrders] = useState<PedidoComercio[]>([])
+    const [orders, setOrders] = useState<Pedido[]>([])
 
-    const handleUpdateOrderStatus = (orderId: string, newStatus: "pendiente" | "en_transito" | "entregado" | "cancelado") => {
+    const handleUpdateOrderStatus = (orderId: number, newStatus: EstadoPedido) => {
         setOrders(orders.map(order =>
-            order.id === orderId ? { ...order, status: newStatus } : order
+            order.idPedido === orderId ? { ...order, estadoPedido: newStatus } : order
         ))
     }
 
-    const handleSelectOrder = (order: PedidoComercio) => {
+    const handleSelectOrder = (order: Pedido) => {
         // TODO: Implementar selección de pedido
         console.log("Selected order:", order)
     }

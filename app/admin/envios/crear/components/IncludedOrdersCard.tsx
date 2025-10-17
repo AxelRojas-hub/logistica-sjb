@@ -1,9 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Package } from "lucide-react"
 
-interface IncludedOrdersCardProps { }
 
-export function IncludedOrdersCard({ }: IncludedOrdersCardProps) {
+export function IncludedOrdersCard() {
     // TODO: Obtener pedidos desde Supabase basándose en la ruta y destino seleccionados
     const orders = [
         { id: "PED-001", descripcion: "Paquete A", localidad: "La Plata" },

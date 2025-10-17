@@ -1,10 +1,19 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { RutaActual } from "@/lib/types"
+import type { RutaConTramos, Tramo } from "@/lib/types"
 import { RouteGeneralDetails } from "./RouteGeneralDetails"
 import { BranchSequence } from "./BranchSequence"
 
+interface TramoConEstado extends Tramo {
+    estado: "completado" | "actual" | "pendiente"
+}
+
+interface RutaConEstado extends RutaConTramos {
+    tramos: TramoConEstado[]
+    tramoActual: number | null
+}
+
 interface RouteInfoCardProps {
-    currentRoute: RutaActual | null
+    currentRoute: RutaConEstado | null
 }
 
 export function RouteInfoCard({ currentRoute }: RouteInfoCardProps) {
@@ -22,7 +31,7 @@ export function RouteInfoCard({ currentRoute }: RouteInfoCardProps) {
         <Card>
             <CardHeader>
                 <CardTitle>Información de la Ruta</CardTitle>
-                <CardDescription>{currentRoute.nombre}</CardDescription>
+                <CardDescription>{currentRoute.nombreRuta}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="grid md:grid-cols-2 gap-6">

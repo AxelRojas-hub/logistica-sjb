@@ -28,29 +28,27 @@ export function FacturasTable({ invoices }: FacturasTableProps) {
                 <Table>
                     <TableHeader>
                         <TableRow>
+                            <TableHead>Nro Factura</TableHead>
                             <TableHead>Fecha Emisión</TableHead>
-                            <TableHead>Vencimiento</TableHead>
-                            <TableHead>Servicios</TableHead>
-                            <TableHead>Estado</TableHead>
-                            <TableHead>Monto</TableHead>
+                            <TableHead>Periodo</TableHead>
+                            <TableHead>Estado Pago</TableHead>
+                            <TableHead>Importe Total</TableHead>
                             <TableHead>Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {invoices.map((invoice) => (
-                            <TableRow key={invoice.id} className="hover:bg-accent/50">
-                                <TableCell>{invoice.fechaEmision}</TableCell>
-                                <TableCell>{invoice.fechaVencimiento}</TableCell>
+                            <TableRow key={invoice.idFactura} className="hover:bg-accent/50">
+                                <TableCell className="font-medium">{invoice.nroFactura}</TableCell>
+                                <TableCell>{new Date(invoice.fechaEmision).toLocaleDateString()}</TableCell>
                                 <TableCell>
-                                    <p className="text-sm max-w-[150px] truncate" title={invoice.servicios.join(", ")}>
-                                        {invoice.servicios.join(", ")}
-                                    </p>
+                                    {new Date(invoice.fechaInicio).toLocaleDateString()} - {new Date(invoice.fechaFin).toLocaleDateString()}
                                 </TableCell>
                                 <TableCell>
-                                    <FacturaStatusBadge status={invoice.estado} />
+                                    <FacturaStatusBadge status={invoice.estadoPago} />
                                 </TableCell>
                                 <TableCell className="font-bold text-lg">
-                                    ${invoice.monto.toLocaleString()}
+                                    ${invoice.importeTotal.toLocaleString()}
                                 </TableCell>
                                 <TableCell>
                                     <FacturaActionsCell

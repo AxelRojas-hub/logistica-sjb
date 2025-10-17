@@ -7,12 +7,12 @@ import {
     DialogTrigger,
 } from "@/components/ui/dialog"
 import { CheckCircle, X } from "lucide-react"
-import type { PedidoComercio } from "@/lib/types"
+import type { Pedido, EstadoPedido } from "@/lib/types"
 import OrderStatusBadge from "./OrderStatusBadge"
 
 interface OrderDetailsDialogProps {
-    order: PedidoComercio
-    onUpdateStatus: (orderId: string, newStatus: "pendiente" | "en_transito" | "entregado" | "cancelado") => void
+    order: Pedido
+    onUpdateStatus: (orderId: number, newStatus: EstadoPedido) => void
     children: React.ReactNode
 }
 
@@ -24,67 +24,67 @@ export default function OrderDetailsDialog({ order, onUpdateStatus, children }: 
             </DialogTrigger>
             <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
                 <DialogHeader>
-                    <DialogTitle>Detalles del Pedido {order.id}</DialogTitle>
+                    <DialogTitle>Detalles del Pedido {order.idPedido}</DialogTitle>
                 </DialogHeader>
                 <div className="grid gap-4">
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <h4 className="font-medium mb-1">Destinatario</h4>
-                            <p className="text-sm">{order.destinatario}</p>
-                            <p className="text-xs text-gray-500">{order.telefono}</p>
+                            <h4 className="font-medium mb-1">ID Pedido</h4>
+                            <p className="text-sm">{order.idPedido}</p>
                         </div>
                         <div>
                             <h4 className="font-medium mb-1">Estado</h4>
-                            <OrderStatusBadge status={order.estado} />
+                            <OrderStatusBadge status={order.estadoPedido} />
                         </div>
                     </div>
                     <div>
-                        <h4 className="font-medium mb-1">Dirección</h4>
-                        <p className="text-sm">{order.direccion}</p>
-                        <p className="text-xs text-gray-500">{order.barrio}</p>
+                        <h4 className="font-medium mb-1">Cliente</h4>
+                        <p className="text-sm">DNI: {order.dniCliente}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <h4 className="font-medium mb-1">Creado</h4>
-                            <p className="text-sm">{order.creadoEn}</p>
+                            <h4 className="font-medium mb-1">Comercio</h4>
+                            <p className="text-sm">ID: {order.idComercio}</p>
                         </div>
                         <div>
-                            <h4 className="font-medium mb-1">Entrega estimada</h4>
-                            <p className="text-sm">{order.entregaEstimada}</p>
+                            <h4 className="font-medium mb-1">Sucursal Destino</h4>
+                            <p className="text-sm">ID: {order.idSucursalDestino}</p>
                         </div>
-                    </div>
-                    <div>
-                        <h4 className="font-medium mb-1">Descripción</h4>
-                        <p className="text-sm">{order.descripcion}</p>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
-                            <h4 className="font-medium mb-1">Peso</h4>
-                            <p className="text-sm">{order.peso}</p>
+                            <h4 className="font-medium mb-1">Precio</h4>
+                            <p className="text-sm">${order.precio.toLocaleString()}</p>
                         </div>
                         <div>
-                            <h4 className="font-medium mb-1">Monto</h4>
-                            <p className="text-sm">${order.montoTotal.toLocaleString()}</p>
+                            <h4 className="font-medium mb-1">Envío</h4>
+                            <p className="text-sm">{order.idEnvio ? `ID: ${order.idEnvio}` : "No asignado"}</p>
                         </div>
                     </div>
-                    {order.instruccionesEspeciales && (
+                    {order.fechaEntrega && (
                         <div>
-                            <h4 className="font-medium mb-1">Instrucciones especiales</h4>
-                            <p className="text-sm">{order.instruccionesEspeciales}</p>
+                            <h4 className="font-medium mb-1">Fecha de Entrega</h4>
+                            <p className="text-sm">{new Date(order.fechaEntrega).toLocaleDateString()}</p>
+                        </div>
+                    )}
+                    {order.fechaLimiteEntrega && (
+                        <div>
+                            <h4 className="font-medium mb-1">Fecha Límite de Entrega</h4>
+                            <p className="text-sm">{new Date(order.fechaLimiteEntrega).toLocaleDateString()}</p>
                         </div>
                     )}
                     <div className="flex gap-2 pt-4 border-t">
                         <Button
                             variant="outline"
-                            onClick={() => onUpdateStatus(order.id, "en_transito")}
-                            disabled={order.estado === "entregado" || order.estado === "cancelado"}
+                            onClick={() => onUpdateStatus(order.idPedido, "en_camino")}
+                            disabled={order.estadoPedido === "entregado" || order.estadoPedido === "cancelado"}
                         >
                             Marcar en Tránsito
                         </Button>
                         <Button
                             variant="default"
-                            onClick={() => onUpdateStatus(order.id, "entregado")}
-                            disabled={order.estado === "entregado" || order.estado === "cancelado"}
+                            onClick={() => onUpdateStatus(order.idPedido, "entregado")}
+                            disabled={order.estadoPedido === "entregado" || order.estadoPedido === "cancelado"}
                             className="bg-green-600 hover:bg-green-700"
                         >
                             <CheckCircle className="h-4 w-4 mr-2" />
@@ -92,8 +92,8 @@ export default function OrderDetailsDialog({ order, onUpdateStatus, children }: 
                         </Button>
                         <Button
                             variant="destructive"
-                            onClick={() => onUpdateStatus(order.id, "cancelado")}
-                            disabled={order.estado === "entregado" || order.estado === "cancelado"}
+                            onClick={() => onUpdateStatus(order.idPedido, "cancelado")}
+                            disabled={order.estadoPedido === "entregado" || order.estadoPedido === "cancelado"}
                         >
                             <X className="h-4 w-4 mr-2" />
                             Cancelar

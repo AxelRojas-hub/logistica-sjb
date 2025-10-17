@@ -1,47 +1,51 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import type { RutaActual } from "@/lib/types"
+import type { RutaConTramos, Tramo } from "@/lib/types"
 import { BranchItem } from "./BranchItem"
 import { RouteCompletedView } from "./RouteCompletedView"
 
 interface RouteStatusCardProps {
-    currentRoute: RutaActual
-    onCheckIn: (branchName: string) => void
+    currentRoute: RutaConTramos
+    onCheckIn: (tramoIndex: number) => void
     onFinishRoute: () => void
-    getNextBranch: () => { nombre: string; hora: string; estado: "completado" | "actual" | "pendiente" } | null
-    isLastBranch: () => boolean
+    getNextTramo: () => Tramo | null
+    isLastTramo: () => boolean
 }
 
 export function RouteStatusCard({
     currentRoute,
     onCheckIn,
     onFinishRoute,
-    getNextBranch,
-    isLastBranch
+    getNextTramo,
+    isLastTramo
 }: RouteStatusCardProps) {
     return (
         <Card>
             <CardHeader>
                 <CardTitle>Estado de la Ruta Actual</CardTitle>
-                <CardDescription>Progreso y próximas sucursales en tu ruta</CardDescription>
+                <CardDescription>Ruta: {currentRoute.nombreRuta}</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
                 <div className="space-y-3">
-                    {currentRoute.sucursales.length === 0 ? (
+                    {currentRoute.tramos.length === 0 ? (
                         <RouteCompletedView />
                     ) : (
-                        currentRoute.sucursales.map((branch, index) => {
-                            const nextBranch = getNextBranch()
-                            const showCheckInButton = nextBranch?.nombre === branch.nombre
-                            const showFinishButton = branch.estado === "actual" && isLastBranch()
+                        currentRoute.tramos.map((tramo, index) => {
+                            const nextTramo = getNextTramo()
+                            const showCheckInButton = nextTramo?.nroTramo === tramo.nroTramo
+                            const showFinishButton = index === currentRoute.tramos.length - 1 && isLastTramo()
 
                             return (
                                 <BranchItem
-                                    key={branch.nombre}
-                                    branch={branch}
+                                    key={`${tramo.nroTramo}-${index}`}
+                                    branch={{
+                                        nombre: `Sucursal ${tramo.idSucursalDestino}`,
+                                        hora: "",
+                                        estado: "pendiente" as const
+                                    }}
                                     index={index}
                                     showCheckInButton={showCheckInButton}
                                     showFinishButton={showFinishButton}
-                                    onCheckIn={onCheckIn}
+                                    onCheckIn={() => onCheckIn(index)}
                                     onFinishRoute={onFinishRoute}
                                 />
                             )

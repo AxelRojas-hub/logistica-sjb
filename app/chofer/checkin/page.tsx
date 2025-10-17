@@ -12,8 +12,8 @@ export default function ChoferCheckinPage() {
         currentRoute,
         handleCheckIn,
         handleFinishRoute,
-        getNextBranch,
-        isLastBranch
+        getNextTramo,
+        isLastTramo
     } = useRouteLogic()
 
     return (
@@ -45,15 +45,15 @@ export default function ChoferCheckinPage() {
                         ) : (
                             <div className="space-y-6">
                                 <Badge variant="outline" className="text-lg px-3 py-1">
-                                    Ruta: {currentRoute.nombre}
+                                    Ruta: {currentRoute.nombreRuta}
                                 </Badge>
 
                                 <RouteStatusCard
                                     currentRoute={currentRoute}
                                     onCheckIn={handleCheckIn}
                                     onFinishRoute={handleFinishRoute}
-                                    getNextBranch={getNextBranch}
-                                    isLastBranch={isLastBranch}
+                                    getNextTramo={getNextTramo}
+                                    isLastTramo={isLastTramo}
                                 />
                             </div>
                         )}

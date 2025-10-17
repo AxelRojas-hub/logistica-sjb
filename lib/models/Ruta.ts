@@ -1,18 +1,9 @@
-import { Ruta } from "@/lib/types"
+import { Ruta, Tramo } from "@/lib/types"
 import { SupabaseClient } from "@supabase/supabase-js"
+import { RutaConTramos } from "@/lib/types"
 
-interface RutaConTramos {
-    idRuta: number
-    nombreRuta: string
-    tramos: any[]
-}
 
-/**
- * Obtiene todas las rutas con sus tramos asociados ordenados correctamente
- * @param supabase Cliente de Supabase
- * @returns Array de rutas con sus tramos
- */
-export async function useRutasConTramos(supabase: SupabaseClient): Promise<RutaConTramos[]> {
+export async function getRutasConTramos(supabase: SupabaseClient): Promise<RutaConTramos[]> {
     // Obtener rutas
     const { data: rutasData, error: rutasError } = await supabase
         .from("ruta")
@@ -23,9 +14,9 @@ export async function useRutasConTramos(supabase: SupabaseClient): Promise<RutaC
         return []
     }
 
-    const rutas: Ruta[] = (rutasData || []).map((row: any) => ({
-        idRuta: row.id_ruta,
-        nombreRuta: row.nombre_ruta,
+    const rutas: Ruta[] = (rutasData || []).map((row: Record<string, unknown>) => ({
+        idRuta: row.id_ruta as number,
+        nombreRuta: row.nombre_ruta as string,
     }))
 
     // Obtener tramos con sus sucursales asociadas
@@ -57,14 +48,15 @@ export async function useRutasConTramos(supabase: SupabaseClient): Promise<RutaC
     }
 
     // Crear un mapa de tramos por ruta
-    const tramoPorRuta = new Map<number, any[]>()
-    rutaTramosData?.forEach((rt: any) => {
-        if (!tramoPorRuta.has(rt.id_ruta)) {
-            tramoPorRuta.set(rt.id_ruta, [])
+    const tramoPorRuta = new Map<number, Tramo[]>()
+    rutaTramosData?.forEach((rt: Record<string, unknown>) => {
+        const idRuta = rt.id_ruta as number
+        if (!tramoPorRuta.has(idRuta)) {
+            tramoPorRuta.set(idRuta, [])
         }
-        const tramo = tramosData?.find((t: any) => t.nro_tramo === rt.nro_tramo)
+        const tramo = tramosData?.find((t: Record<string, unknown>) => t.nro_tramo === rt.nro_tramo)
         if (tramo) {
-            tramoPorRuta.get(rt.id_ruta)?.push(tramo)
+            tramoPorRuta.get(idRuta)?.push(tramo as Tramo)
         }
     })
 
@@ -82,26 +74,26 @@ export async function useRutasConTramos(supabase: SupabaseClient): Promise<RutaC
  * @param tramos Array de tramos para la ruta
  * @returns Array de tramos ordenados desde inicio hasta fin
  */
-export function construirCaminoRuta(tramos: any[]): any[] {
+export function construirCaminoRuta(tramos: Tramo[]): Tramo[] {
     if (tramos.length === 0) return []
 
     // Encontrar el nodo inicial (sucursal que no es destino de ningún tramo)
-    const todosDest = new Set(tramos.map((t: any) => t.id_sucursal_destino))
-    const startTramo = tramos.find((t: any) => !todosDest.has(t.id_sucursal_origen))
+    const todosDest = new Set(tramos.map((t: Tramo) => t.idSucursalDestino))
+    const startTramo = tramos.find((t: Tramo) => !todosDest.has(t.idSucursalOrigen))
 
     if (!startTramo) return tramos // Si hay ciclo, retornar en orden original
 
     // Construir el camino ordenado encadenando tramos
-    const camino: any[] = [startTramo]
-    let currentDestino = startTramo.id_sucursal_destino
+    const camino: Tramo[] = [startTramo]
+    let currentDestino = startTramo.idSucursalDestino
 
     while (camino.length < tramos.length) {
         const nextTramo = tramos.find(
-            (t: any) => t.id_sucursal_origen === currentDestino && !camino.includes(t)
+            (t: Tramo) => t.idSucursalOrigen === currentDestino && !camino.includes(t)
         )
         if (!nextTramo) break
         camino.push(nextTramo)
-        currentDestino = nextTramo.id_sucursal_destino
+        currentDestino = nextTramo.idSucursalDestino
     }
 
     return camino

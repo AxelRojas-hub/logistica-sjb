@@ -16,7 +16,11 @@ export type EstadoComercio = "habilitado" | "deshabilitado";
 
 export type EstadoPago = "pagado" | "pendiente" | "vencido";
 
-
+export interface RutaConTramos {
+    idRuta: number
+    nombreRuta: string
+    tramos: Tramo[]
+}
 // Tablas
 
 export interface Sucursal {

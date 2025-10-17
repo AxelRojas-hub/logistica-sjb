@@ -1,10 +1,8 @@
-import { Servicio } from "@/lib/types";
 import { ContractPageHeader, ContratoCard } from "./components"
 
 export default function ComercioContratoPage() {
-    // TODO: Obtener contrato y servicios disponibles desde la API
-    const contract = null;
-    const availableServices: Servicio[] = [];
+    // TODO: Obtener contrato desde la API
+    const contract = null
 
     return (
         <div className="min-h-screen bg-background pt-4 flex flex-col">
@@ -12,10 +10,7 @@ export default function ComercioContratoPage() {
                 <ContractPageHeader />
 
                 <div className="space-y-6">
-                    <ContratoCard
-                        contract={contract}
-                        availableServices={availableServices}
-                    />
+                    <ContratoCard contract={contract} />
                 </div>
             </div>
         </div>

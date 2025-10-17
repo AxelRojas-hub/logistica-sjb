@@ -1,28 +1,35 @@
 import { useState } from "react"
-import type { RutaActual } from "@/lib/types"
+import type { RutaConTramos, Tramo } from "@/lib/types"
+
+interface TramoConEstado extends Tramo {
+    estado: "completado" | "actual" | "pendiente"
+}
+
+interface RutaConEstado extends RutaConTramos {
+    tramos: TramoConEstado[]
+    tramoActual: number | null
+}
 
 export function useRouteLogic() {
     // TODO: Obtener ruta actual desde la API
-    const [currentRoute, setCurrentRoute] = useState<RutaActual | null>(null)
+    const [currentRoute, setCurrentRoute] = useState<RutaConEstado | null>(null)
 
-    const handleCheckIn = (branchName: string) => {
+    const handleCheckIn = (tramoIndex: number) => {
         setCurrentRoute(prev => {
-            if (!prev) return null;
-
-            const branchIndex = prev.sucursales.findIndex(b => b.nombre === branchName)
+            if (!prev) return null
 
             return {
                 ...prev,
-                sucursales: prev.sucursales.map((branch, index) => {
-                    if (branch.nombre === branchName) {
-                        return { ...branch, estado: "actual" as const }
+                tramos: prev.tramos.map((tramo, index) => {
+                    if (index === tramoIndex) {
+                        return { ...tramo, estado: "actual" as const }
                     }
-                    if (index < branchIndex && branch.estado === "actual") {
-                        return { ...branch, estado: "completado" as const }
+                    if (index < tramoIndex && tramo.estado === "actual") {
+                        return { ...tramo, estado: "completado" as const }
                     }
-                    return branch
+                    return tramo
                 }),
-                sucursalActual: branchName
+                tramoActual: tramoIndex
             }
         })
     }
@@ -31,23 +38,23 @@ export function useRouteLogic() {
         setCurrentRoute(null)
     }
 
-    const getNextBranch = () => {
-        if (!currentRoute) return null;
-        const currentIndex = currentRoute.sucursales.findIndex(branch => branch.estado === "actual")
-        return currentRoute.sucursales[currentIndex + 1] || null
+    const getNextTramo = (): Tramo | null => {
+        if (!currentRoute) return null
+        const currentIndex = currentRoute.tramos.findIndex(tramo => tramo.estado === "actual")
+        return currentRoute.tramos[currentIndex + 1] || null
     }
 
-    const isLastBranch = () => {
-        if (!currentRoute) return false;
-        const currentIndex = currentRoute.sucursales.findIndex(branch => branch.estado === "actual")
-        return currentIndex === currentRoute.sucursales.length - 1
+    const isLastTramo = () => {
+        if (!currentRoute) return false
+        const currentIndex = currentRoute.tramos.findIndex(tramo => tramo.estado === "actual")
+        return currentIndex === currentRoute.tramos.length - 1
     }
 
     return {
         currentRoute,
         handleCheckIn,
         handleFinishRoute,
-        getNextBranch,
-        isLastBranch
+        getNextTramo,
+        isLastTramo
     }
 }

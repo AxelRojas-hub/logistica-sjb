@@ -23,7 +23,7 @@ export function FacturaActionsCell({ invoice, onViewInvoice }: FacturaActionsCel
             <Button variant="outline" size="sm">
                 <Download className="h-4 w-4" />
             </Button>
-            {invoice.estado !== "pagada" && (
+            {invoice.estadoPago !== "pagado" && (
                 <Button size="sm" className="bg-green-600 hover:bg-green-700">
                     <CreditCard className="h-4 w-4" />
                 </Button>

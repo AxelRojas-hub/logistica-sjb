@@ -1,13 +1,13 @@
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import type { PedidoComercio } from "@/lib/types"
+import type { Pedido, EstadoPedido } from "@/lib/types"
 import OrderStatusBadge from "./OrderStatusBadge"
 import OrderActionsCell from "./OrderActionsCell"
 
 interface OrdersTableProps {
-    orders: PedidoComercio[]
-    onUpdateStatus: (orderId: string, newStatus: "pendiente" | "en_transito" | "entregado" | "cancelado") => void
-    onSelectOrder: (order: PedidoComercio) => void
+    orders: Pedido[]
+    onUpdateStatus: (orderId: number, newStatus: EstadoPedido) => void
+    onSelectOrder: (order: Pedido) => void
 }
 
 export default function OrdersTable({ orders, onUpdateStatus, onSelectOrder }: OrdersTableProps) {
@@ -16,25 +16,24 @@ export default function OrdersTable({ orders, onUpdateStatus, onSelectOrder }: O
             <Table>
                 <TableHeader>
                     <TableRow>
-                        <TableHead>Destinatario</TableHead>
+                        <TableHead>ID Pedido</TableHead>
                         <TableHead className="text-center">Estado</TableHead>
-                        <TableHead className="text-center">Entrega Estimada</TableHead>
+                        <TableHead className="text-center">Cliente DNI</TableHead>
+                        <TableHead className="text-center">Precio</TableHead>
                         <TableHead className="text-center">Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
                     {orders.map((order) => (
-                        <TableRow key={order.id} className="hover:bg-accent/50">
+                        <TableRow key={order.idPedido} className="hover:bg-accent/50">
                             <TableCell className="font-medium">
-                                <div>
-                                    <p className="font-medium">{order.destinatario}</p>
-                                    <p className="text-sm text-muted-foreground">{order.telefono}</p>
-                                </div>
+                                {order.idPedido}
                             </TableCell>
                             <TableCell className="text-center">
-                                <OrderStatusBadge status={order.estado} />
+                                <OrderStatusBadge status={order.estadoPedido} />
                             </TableCell>
-                            <TableCell className="text-center">{order.entregaEstimada}</TableCell>
+                            <TableCell className="text-center">{order.dniCliente}</TableCell>
+                            <TableCell className="text-center">${order.precio.toLocaleString()}</TableCell>
                             <TableCell className="text-center">
                                 <OrderActionsCell
                                     order={order}

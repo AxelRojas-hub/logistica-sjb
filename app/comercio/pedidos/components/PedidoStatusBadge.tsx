@@ -1,29 +1,36 @@
 import { Badge } from "@/components/ui/badge"
+import type { EstadoPedido } from "@/lib/types"
 
 interface OrderStatusBadgeProps {
-    status: string
+    status: EstadoPedido
 }
 
 export function OrderStatusBadge({ status }: OrderStatusBadgeProps) {
-    const getStatusColor = (status: string) => {
+    const getStatusColor = (status: EstadoPedido) => {
         switch (status) {
-            case "pendiente":
+            case "en_preparacion":
                 return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300"
-            case "en proceso":
+            case "en_camino":
                 return "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
-            case "completado":
+            case "en_sucursal":
+                return "bg-purple-100 text-purple-800 dark:bg-purple-900/50 dark:text-purple-300"
+            case "entregado":
                 return "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+            case "cancelado":
+                return "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
             default:
                 return "bg-muted text-muted-foreground"
         }
     }
 
-    const getStatusText = (status: string) => {
+    const getStatusText = (status: EstadoPedido) => {
         switch (status) {
-            case "pendiente":
-                return "Pendiente"
-            case "en_transito":
+            case "en_preparacion":
+                return "En Preparación"
+            case "en_camino":
                 return "En Tránsito"
+            case "en_sucursal":
+                return "En Sucursal"
             case "entregado":
                 return "Entregado"
             case "cancelado":

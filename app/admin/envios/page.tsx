@@ -4,9 +4,7 @@ import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import {
     Truck,
-    Package,
     MapPin,
-    Clock,
     Filter,
     Search,
     Eye,
@@ -16,15 +14,16 @@ import {
 import Link from "next/link"
 import { Envio } from "@/lib/types"
 import { createClient } from "@/lib/supabaseServer"
-import { useSucursales, useRutasConTramos, construirCaminoRuta } from "../../hooks"
+import { getSucursales } from "@/lib/models/Sucursal"
+import { getRutasConTramos, construirCaminoRuta } from "@/lib/models/Ruta"
 
 export default async function AdminEnviosPage() {
     const supabase = await createClient()
 
-    // Obtener datos usando los hooks
-    const sucursales = await useSucursales(supabase)
-    const rutasConTramos = await useRutasConTramos(supabase)
-    const mockEnvios: Envio[] = [];
+    // Obtener datos usando las funciones de modelos
+    const sucursales = await getSucursales(supabase)
+    const rutasConTramos = await getRutasConTramos(supabase)
+    const mockEnvios: Envio[] = []
     const getStatusColor = (status: string) => {
         switch (status) {
             case "en_camino":
@@ -149,16 +148,16 @@ export default async function AdminEnviosPage() {
                                                                 <p className="text-xs text-muted-foreground">Recorrido:</p>
                                                                 <div className="text-sm space-y-1">
                                                                     {caminoOrdenado.map((tramo, index) => (
-                                                                        <div key={`${tramo.nro_tramo}-${index}`} className="flex items-center gap-1 text-xs">
+                                                                        <div key={`${tramo.nroTramo}-${index}`} className="flex items-center gap-1 text-xs">
                                                                             <span className="font-medium text-foreground">
-                                                                                {tramo.sucursal_origen?.ciudad_sucursal || "Inicio"}
+                                                                                Sucursal {tramo.idSucursalOrigen}
                                                                             </span>
                                                                             <span className="text-muted-foreground">→</span>
                                                                             <span className="font-medium text-foreground">
-                                                                                {tramo.sucursal_destino?.ciudad_sucursal || "Fin"}
+                                                                                Sucursal {tramo.idSucursalDestino}
                                                                             </span>
                                                                             <span className="text-muted-foreground">
-                                                                                ({tramo.distancia_km} km)
+                                                                                ({tramo.distanciaKm} km)
                                                                             </span>
                                                                         </div>
                                                                     ))}
