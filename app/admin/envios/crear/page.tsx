@@ -1,28 +1,18 @@
 "use client"
 
+import { useState } from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import {
-    PageHeader,
-    ShipmentConfigurationCard,
-    IncludedOrdersCard,
-    useShipmentLogic
-} from "./components"
+import { PageHeader, ShipmentConfigurationCard, IncludedOrdersCard } from "./components"
 
 export default function AdminCrearEnvioPage() {
-    const {
-        adminBranch,
-        pendingOrders,
-        suggestedRoute,
-        routeSegments,
-        ordersForDestination,
-        availableDrivers,
-        selectedDriver,
-        setSelectedDriver,
-        selectedRouteInfo,
-        selectedDriverInfo,
-        canCreateShipment,
-        getOrderSegment
-    } = useShipmentLogic()
+    const [selectedRoute, setSelectedRoute] = useState<string>("")
+    const [selectedDriver, setSelectedDriver] = useState<string>("")
+
+    // TODO: Implementar obtención de datos desde Supabase
+    // TODO: Obtener sucursal actual del admin autenticado
+    // TODO: Obtener pedidos pendientes del comercio
+    // TODO: Obtener rutas disponibles
+    // TODO: Obtener choferes disponibles
 
     return (
         <TooltipProvider>
@@ -32,25 +22,13 @@ export default function AdminCrearEnvioPage() {
 
                     <div className="grid gap-6 lg:grid-cols-2">
                         <ShipmentConfigurationCard
-                            adminBranch={adminBranch}
-                            suggestedRoute={suggestedRoute}
-                            routeSegments={routeSegments}
-                            ordersForDestination={ordersForDestination}
-                            pendingOrders={pendingOrders}
-                            availableDrivers={availableDrivers}
+                            selectedRoute={selectedRoute}
+                            onRouteChange={setSelectedRoute}
                             selectedDriver={selectedDriver}
-                            setSelectedDriver={setSelectedDriver}
-                            canCreateShipment={canCreateShipment}
-                            selectedRouteInfo={selectedRouteInfo}
-                            selectedDriverInfo={selectedDriverInfo}
+                            onDriverChange={setSelectedDriver}
                         />
 
-                        <IncludedOrdersCard
-                            ordersForDestination={ordersForDestination}
-                            suggestedRoute={suggestedRoute}
-                            routeSegments={routeSegments}
-                            getOrderSegment={getOrderSegment}
-                        />
+                        <IncludedOrdersCard />
                     </div>
                 </div>
             </div>

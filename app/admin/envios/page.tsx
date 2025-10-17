@@ -1,5 +1,3 @@
-"use client"
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -12,21 +10,26 @@ import {
     Filter,
     Search,
     Eye,
-    ArrowLeft
+    ArrowLeft,
+    PackageX
 } from "lucide-react"
 import Link from "next/link"
-import { Envio, Ruta, Sucursal } from "@/lib/types"
+import { Envio } from "@/lib/types"
+import { createClient } from "@/lib/supabaseServer"
+import { useSucursales, useRutasConTramos, construirCaminoRuta } from "../../hooks"
 
-export default function AdminEnviosPage() {
-    // TODO: Obtener envíos, rutas y sucursales desde la API
+export default async function AdminEnviosPage() {
+    const supabase = await createClient()
+
+    // Obtener datos usando los hooks
+    const sucursales = await useSucursales(supabase)
+    const rutasConTramos = await useRutasConTramos(supabase)
     const mockEnvios: Envio[] = [];
-    const mockRutas: Ruta[] = [];
-    const mockSucursales: Sucursal[] = [];
     const getStatusColor = (status: string) => {
         switch (status) {
-            case "En ruta":
+            case "en_camino":
                 return "bg-blue-100 text-blue-800"
-            case "En sucursal":
+            case "finalizado":
                 return "bg-green-100 text-green-800"
             default:
                 return "bg-muted text-muted-foreground"
@@ -77,43 +80,51 @@ export default function AdminEnviosPage() {
                         </div>
 
                         {/* Shipments Grid */}
-                        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                            {mockEnvios.map((shipment) => (
-                                <Card key={shipment.id} className="hover:shadow-md transition-shadow">
-                                    <CardHeader className="pb-3">
-                                        <div className="flex justify-between items-start">
-                                            <CardTitle className="text-lg">{shipment.id}</CardTitle>
-                                            <Badge className={getStatusColor(shipment.estado)}>{shipment.estado}</Badge>
+                        {mockEnvios.length === 0 ? (
+                            <Card className="col-span-full">
+                                <CardContent className="flex flex-col items-center justify-center py-16">
+                                    <div className="flex flex-col items-center text-center space-y-4">
+                                        <div className="rounded-full bg-muted p-6">
+                                            <PackageX className="h-12 w-12 text-muted-foreground" />
                                         </div>
-                                        <CardDescription>Chofer: {shipment.chofer}</CardDescription>
-                                    </CardHeader>
-                                    <CardContent className="space-y-3">
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <Package className="h-4 w-4 text-gray-500" />
-                                            <span>{shipment.pedidos} pedidos</span>
+                                        <div className="space-y-2">
+                                            <h3 className="text-lg font-medium text-foreground">No hay envíos activos</h3>
+                                            <p className="text-sm text-muted-foreground max-w-sm">
+                                                No se encontraron envíos en curso.
+                                            </p>
                                         </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <MapPin className="h-4 w-4 text-gray-500" />
-                                            <span>{shipment.sucursalActual}</span>
-                                        </div>
-                                        <div className="flex items-center gap-2 text-sm">
-                                            <Clock className="h-4 w-4 text-gray-500" />
-                                            <span>Actualizado: {shipment.ultimaActualizacion}</span>
-                                        </div>
-                                        <div className="pt-2 border-t">
-                                            <div className="flex justify-between text-sm">
-                                                <span>Duración: {shipment.duracionEstimada}</span>
-                                                <span>Distancia: {shipment.distanciaTotal}</span>
+                                    </div>
+                                </CardContent>
+                            </Card>
+                        ) : (
+                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                                {mockEnvios.map((envio) => (
+                                    <Card key={envio.idEnvio} className="hover:shadow-md transition-shadow">
+                                        <CardHeader className="pb-3">
+                                            <div className="flex justify-between items-start">
+                                                <CardTitle className="text-lg">Envío #{envio.idEnvio}</CardTitle>
+                                                <Badge className={getStatusColor(envio.estadoEnvio)}>{envio.estadoEnvio}</Badge>
                                             </div>
-                                        </div>
-                                        <Button variant="outline" size="sm" className="w-full bg-transparent">
-                                            <Eye className="h-4 w-4 mr-2" />
-                                            Ver Detalles
-                                        </Button>
-                                    </CardContent>
-                                </Card>
-                            ))}
-                        </div>
+                                            <CardDescription>Chofer: {envio.legajoEmpleado}</CardDescription>
+                                        </CardHeader>
+                                        <CardContent className="space-y-3">
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <Truck className="h-4 w-4 text-gray-500" />
+                                                <span>Ruta: {envio.idRuta}</span>
+                                            </div>
+                                            <div className="flex items-center gap-2 text-sm">
+                                                <MapPin className="h-4 w-4 text-gray-500" />
+                                                <span>Sucursal actual: {envio.idSucursalActual}</span>
+                                            </div>
+                                            <Button variant="outline" size="sm" className="w-full bg-transparent">
+                                                <Eye className="h-4 w-4 mr-2" />
+                                                Ver Detalles
+                                            </Button>
+                                        </CardContent>
+                                    </Card>
+                                ))}
+                            </div>
+                        )}
 
                         {/* Routes and Branches */}
                         <div className="grid gap-6 md:grid-cols-2">
@@ -124,16 +135,47 @@ export default function AdminEnviosPage() {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="max-h-80 overflow-y-auto space-y-4">
-                                        {mockRutas.map((route) => (
-                                            <div key={route.id} className="border rounded-lg p-3">
-                                                <div className="flex justify-between items-start mb-2">
-                                                    <h4 className="font-medium">{route.nombre}</h4>
-                                                    <span className="text-sm text-muted-foreground">{route.tiempoEstimado}</span>
-                                                </div>
-                                                <p className="text-sm text-muted-foreground mb-2">{route.sucursales.join(" → ")}</p>
-                                                <span className="text-xs bg-muted text-muted-foreground px-2 py-1 rounded">{route.segmentos} segmentos</span>
-                                            </div>
-                                        ))}
+                                        {rutasConTramos.length > 0 ? (
+                                            rutasConTramos.map((route) => {
+                                                const caminoOrdenado = construirCaminoRuta(route.tramos)
+
+                                                return (
+                                                    <div key={route.idRuta} className="border rounded-lg p-3">
+                                                        <div className="flex justify-between items-start mb-2">
+                                                            <h4 className="font-medium">{route.nombreRuta}</h4>
+                                                        </div>
+                                                        {caminoOrdenado.length > 0 ? (
+                                                            <div className="space-y-2">
+                                                                <p className="text-xs text-muted-foreground">Recorrido:</p>
+                                                                <div className="text-sm space-y-1">
+                                                                    {caminoOrdenado.map((tramo, index) => (
+                                                                        <div key={`${tramo.nro_tramo}-${index}`} className="flex items-center gap-1 text-xs">
+                                                                            <span className="font-medium text-foreground">
+                                                                                {tramo.sucursal_origen?.ciudad_sucursal || "Inicio"}
+                                                                            </span>
+                                                                            <span className="text-muted-foreground">→</span>
+                                                                            <span className="font-medium text-foreground">
+                                                                                {tramo.sucursal_destino?.ciudad_sucursal || "Fin"}
+                                                                            </span>
+                                                                            <span className="text-muted-foreground">
+                                                                                ({tramo.distancia_km} km)
+                                                                            </span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                                <p className="text-xs text-muted-foreground pt-1">
+                                                                    {caminoOrdenado.length} tramo(s)
+                                                                </p>
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-xs text-muted-foreground">Sin tramos asignados</p>
+                                                        )}
+                                                    </div>
+                                                )
+                                            })
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground">No hay rutas disponibles</p>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>
@@ -145,16 +187,16 @@ export default function AdminEnviosPage() {
                                 </CardHeader>
                                 <CardContent className="space-y-4">
                                     <div className="max-h-80 overflow-y-auto space-y-4">
-                                        {mockSucursales.map((branch) => (
-                                            <div key={branch.id} className="border rounded-lg p-3">
-                                                <h4 className="font-medium mb-1">{branch.nombre}</h4>
-                                                <p className="text-sm text-muted-foreground mb-1">{branch.ubicacion}</p>
-                                                <div className="flex justify-between text-xs text-muted-foreground">
-                                                    <span>{branch.telefono}</span>
-                                                    <span>{branch.email}</span>
+                                        {sucursales.length > 0 ? (
+                                            sucursales.map((branch) => (
+                                                <div key={branch.idSucursal} className="border rounded-lg p-3">
+                                                    <h4 className="font-medium mb-1">{branch.ciudadSucursal}</h4>
+                                                    <p className="text-sm text-muted-foreground mb-1">{branch.direccionSucursal}</p>
                                                 </div>
-                                            </div>
-                                        ))}
+                                            ))
+                                        ) : (
+                                            <p className="text-sm text-muted-foreground">No hay sucursales disponibles</p>
+                                        )}
                                     </div>
                                 </CardContent>
                             </Card>

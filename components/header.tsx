@@ -4,20 +4,13 @@ import { useRouter, usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { User, Truck, Building2, Home, Sun, Moon, Monitor } from "lucide-react"
+import { Home, Sun, Moon, Monitor } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
-import {
-    Select,
-    SelectTrigger,
-    SelectValue,
-    SelectContent,
-    SelectItem,
-} from "@/components/ui/select"
 
 export function Header() {
     const router = useRouter()
@@ -28,43 +21,6 @@ export function Header() {
     useEffect(() => {
         setMounted(true)
     }, [])
-
-    const getActiveActor = () => {
-        if (pathname.startsWith("/admin")) return "admin"
-        if (pathname.startsWith("/chofer")) return "chofer"
-        if (pathname.startsWith("/comercio")) return "comercio"
-        return "home"
-    }
-
-    const activeActor = getActiveActor()
-
-    const actors = [
-        {
-            id: "admin",
-            name: "Administrador",
-            icon: User,
-            path: "/admin",
-            color: "bg-blue-500 hover:bg-blue-600"
-        },
-        {
-            id: "chofer",
-            name: "Chofer",
-            icon: Truck,
-            path: "/chofer",
-            color: "bg-green-500 hover:bg-green-600"
-        },
-        {
-            id: "comercio",
-            name: "Comercio",
-            icon: Building2,
-            path: "/comercio",
-            color: "bg-purple-500 hover:bg-purple-600"
-        }
-    ]
-
-    const handleActorChange = (path: string) => {
-        router.push(path)
-    }
 
     const handleHomeClick = () => {
         router.push("/")
@@ -93,28 +49,6 @@ export function Header() {
 
                     {/* Select de cambio de actor y toggle de tema */}
                     <div className="flex items-center gap-2">
-                        <Select
-                            value={activeActor}
-                            onValueChange={(val) => {
-                                const actor = actors.find((a) => a.id === val)
-                                if (actor) handleActorChange(actor.path)
-                            }}
-                        >
-                            <SelectTrigger size="sm" className="min-w-[10rem]">
-                                <SelectValue />
-                            </SelectTrigger>
-                            <SelectContent>
-                                {actors.map((actor) => {
-                                    const IconComponent = actor.icon
-                                    return (
-                                        <SelectItem key={actor.id} value={actor.id} className="flex items-center gap-2">
-                                            <IconComponent className="h-4 w-4" />
-                                            <span>{actor.name}</span>
-                                        </SelectItem>
-                                    )
-                                })}
-                            </SelectContent>
-                        </Select>
 
                         {/* Toggle de tema */}
                         <DropdownMenu>

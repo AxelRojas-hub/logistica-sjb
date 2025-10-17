@@ -2,35 +2,32 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { Building, Users, Truck, Route } from "lucide-react"
-import type { Chofer, Sucursal, Ruta, Pedido } from "@/lib/types"
 
 interface ShipmentConfigurationCardProps {
-    adminBranch: Sucursal | undefined
-    suggestedRoute: Ruta | null | undefined
-    routeSegments: string[]
-    ordersForDestination: Pedido[]
-    pendingOrders: Pedido[]
-    availableDrivers: Chofer[]
+    selectedRoute: string
+    onRouteChange: (value: string) => void
     selectedDriver: string
-    setSelectedDriver: (value: string) => void
-    canCreateShipment: boolean
-    selectedRouteInfo: Ruta | undefined
-    selectedDriverInfo: Chofer | undefined
+    onDriverChange: (value: string) => void
 }
 
 export function ShipmentConfigurationCard({
-    adminBranch,
-    suggestedRoute,
-    routeSegments,
-    ordersForDestination,
-    pendingOrders,
-    availableDrivers,
+    selectedRoute,
+    onRouteChange,
     selectedDriver,
-    setSelectedDriver,
-    canCreateShipment,
-    selectedRouteInfo,
-    selectedDriverInfo
+    onDriverChange
 }: ShipmentConfigurationCardProps) {
+    // TODO: Obtener rutas desde Supabase
+    const routes = [
+        { id: "1", nombre: "Ruta Buenos Aires - La Plata" },
+        { id: "2", nombre: "Ruta Buenos Aires - Quilmes" }
+    ]
+
+    // TODO: Obtener choferes disponibles desde Supabase
+    const drivers = [
+        { id: "1", nombre: "Juan Pérez" },
+        { id: "2", nombre: "Carlos García" }
+    ]
+
     return (
         <Card className="h-[580px]">
             <CardHeader>
@@ -38,38 +35,23 @@ export function ShipmentConfigurationCard({
                     <Building className="h-5 w-5" />
                     Configuración de Envío
                 </CardTitle>
-                <CardDescription>
-                    {adminBranch?.nombre}
-                </CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
                 <div className="space-y-4">
-                    {suggestedRoute && (
-                        <div className="p-3 bg-green-50 rounded-lg">
-                            <p className="text-sm font-medium mb-2 text-green-700 dark:text-green-800">Ruta sugerida:</p>
-                            <p className="text-sm text-green-800 mb-1">{suggestedRoute.nombre}</p>
-                            <div className="text-xs text-green-600 mb-2">
-                                <div className="flex items-center gap-1 mb-1">
-                                    <Route className="h-3 w-3" />
-                                    <span>Tramos: {routeSegments.join(' → ')}</span>
-                                </div>
-                                <div>Tiempo estimado: {suggestedRoute.tiempoEstimado}</div>
-                            </div>
-                        </div>
-                    )}
-
-                    <div className="p-3 bg-orange-50 rounded-lg">
-                        <p className="text-sm font-medium mb-1 text-orange-800">Resumen de pedidos:</p>
-                        <div className="text-xs text-orange-700 space-y-1">
-                            <div className="flex justify-between">
-                                <span>Incluidos en este envío:</span>
-                                <span className="font-medium text-green-700">{ordersForDestination.length}</span>
-                            </div>
-                            <div className="flex justify-between">
-                                <span>Quedarán pendientes:</span>
-                                <span className="font-medium">{pendingOrders.filter(order => !ordersForDestination.some(included => included.id === order.id)).length}</span>
-                            </div>
-                        </div>
+                    <div className="space-y-2">
+                        <label className="text-sm font-medium">Seleccionar ruta:</label>
+                        <Select value={selectedRoute} onValueChange={onRouteChange}>
+                            <SelectTrigger>
+                                <SelectValue placeholder="Selecciona una ruta" />
+                            </SelectTrigger>
+                            <SelectContent>
+                                {routes.map((route) => (
+                                    <SelectItem key={route.id} value={route.id}>
+                                        {route.nombre}
+                                    </SelectItem>
+                                ))}
+                            </SelectContent>
+                        </Select>
                     </div>
                 </div>
 
@@ -80,17 +62,17 @@ export function ShipmentConfigurationCard({
                     </h4>
 
                     <p className="text-sm text-muted-foreground">
-                        {availableDrivers.length} choferes disponibles en {adminBranch?.nombre}
+                        {drivers.length} choferes disponibles
                     </p>
 
                     <div>
                         <label className="text-sm font-medium mb-2 block">Seleccionar chofer:</label>
-                        <Select value={selectedDriver} onValueChange={setSelectedDriver}>
+                        <Select value={selectedDriver} onValueChange={onDriverChange}>
                             <SelectTrigger>
                                 <SelectValue placeholder="Selecciona un chofer" />
                             </SelectTrigger>
                             <SelectContent>
-                                {availableDrivers.map((driver) => (
+                                {drivers.map((driver) => (
                                     <SelectItem key={driver.id} value={driver.id}>
                                         {driver.nombre}
                                     </SelectItem>
@@ -102,9 +84,9 @@ export function ShipmentConfigurationCard({
                     <div className="pt-4">
                         <Button
                             className="w-full"
-                            disabled={!canCreateShipment}
+                            disabled={!selectedRoute || !selectedDriver}
                             onClick={() => {
-                                alert(`Envío creado:\n- Ruta: ${selectedRouteInfo?.nombre}\n- Pedidos: ${ordersForDestination.length}\n- Chofer: ${selectedDriverInfo?.nombre}`)
+                                alert(`Envío creado con ruta ${selectedRoute} y chofer ${selectedDriver}`)
                             }}
                         >
                             <Truck className="h-4 w-4 mr-2" />

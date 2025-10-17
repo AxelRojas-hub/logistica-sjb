@@ -4,7 +4,7 @@
 - Obtener comercios desde la API
 
 ## app/admin/envios
-- Obtener envíos, rutas y sucursales desde la API
+- Obtener envíos desde la API
 
 ## app/admin/envios/crear/components
 - Obtener datos desde la API

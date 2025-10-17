@@ -10,7 +10,6 @@ import { ActionGlossary, OrdersTable } from "./components"
 
 export default function AdminPedidosPage() {
     const [orders, setOrders] = useState<PedidoComercio[]>([])
-    const [selectedOrder, setSelectedOrder] = useState<PedidoComercio | null>(null)
 
     const handleUpdateOrderStatus = (orderId: string, newStatus: "pendiente" | "en_transito" | "entregado" | "cancelado") => {
         setOrders(orders.map(order =>
@@ -19,7 +18,8 @@ export default function AdminPedidosPage() {
     }
 
     const handleSelectOrder = (order: PedidoComercio) => {
-        setSelectedOrder(order)
+        // TODO: Implementar selección de pedido
+        console.log("Selected order:", order)
     }
 
     return (
