@@ -56,6 +56,8 @@ export interface Tramo {
     idSucursalDestino: number;
     duracionEstimadaMin: number;
     distanciaKm: number;
+    nombreSucursalOrigen?: string;
+    nombreSucursalDestino?: string;
 }
 
 export interface RutaTramo {

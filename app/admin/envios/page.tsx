@@ -150,14 +150,14 @@ export default async function AdminEnviosPage() {
                                                                     {caminoOrdenado.map((tramo, index) => (
                                                                         <div key={`${tramo.nroTramo}-${index}`} className="flex items-center gap-1 text-xs">
                                                                             <span className="font-medium text-foreground">
-                                                                                Sucursal {tramo.idSucursalOrigen}
+                                                                                {tramo.nombreSucursalOrigen || `Sucursal ${tramo.idSucursalOrigen}`}
                                                                             </span>
                                                                             <span className="text-muted-foreground">→</span>
                                                                             <span className="font-medium text-foreground">
-                                                                                Sucursal {tramo.idSucursalDestino}
+                                                                                {tramo.nombreSucursalDestino || `Sucursal ${tramo.idSucursalDestino}`}
                                                                             </span>
                                                                             <span className="text-muted-foreground">
-                                                                                ({tramo.distanciaKm} km)
+                                                                                ({tramo.distanciaKm || 0} km)
                                                                             </span>
                                                                         </div>
                                                                     ))}

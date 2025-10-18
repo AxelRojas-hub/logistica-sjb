@@ -54,9 +54,20 @@ export async function getRutasConTramos(supabase: SupabaseClient): Promise<RutaC
         if (!tramoPorRuta.has(idRuta)) {
             tramoPorRuta.set(idRuta, [])
         }
-        const tramo = tramosData?.find((t: Record<string, unknown>) => t.nro_tramo === rt.nro_tramo)
-        if (tramo) {
-            tramoPorRuta.get(idRuta)?.push(tramo as Tramo)
+        const tramoData = tramosData?.find((t: Record<string, unknown>) => t.nro_tramo === rt.nro_tramo)
+        if (tramoData) {
+            const tramo: Tramo = {
+                nroTramo: tramoData.nro_tramo as number,
+                idSucursalOrigen: tramoData.id_sucursal_origen as number,
+                idSucursalDestino: tramoData.id_sucursal_destino as number,
+                duracionEstimadaMin: tramoData.duracion_estimada_min as number,
+                distanciaKm: tramoData.distancia_km as number,
+                nombreSucursalOrigen: tramoData.sucursal_origen?.ciudad_sucursal as string | undefined,
+                nombreSucursalDestino: typeof tramoData.sucursal_destino?.ciudad_sucursal === "string"
+                    ? tramoData.sucursal_destino.ciudad_sucursal
+                    : undefined,
+            }
+            tramoPorRuta.get(idRuta)?.push(tramo)
         }
     })
 
