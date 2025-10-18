@@ -31,7 +31,7 @@ export function BranchSequence({ currentRoute }: BranchSequenceProps) {
                         </div>
                         <div className="flex-1 flex justify-between items-center">
                             <span className={tramo.estado === "actual" ? "font-medium" : ""}>
-                                Sucursal {tramo.idSucursalDestino}
+                                {tramo.nombreSucursalDestino || `Sucursal ${tramo.idSucursalDestino}`}
                             </span>
                             <span className="text-sm text-gray-500">{tramo.duracionEstimadaMin} min</span>
                         </div>

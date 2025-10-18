@@ -47,7 +47,7 @@ export function BranchItem({
                 </div>
                 <div>
                     <p className="font-medium">{branch.nombre}</p>
-                    <p className="text-sm text-gray-500">Horario estimado: {branch.hora}</p>
+                    <p className="text-sm text-gray-500">Duración estimada: {branch.hora}</p>
                 </div>
             </div>
             <div className="flex items-center gap-2">

@@ -32,7 +32,7 @@ export function RouteGeneralDetails({ currentRoute }: RouteGeneralDetailsProps) 
                 <div className="flex justify-between">
                     <span className="text-gray-600">Próximo destino:</span>
                     <span className="font-medium">
-                        {proxTramo ? `Sucursal ${proxTramo.idSucursalDestino}` : "Completado"}
+                        {proxTramo ? (proxTramo.nombreSucursalDestino || `Sucursal ${proxTramo.idSucursalDestino}`) : "Completado"}
                     </span>
                 </div>
                 <div className="flex justify-between">

@@ -1,20 +1,42 @@
-"use client"
-
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { RouteStatusCard, useRouteLogic } from "./components"
+import { createClient } from "@/lib/supabaseServer"
+import { getRutaConTramo } from "@/lib/models/Ruta"
+import type { RutaConTramos, Tramo } from "@/lib/types"
+import { CheckinContent } from "./checkinContent"
 
-export default function ChoferCheckinPage() {
-    const {
-        currentRoute,
-        handleCheckIn,
-        handleFinishRoute,
-        getNextTramo,
-        isLastTramo
-    } = useRouteLogic()
+interface TramoConEstado extends Tramo {
+    estado: "completado" | "actual" | "pendiente"
+}
+
+interface RutaConEstado extends RutaConTramos {
+    tramos: TramoConEstado[]
+    tramoActual: number | null
+}
+
+export default async function ChoferCheckinPage() {
+    const supabase = await createClient()
+
+    // Obtener la ruta con ID 1 y sus tramos
+    const rutaData = await getRutaConTramo(supabase, 1)
+
+    let currentRoute: RutaConEstado | null = null
+
+    if (rutaData && rutaData.tramos.length > 0) {
+        // Mapear los tramos a TramoConEstado con estados
+        const tramosConEstado: TramoConEstado[] = rutaData.tramos.map((tramo, index) => ({
+            ...tramo,
+            estado: index === 0 ? "actual" : "pendiente" as const
+        }))
+
+        currentRoute = {
+            ...rutaData,
+            tramos: tramosConEstado,
+            tramoActual: 0
+        }
+    }
 
     return (
         <TooltipProvider>
@@ -38,25 +60,7 @@ export default function ChoferCheckinPage() {
                             <p className="mt-2 text-muted-foreground">Marca la llegada a cada sucursal de tu ruta</p>
                         </div>
 
-                        {!currentRoute ? (
-                            <div className="text-center py-12 text-muted-foreground">
-                                No hay ruta asignada actualmente
-                            </div>
-                        ) : (
-                            <div className="space-y-6">
-                                <Badge variant="outline" className="text-lg px-3 py-1">
-                                    Ruta: {currentRoute.nombreRuta}
-                                </Badge>
-
-                                <RouteStatusCard
-                                    currentRoute={currentRoute}
-                                    onCheckIn={handleCheckIn}
-                                    onFinishRoute={handleFinishRoute}
-                                    getNextTramo={getNextTramo}
-                                    isLastTramo={isLastTramo}
-                                />
-                            </div>
-                        )}
+                        <CheckinContent initialRoute={currentRoute} />
                     </div>
                 </div>
             </div>

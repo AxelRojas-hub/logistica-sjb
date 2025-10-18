@@ -3,8 +3,16 @@ import type { RutaConTramos, Tramo } from "@/lib/types"
 import { BranchItem } from "./BranchItem"
 import { RouteCompletedView } from "./RouteCompletedView"
 
+interface TramoConEstado extends Tramo {
+    estado: "completado" | "actual" | "pendiente"
+}
+
+interface RutaConEstado extends RutaConTramos {
+    tramos: TramoConEstado[]
+}
+
 interface RouteStatusCardProps {
-    currentRoute: RutaConTramos
+    currentRoute: RutaConEstado
     onCheckIn: (tramoIndex: number) => void
     onFinishRoute: () => void
     getNextTramo: () => Tramo | null
@@ -38,9 +46,9 @@ export function RouteStatusCard({
                                 <BranchItem
                                     key={`${tramo.nroTramo}-${index}`}
                                     branch={{
-                                        nombre: `Sucursal ${tramo.idSucursalDestino}`,
-                                        hora: "",
-                                        estado: "pendiente" as const
+                                        nombre: tramo.nombreSucursalDestino || `Sucursal ${tramo.idSucursalDestino}`,
+                                        hora: `${tramo.duracionEstimadaMin} min`,
+                                        estado: tramo.estado
                                     }}
                                     index={index}
                                     showCheckInButton={showCheckInButton}

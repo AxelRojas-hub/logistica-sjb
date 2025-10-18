@@ -1,18 +1,35 @@
-"use client"
-
-import { useState } from "react"
 import { TooltipProvider } from "@/components/ui/tooltip"
-import { PageHeader, ShipmentConfigurationCard, IncludedOrdersCard } from "./components"
+import { PageHeader } from "./components"
+import { CrearEnvioContent } from "./crearEnvioContent"
+import { createClient } from "@/lib/supabaseServer"
+import { getRutasConTramos } from "@/lib/models/Ruta"
 
-export default function AdminCrearEnvioPage() {
-    const [selectedRoute, setSelectedRoute] = useState<string>("")
-    const [selectedDriver, setSelectedDriver] = useState<string>("")
+export default async function AdminCrearEnvioPage() {
+    const supabase = await createClient()
 
-    // TODO: Implementar obtención de datos desde Supabase
-    // TODO: Obtener sucursal actual del admin autenticado
-    // TODO: Obtener pedidos pendientes del comercio
-    // TODO: Obtener rutas disponibles
-    // TODO: Obtener choferes disponibles
+    // Obtener rutas disponibles
+    const rutasConTramos = await getRutasConTramos(supabase)
+    const rutas: { id: string; nombre: string }[] = rutasConTramos.map((r) => ({
+        id: r.idRuta.toString(),
+        nombre: r.nombreRuta,
+    }))
+
+    // Obtener choferes disponibles (empleados con rol de chofer)
+    const { data: choforesData, error: choforesError } = await supabase
+        .from("empleado")
+        .select("*")
+        .eq("rol", "chofer")
+
+    if (choforesError) {
+        console.error("Error al obtener choferes:", choforesError)
+    }
+
+    const choferes: { id: string; nombre: string }[] = (choforesData || []).map(
+        (row: Record<string, unknown>) => ({
+            id: (row.legajo_empleado as number).toString(),
+            nombre: row.nombre_empleado as string,
+        })
+    )
 
     return (
         <TooltipProvider>
@@ -20,18 +37,10 @@ export default function AdminCrearEnvioPage() {
                 <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8">
                     <PageHeader />
 
-                    <div className="grid gap-6 lg:grid-cols-2">
-                        <ShipmentConfigurationCard
-                            selectedRoute={selectedRoute}
-                            onRouteChange={setSelectedRoute}
-                            selectedDriver={selectedDriver}
-                            onDriverChange={setSelectedDriver}
-                        />
-
-                        <IncludedOrdersCard />
-                    </div>
+                    <CrearEnvioContent rutas={rutas} choferes={choferes} />
                 </div>
             </div>
         </TooltipProvider>
     )
 }
+

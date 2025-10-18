@@ -8,26 +8,18 @@ interface ShipmentConfigurationCardProps {
     onRouteChange: (value: string) => void
     selectedDriver: string
     onDriverChange: (value: string) => void
+    rutas: { id: string; nombre: string }[]
+    choferes: { id: string; nombre: string }[]
 }
 
 export function ShipmentConfigurationCard({
     selectedRoute,
     onRouteChange,
     selectedDriver,
-    onDriverChange
+    onDriverChange,
+    rutas,
+    choferes
 }: ShipmentConfigurationCardProps) {
-    // TODO: Obtener rutas desde Supabase
-    const routes = [
-        { id: "1", nombre: "Ruta Buenos Aires - La Plata" },
-        { id: "2", nombre: "Ruta Buenos Aires - Quilmes" }
-    ]
-
-    // TODO: Obtener choferes disponibles desde Supabase
-    const drivers = [
-        { id: "1", nombre: "Juan Pérez" },
-        { id: "2", nombre: "Carlos García" }
-    ]
-
     return (
         <Card className="h-[580px]">
             <CardHeader>
@@ -45,7 +37,7 @@ export function ShipmentConfigurationCard({
                                 <SelectValue placeholder="Selecciona una ruta" />
                             </SelectTrigger>
                             <SelectContent>
-                                {routes.map((route) => (
+                                {rutas.map((route) => (
                                     <SelectItem key={route.id} value={route.id}>
                                         {route.nombre}
                                     </SelectItem>
@@ -62,7 +54,7 @@ export function ShipmentConfigurationCard({
                     </h4>
 
                     <p className="text-sm text-muted-foreground">
-                        {drivers.length} choferes disponibles
+                        {choferes.length} choferes disponibles
                     </p>
 
                     <div>
@@ -72,7 +64,7 @@ export function ShipmentConfigurationCard({
                                 <SelectValue placeholder="Selecciona un chofer" />
                             </SelectTrigger>
                             <SelectContent>
-                                {drivers.map((driver) => (
+                                {choferes.map((driver) => (
                                     <SelectItem key={driver.id} value={driver.id}>
                                         {driver.nombre}
                                     </SelectItem>
