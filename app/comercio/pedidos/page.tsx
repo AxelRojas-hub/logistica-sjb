@@ -1,26 +1,18 @@
 import { createClient } from "@/lib/supabaseServer"
+import { getPedidosByComercio } from "@/lib/models/Pedido"
 import type { Pedido } from "@/lib/types"
 import { PedidosContent } from "./components"
 
 export default async function ComercioPedidosPage() {
     const supabase = await createClient()
 
-    // TODO: Obtener nombre_comercio de la sesión de Supabase
-    const nombreComercio = null
+    // TODO: Obtener idComercio de la sesión de Supabase
+    const idComercio = null
 
     let pedidos: Pedido[] = []
 
-    if (nombreComercio) {
-        const { data, error } = await supabase
-            .from("pedido")
-            .select("*")
-            .eq("id_comercio", nombreComercio)
-
-        if (error) {
-            console.error("Error fetching pedidos:", error)
-        } else {
-            pedidos = data || []
-        }
+    if (idComercio) {
+        pedidos = await getPedidosByComercio(supabase, idComercio)
     }
 
     return <PedidosContent pedidos={pedidos} />
