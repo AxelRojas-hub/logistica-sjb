@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -21,34 +21,19 @@ interface Sucursal {
     ciudadSucursal: string;
 }
 
-export default function CreateAccountForm() {
+interface CreateAccountFormProps {
+    sucursales: Sucursal[];
+}
+
+export default function CreateAccountForm({ sucursales }: CreateAccountFormProps) {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [nombre, setNombre] = useState("");
     const [rol, setRol] = useState<UserRole>("chofer");
     const [idSucursal, setIdSucursal] = useState("");
-    const [sucursales, setSucursales] = useState<Sucursal[]>([]);
     const [loading, setLoading] = useState(false);
-    const [loadingSucursales, setLoadingSucursales] = useState(false);
     const [message, setMessage] = useState("");
     const [error, setError] = useState("");
-
-    useEffect(() => {
-        const fetchSucursales = async () => {
-            setLoadingSucursales(true);
-            try {
-                const res = await fetch("/api/sucursales");
-                const data = await res.json();
-                setSucursales(data);
-            } catch (err) {
-                console.error("Error fetching sucursales:", err);
-            } finally {
-                setLoadingSucursales(false);
-            }
-        };
-
-        fetchSucursales();
-    }, []);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -227,12 +212,12 @@ export default function CreateAccountForm() {
                                 <div className="space-y-2">
                                     <Label htmlFor="sucursal">Sucursal</Label>
                                     <Select value={idSucursal} onValueChange={setIdSucursal}>
-                                        <SelectTrigger id="sucursal" disabled={loadingSucursales}>
+                                        <SelectTrigger id="sucursal">
                                             <SelectValue placeholder="Selecciona una sucursal" />
                                         </SelectTrigger>
                                         <SelectContent>
                                             {sucursales.map((sucursal) => (
-                                                <SelectItem key={sucursal.direccionSucursal} value={sucursal.idSucursal.toString()}>
+                                                <SelectItem key={sucursal.idSucursal} value={sucursal.idSucursal.toString()}>
                                                     {sucursal.ciudadSucursal} - {sucursal.direccionSucursal}
                                                 </SelectItem>
                                             ))}
