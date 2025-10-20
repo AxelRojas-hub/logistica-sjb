@@ -12,7 +12,7 @@ export async function POST(req: Request) {
             idSucursal,
         } = await req.json();
 
-        // Validaciones básicas
+        // Validaciones
         if (
             !email ||
             !password ||
@@ -33,7 +33,8 @@ export async function POST(req: Request) {
             .insert({
                 email_comercio: email,
                 nombre_responsable: nombreResponsable,
-                contrasena_comercio: password, // En producción, esto debería ser hasheado si se almacena
+                contrasena_comercio: password, // Almacenamos la contraseña temporalmente, 
+                //TODO: Si se va a almacenar, hashearla o eliminar la columna directamente
             })
             .select("id_cuenta_comercio")
             .single();

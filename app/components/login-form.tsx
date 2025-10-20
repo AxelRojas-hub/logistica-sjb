@@ -44,7 +44,7 @@ export default function LoginForm() {
         }
         setLoading(true);
         try {
-            const { error } = await supabaseClient.auth.signInWithPassword({
+            const { data, error } = await supabaseClient.auth.signInWithPassword({
                 email,
                 password,
             });
@@ -52,7 +52,21 @@ export default function LoginForm() {
                 console.log("Error", error.message);
                 setError("Credenciales incorrectas.");
             } else {
-                router.push("/comercio");
+                // Redirigir según el rol del usuario
+                const rol = data.user.user_metadata.rol;
+                let url = "/"
+                switch (rol) {
+                    case "comercio":
+                        url = "/comercio";
+                        break;
+                    case "admin":
+                        url = "/admin";
+                        break;
+                    case "chofer":
+                        url = "/chofer";
+                        break;
+                }
+                router.push(url);
                 router.refresh();
             }
         } catch {
