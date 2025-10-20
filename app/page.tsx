@@ -1,102 +1,125 @@
-"use client"
-import { useRouter } from "next/navigation"
-import { Card, CardContent } from "@/components/ui/card"
-import { Button } from "@/components/ui/button"
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
-import { Truck, Building2, User, Sun, Moon, Monitor } from "lucide-react"
-import { useTheme } from "next-themes"
+"use client";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
+import { Card, CardHeader, CardContent } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
-export default function Home() {
-  const router = useRouter()
-  const { setTheme } = useTheme()
+export default function LoginPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+  const [loading, setLoading] = useState(false);
 
-  const handleActorSelect = (actor: string) => {
-    router.push(`/${actor}`)
-  }
+  useEffect(() => {
+    if (searchParams.get("registered") === "true") {
+      setSuccess("¡Cuenta registrada exitosamente! Puedes iniciar sesión ahora.");
+    }
+  }, [searchParams]);
+
+  const validate = () => {
+    if (!email || !password) {
+      return "Todos los campos son obligatorios.";
+    }
+    // Validación básica de email
+    if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+      return "El correo electrónico no es válido.";
+    }
+    return "";
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    const validationError = validate();
+    if (validationError) {
+      setError(validationError);
+      return;
+    }
+    setLoading(true);
+    try {
+      const res = await fetch("/api/auth", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+      const data = await res.json();
+      if (data.ok) {
+        router.push("/");
+        router.refresh();
+      } else {
+        console.log("Error", data.error);
+        setError("Credenciales incorrectas.");
+      }
+    } catch {
+      setError("Error de red. Intenta de nuevo.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-background flex flex-col">
-      {/* Header with theme toggle */}
-      <div className="bg-card border-b">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex justify-between items-center py-4">
-            <h2 className="text-lg font-semibold text-foreground">Sistema de Logística SJB</h2>
-
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" size="sm">
-                  <Sun className="h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-                  <Moon className="absolute h-4 w-4 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
-                  <span className="sr-only">Toggle theme</span>
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={() => setTheme("light")}>
-                  <Sun className="mr-2 h-4 w-4" />
-                  <span>Claro</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("dark")}>
-                  <Moon className="mr-2 h-4 w-4" />
-                  <span>Oscuro</span>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => setTheme("system")}>
-                  <Monitor className="mr-2 h-4 w-4" />
-                  <span>Sistema</span>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+    <div className="h-screen flex flex-col items-center justify-center">
+      <Card className="w-full max-w-sm shadow-lg">
+        <CardHeader className="flex flex-col items-center pb-0">
+          <h1 className="text-2xl font-bold mb-2">Iniciar sesión</h1>
+          <p className="text-muted-foreground text-sm">Accede a tu cuenta</p>
+        </CardHeader>
+        <CardContent>
+          {success && (
+            <div className="mb-4 p-2 rounded bg-green-100 text-green-700 text-sm text-center">{success}</div>
+          )}
+          {error && (
+            <div className="mb-4 p-2 rounded bg-red-100 text-red-700 text-sm text-center">{error}</div>
+          )}
+          <form className="space-y-6" onSubmit={handleSubmit} autoComplete="off">
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="email">Correo electrónico</Label>
+                <Input
+                  id="email"
+                  name="email"
+                  type="email"
+                  value={email}
+                  onChange={e => setEmail(e.target.value)}
+                  required
+                  autoComplete="email"
+                  placeholder="usuario@correo.com"
+                  disabled={loading}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="password">Contraseña</Label>
+                <Input
+                  id="password"
+                  name="password"
+                  type="password"
+                  value={password}
+                  onChange={e => setPassword(e.target.value)}
+                  required
+                  autoComplete="current-password"
+                  placeholder="••••••••"
+                  disabled={loading}
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Accediendo..." : "Acceder"}
+            </Button>
+          </form>
+          <div className="mt-4 text-center text-sm">
+            <span className="text-muted-foreground">¿No tienes cuenta? </span>
+            <Link href="/auth/register" className="text-blue-600 hover:underline">
+              Regístrate
+            </Link>
           </div>
-        </div>
-      </div>
-
-      {/* Actor Selection */}
-      <div className="flex-1 flex items-center justify-center">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-          <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-foreground mb-2">
-              Selecciona tu Perfil
-            </h1>
-            <p className="text-muted-foreground">
-              Selecciona tu perfil para acceder al sistema
-            </p>
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-4xl mx-auto">
-            <Card
-              className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-blue-500"
-              onClick={() => handleActorSelect("admin")}
-            >
-              <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                <User className="h-16 w-16 text-blue-600 mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">Administrador</h3>
-                <p className="text-muted-foreground">Gestiona envíos, comercios y reportes</p>
-              </CardContent>
-            </Card>
-
-            <Card
-              className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-green-500"
-              onClick={() => handleActorSelect("chofer")}
-            >
-              <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                <Truck className="h-16 w-16 text-green-600 mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">Chofer</h3>
-                <p className="text-muted-foreground">Gestiona entregas y rutas asignadas</p>
-              </CardContent>
-            </Card>
-
-            <Card
-              className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-purple-500"
-              onClick={() => handleActorSelect("comercio")}
-            >
-              <CardContent className="flex flex-col items-center justify-center p-8 text-center">
-                <Building2 className="h-16 w-16 text-purple-600 mb-4" />
-                <h3 className="text-xl font-semibold text-foreground mb-2">Comercio</h3>
-                <p className="text-muted-foreground">Gestiona pedidos y facturación</p>
-              </CardContent>
-            </Card>
-          </div>
-        </div>
-      </div>
+        </CardContent>
+      </Card>
     </div>
-  )
+  );
 }

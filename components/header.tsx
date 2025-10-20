@@ -27,7 +27,7 @@ export function Header() {
     }
 
     // No mostrar header en la página principal
-    if (pathname === "/" || pathname === "/login" || pathname === "/register" || pathname === "/reset-password") {
+    if (pathname === "/" || pathname === "/auth/register" || pathname === "/auth/reset") {
         return null
     }
 
