@@ -1,12 +1,9 @@
 # Base de Datos – Logística SJB
 
-Este documento define la estructura del modelo de datos utilizado en el sistema **Logística SJB**.  
-Convenciones:
 - Todos los identificadores en `snake_case`.
 - Las claves primarias comienzan con `id_` o `legajo_`.
 - Claves foráneas prefijadas con `fk_`.
 - Tipos `ENUM` para controlar estados fijos.
-- Sin índices adicionales ni triggers.
 
 ---
 

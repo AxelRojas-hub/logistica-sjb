@@ -1,17 +1,26 @@
 "use client";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Card, CardHeader, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import Link from "next/link";
 
 export default function LoginPage() {
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
+    const [success, setSuccess] = useState("");
     const [loading, setLoading] = useState(false);
+
+    useEffect(() => {
+        if (searchParams.get("registered") === "true") {
+            setSuccess("¡Cuenta registrada exitosamente! Puedes iniciar sesión ahora.");
+        }
+    }, [searchParams]);
 
     const validate = () => {
         if (!email || !password) {
@@ -62,6 +71,9 @@ export default function LoginPage() {
                     <p className="text-muted-foreground text-sm">Accede a tu cuenta</p>
                 </CardHeader>
                 <CardContent>
+                    {success && (
+                        <div className="mb-4 p-2 rounded bg-green-100 text-green-700 text-sm text-center">{success}</div>
+                    )}
                     {error && (
                         <div className="mb-4 p-2 rounded bg-red-100 text-red-700 text-sm text-center">{error}</div>
                     )}
@@ -100,6 +112,12 @@ export default function LoginPage() {
                             {loading ? "Accediendo..." : "Acceder"}
                         </Button>
                     </form>
+                    <div className="mt-4 text-center text-sm">
+                        <span className="text-muted-foreground">¿No tienes cuenta? </span>
+                        <Link href="/login/register" className="text-blue-600 hover:underline">
+                            Regístrate
+                        </Link>
+                    </div>
                 </CardContent>
             </Card>
         </div>
