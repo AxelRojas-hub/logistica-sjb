@@ -4,13 +4,14 @@ import { useRouter, usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Home, Sun, Moon, Monitor } from "lucide-react"
+import { Home, Sun, Moon, Monitor, LogOut } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import { supabaseClient } from "@/lib/supabaseClient"
 
 export function Header() {
     const router = useRouter()
@@ -24,6 +25,12 @@ export function Header() {
 
     const handleHomeClick = () => {
         router.push("/")
+    }
+
+    const handleLogout = async () => {
+        await supabaseClient.auth.signOut()
+        router.push("/")
+        router.refresh()
     }
 
     // No mostrar header en la página principal
@@ -49,6 +56,16 @@ export function Header() {
 
                     {/* Select de cambio de actor y toggle de tema */}
                     <div className="flex items-center gap-2">
+                        {/* Botón Logout */}
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleLogout}
+                            className="flex items-center gap-2"
+                            title="Cerrar sesión"
+                        >
+                            <LogOut className="h-4 w-4" />
+                        </Button>
 
                         {/* Toggle de tema */}
                         <DropdownMenu>
