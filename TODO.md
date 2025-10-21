@@ -1,25 +1,52 @@
-# TODO
+# Admin
 
 ## app/admin/comercios
-- Obtener comercios desde la API
+
+- [x] Obtener comercios desde la BD
+- [x] Detalle del comercio
+    - Revisar que informacion mostrar
+- [ ] Historial de pedidos del comercio
 
 ## app/admin/envios
-- Obtener envíos desde la API
 
-## app/admin/envios/crear/components
-- Obtener datos desde la API
+- [ ] Obtener envíos actuales desde la BD
+- [ ] Corregir CrearEnvio
+
+## app/admin/envios/crear
+
+- [ ] Obtener pedidos desde la BD
+- [ ] Obtener choferes desde la BD
+- [ ] Obtener sucursales desde la BD
+
+## app/admin/pedidos
+
+- [ ] handleSelectOrder
+- [ ] updateOrderStatus
+
+# Chofer
 
 ## app/chofer/checkin/components
-- Obtener ruta actual desde la API
+
+- [x] Obtener ruta actual desde la BD
+- [ ] Checkear como persistir los estados de checkin
 
 ## app/chofer/ruta
-- Obtener datos de ruta desde la API
+
+- [x] Obtener datos de ruta desde la BD
+- [ ] Asignar con datos de la session
+
+# Comercio
+
+## app/comercio/pedidos
+
+- [ ] Obtener pedidos desde la BD
+- [ ] Asignar con datos de la session
+- [ ] Registrar/Cancelar pedido -> Checkear estado de contrato
 
 ## app/comercio/contrato
-- Obtener contrato y servicios disponibles desde la API
+
+- [ ] Obtener contrato y servicios disponibles desde la BD
 
 ## app/comercio/facturas
-- Obtener facturas desde la API
 
-## app/comercio/pedidos/components
-- Obtener pedidos desde la API
+- [ ] Obtener facturas desde la BD

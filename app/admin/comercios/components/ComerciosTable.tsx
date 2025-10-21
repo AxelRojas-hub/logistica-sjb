@@ -1,5 +1,6 @@
 "use client"
 
+import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
@@ -7,6 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Eye, FileText, AlertTriangle } from "lucide-react"
 import { Comercio, Contrato, Factura } from "@/lib/types"
+import { ComercioDetailsDialog } from "./ComercioDetailsDialog"
 
 interface ComercioWithDetails extends Comercio {
     email?: string
@@ -20,6 +22,14 @@ interface ComerciosTableProps {
 }
 
 export function ComerciosTable({ comercios }: ComerciosTableProps) {
+    const [selectedComercio, setSelectedComercio] = useState<ComercioWithDetails | null>(null)
+    const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false)
+
+    const handleViewDetails = (comercio: ComercioWithDetails) => {
+        setSelectedComercio(comercio)
+        setIsDetailsDialogOpen(true)
+    }
+
     const getStatusColor = (status: string) => {
         switch (status) {
             case "En ruta":
@@ -133,7 +143,11 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                                         <div className="flex gap-1">
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button variant="outline" size="sm">
+                                                    <Button
+                                                        variant="outline"
+                                                        size="sm"
+                                                        onClick={() => handleViewDetails(comercio)}
+                                                    >
                                                         <Eye className="h-4 w-4" />
                                                     </Button>
                                                 </TooltipTrigger>
@@ -159,6 +173,12 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                     </Table>
                 </div>
             </Card>
+
+            <ComercioDetailsDialog
+                comercio={selectedComercio}
+                isOpen={isDetailsDialogOpen}
+                onOpenChange={setIsDetailsDialogOpen}
+            />
         </TooltipProvider>
     )
 }
