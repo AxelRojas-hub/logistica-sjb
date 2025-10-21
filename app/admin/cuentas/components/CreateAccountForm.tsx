@@ -12,6 +12,8 @@ import {
     SelectValue,
 } from "@/components/ui/select";
 import { supabaseClient } from "@/lib/supabaseClient";
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 
 type UserRole = "chofer" | "admin";
 
@@ -138,6 +140,15 @@ export default function CreateAccountForm({ sucursales }: CreateAccountFormProps
     return (
         <div className="min-h-screen bg-background pt-4 flex flex-col">
             <div className="max-w-2xl mx-auto px-4 w-full py-8">
+                <Link href="/admin">
+                    <Button
+                        variant="outline"
+                        className="flex items-center mb-4 gap-2"
+                    >
+                        <ArrowLeft className="h-4 w-4" />
+                        Volver al menú principal
+                    </Button>
+                </Link>
                 <Card>
                     <CardHeader>
                         <h1 className="text-2xl font-bold">Crear Cuenta</h1>
