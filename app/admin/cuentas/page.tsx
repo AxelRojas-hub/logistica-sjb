@@ -1,8 +1,6 @@
-import { Button } from "@/components/ui/button";
 import CreateAccountForm from "./components/CreateAccountForm";
 import { createClient } from "@/lib/supabaseServer";
-import Link from "next/link";
-import { ArrowLeft } from "lucide-react";
+
 export const dynamic = "force-dynamic";
 interface Sucursal {
     idSucursal: number;

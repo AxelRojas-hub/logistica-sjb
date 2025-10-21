@@ -1,8 +1,10 @@
 import { Button } from "@/components/ui/button"
+import { EstadoContrato } from "@/lib/types"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 
 export function ContractPageHeader() {
+
     return (
         <div className="space-y-6">
             <div className="mb-8">

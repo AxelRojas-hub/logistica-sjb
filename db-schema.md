@@ -20,7 +20,12 @@ create type estado_pedido as enum (
 
 create type estado_envio as enum (
   'en_camino',
-  'finalizado'
+  'finalizado',
+  'planificado'
+);
+create type cobro_contrato as enum (
+  'mensual',
+  'quincenal'
 );
 
 create type estado_contrato as enum (
@@ -241,15 +246,3 @@ Relación N:N entre `pedido` y `servicio`.
 | id_pedido | bigint | FK → pedido.id_pedido |
 | id_servicio | bigint | FK → servicio.id_servicio |
 | Primary Key | (id_pedido, id_servicio) |
-
----
-
-### Relaciones clave del dominio
-
-- `sucursal` se vincula con `tramo`, `comercio` y `envio`.
-- `empleado` se especializa en `chofer` y `administrador`.
-- `contrato` agrupa servicios mediante `contrato_servicio`.
-- `pedido` se asocia a `envio`, `factura`, `cliente_destinatario` y `comercio`.
-- `pedido_servicio` y `ruta_tramo` son tablas intermedias N:N.
-
----

@@ -2,14 +2,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import type { Contrato } from "@/lib/types"
 import { ContratoStatusBadge } from "./ContratoStatusBadge"
 import { DetalleContrato } from "./DetalleContrato"
-import { ContratoActions } from "./ContratoActions"
+import { Button } from "@/components/ui/button"
 
 interface ContratoCardProps {
-    contract: Contrato | null
+    contrato: Contrato | null
 }
 
-export function ContratoCard({ contract }: ContratoCardProps) {
-    if (!contract) {
+export function ContratoCard({ contrato }: ContratoCardProps) {
+    if (!contrato) {
         return (
             <Card>
                 <CardContent className="py-8 text-center text-muted-foreground">
@@ -24,15 +24,22 @@ export function ContratoCard({ contract }: ContratoCardProps) {
             <CardHeader>
                 <div className="flex justify-between items-start">
                     <div>
-                        <CardTitle className="text-xl">Contrato {contract.idContrato}</CardTitle>
+                        <CardTitle className="text-xl">Contrato {contrato.idContrato}</CardTitle>
                         <CardDescription>Plan de servicios logísticos</CardDescription>
                     </div>
-                    <ContratoStatusBadge status={contract.estadoContrato} />
+                    <ContratoStatusBadge status={contrato.estadoContrato} />
                 </div>
             </CardHeader>
             <CardContent className="space-y-6">
-                <DetalleContrato contract={contract} />
-                <ContratoActions />
+                <DetalleContrato contrato={contrato} />
+                <div className="flex gap-2 pt-4 border-t">
+                    <Button className="dark:text-white bg-blue-600 hover:bg-blue-700">
+                        Renovar Contrato
+                    </Button>
+                    <Button variant="outline">
+                        Modificar Plan
+                    </Button>
+                </div>
             </CardContent>
         </Card>
     )

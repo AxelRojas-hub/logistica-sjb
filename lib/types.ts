@@ -8,13 +8,14 @@ export type EstadoPedido =
     | "en_sucursal"
     | "entregado";
 
-export type EstadoEnvio = "en_camino" | "finalizado";
+export type EstadoEnvio = "en_camino" | "finalizado" | "planificado";
 
 export type EstadoContrato = "vigente" | "suspendido" | "vencido";
 
 export type EstadoComercio = "habilitado" | "deshabilitado";
 
 export type EstadoPago = "pagado" | "pendiente" | "vencido";
+export type CobroContrato = "mensual" | "quincenal";
 
 export interface RutaConTramos {
     idRuta: number
@@ -80,7 +81,7 @@ export interface CuentaComercio {
 
 export interface Contrato {
     idContrato: number;
-    tipoCobro: string;
+    tipoCobro: CobroContrato;
     descuento: number;
     estadoContrato: EstadoContrato;
     duracionContratoMeses: 3 | 6 | 12;
