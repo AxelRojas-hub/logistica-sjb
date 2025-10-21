@@ -2,7 +2,7 @@
 
 import { Badge } from "@/components/ui/badge"
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/components/ui/dialog"
-import { AlertTriangle } from "lucide-react"
+// import { AlertTriangle } from "lucide-react"
 import { Comercio, Contrato, Factura } from "@/lib/types"
 
 interface ComercioWithDetails extends Comercio {
@@ -40,16 +40,16 @@ const getStatusColor = (status: string) => {
             return "bg-muted text-muted-foreground"
     }
 }
+// Revisar si queda 
+// const calculateDeudaTotal = (facturas: Factura[]) => {
+//     return facturas
+//         .filter((f) => f.estadoPago !== "pagado")
+//         .reduce((sum, f) => sum + f.importeTotal, 0)
+// }
 
-const calculateDeudaTotal = (facturas: Factura[]) => {
-    return facturas
-        .filter((f) => f.estadoPago !== "pagado")
-        .reduce((sum, f) => sum + f.importeTotal, 0)
-}
-
-const calculateFacturasVencidas = (facturas: Factura[]) => {
-    return facturas.filter((f) => f.estadoPago === "vencido").length
-}
+// const calculateFacturasVencidas = (facturas: Factura[]) => {
+//     return facturas.filter((f) => f.estadoPago === "vencido").length
+// }
 
 export function ComercioDetailsDialog({
     comercio,

@@ -1,6 +1,7 @@
 import CreateAccountForm from "./components/CreateAccountForm";
 import { createClient } from "@/lib/supabaseServer";
 
+export const dynamic = "force-dynamic";
 interface Sucursal {
     idSucursal: number;
     direccionSucursal: string;
@@ -18,7 +19,7 @@ export default async function CuentasPage() {
             .order("ciudad_sucursal");
 
         if (!error && data) {
-            sucursales = data.map((s: any) => ({
+            sucursales = data.map((s) => ({
                 idSucursal: s.id_sucursal,
                 direccionSucursal: s.direccion_sucursal,
                 ciudadSucursal: s.ciudad_sucursal,
