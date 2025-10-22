@@ -1,5 +1,4 @@
 import { Button } from "@/components/ui/button"
-import { EstadoContrato } from "@/lib/types"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 

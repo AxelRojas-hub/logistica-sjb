@@ -6,6 +6,7 @@ import { createClient } from "@/lib/supabaseServer"
 import { getRutaConTramo } from "@/lib/models/Ruta"
 import type { RutaConTramos, Tramo } from "@/lib/types"
 import { CheckinContent } from "./checkinContent"
+import { getEnvioAsignadoByLegajo } from "@/lib/models/Envio"
 
 interface TramoConEstado extends Tramo {
     estado: "completado" | "actual" | "pendiente"
@@ -18,32 +19,34 @@ interface RutaConEstado extends RutaConTramos {
 
 export default async function ChoferCheckinPage() {
     const supabase = await createClient()
-
-    // Obtener la ruta con ID 1 y sus tramos
-    const rutaData = await getRutaConTramo(supabase, 1)
-
+    const user = await supabase.auth.getUser();
+    const legajo = user.data!.user!.user_metadata.legajo;
+    const envioAsignado = await getEnvioAsignadoByLegajo(legajo, supabase);
+    const idSucursalActual = envioAsignado.id_sucursal_actual;
+    const idRuta = envioAsignado.id_ruta;
+    const rutaData = await getRutaConTramo(supabase, idRuta)
+    const tramoActual = rutaData!.tramos.findIndex((tramo) => { return tramo.idSucursalOrigen === idSucursalActual })
     let currentRoute: RutaConEstado | null = null
 
     if (rutaData && rutaData.tramos.length > 0) {
         // Mapear los tramos a TramoConEstado con estados
         const tramosConEstado: TramoConEstado[] = rutaData.tramos.map((tramo, index) => ({
             ...tramo,
-            estado: index === 0 ? "actual" : "pendiente" as const
+            estado: index === tramoActual ? "actual" : "pendiente" as const
         }))
 
         currentRoute = {
             ...rutaData,
             tramos: tramosConEstado,
-            tramoActual: 0
+            tramoActual
         }
     }
 
     return (
         <TooltipProvider>
-            <div className="h-screen bg-background flex flex-col">
+            <div className="min-h-[80dvh] bg-background flex flex-col">
                 <div className="flex-1">
                     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                        {/* Botón para volver al menú principal */}
                         <div className="flex items-center gap-4 mb-6">
                             <Link href="/chofer">
                                 <Button

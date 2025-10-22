@@ -27,7 +27,7 @@
 ## app/chofer/checkin/components
 
 - [x] Obtener ruta actual desde la BD
-- [ ] Checkear como persistir los estados de checkin
+- [x] Checkear como persistir los estados de checkin
 
 ## app/chofer/ruta
 

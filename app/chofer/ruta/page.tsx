@@ -23,7 +23,6 @@ export default async function ChoferRutaPage() {
     const legajo = user.data!.user!.user_metadata.legajo;
     const envioAsignado = await getEnvioAsignadoByLegajo(legajo, supabase);
     const idRuta = envioAsignado.id_ruta;
-    // Obtener la ruta con ID 1 y sus tramos
     const rutaData = await getRutaConTramo(supabase, idRuta)
 
     let currentRoute: RutaConEstado | null = null

@@ -9,7 +9,7 @@ import Link from "next/link"
 export default function ChoferPage() {
     return (
         <TooltipProvider>
-            <div className="h-screen bg-background flex flex-col">
+            <div className="h-[85dvh] bg-background flex flex-col">
                 <div className="flex-1 flex flex-col items-center justify-center px-4">
                     <div className="mb-8 text-center">
                         <h1 className="text-3xl font-bold text-foreground">Panel de Chofer</h1>
