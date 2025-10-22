@@ -5,7 +5,7 @@
 - [x] Obtener comercios desde la BD
 - [x] Detalle del comercio
   - Revisar que informacion mostrar
-- [ ] Historial de pedidos del comercio [Fiorella]
+- [ ] Historial de pedidos del comercio [Fiore]
 
 ## app/admin/envios
 
