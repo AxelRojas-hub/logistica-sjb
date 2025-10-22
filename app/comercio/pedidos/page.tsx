@@ -5,10 +5,11 @@ import { PedidosContent } from "./components"
 
 export default async function ComercioPedidosPage() {
     const supabase = await createClient()
-    const comercio = await supabase.auth.getUser();
-    console.log(comercio.data.user?.user_metadata);
-    // TODO: Obtener idComercio de la sesión de Supabase
-    const idComercio = null
+    const user = await supabase.auth.getUser();
+    const idCuentaComercio = user.data.user?.user_metadata.idCuentaComercio;
+    const comercio = await supabase.from('comercio').select('*').eq('id_cuenta_comercio', idCuentaComercio).single();
+    console.log(comercio);
+    const idComercio = comercio.data.id_comercio;
 
     let pedidos: Pedido[] = []
 

@@ -26,9 +26,10 @@
 
 ## app/comercio/pedidos
 
-- [ ] Obtener pedidos desde la BD [Axel]
-- [ ] Asignar con datos de la session [Axel]
-- [ ] Registrar/Cancelar pedido -> Hace falta checkear estado de contrato para hacer esta tarea
+- [x] Obtener pedidos desde la BD
+- [x] Asignar con datos de la session
+- [ ] Registrar pedido -> Hace falta checkear estado de contrato para hacer esta tarea
+- [ ] Cancelar pedido -> Hace falta checkear estado de contrato para hacer esta tarea
 
 ## app/comercio/contrato
 
