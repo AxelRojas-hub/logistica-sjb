@@ -5,7 +5,8 @@ import { PedidosContent } from "./components"
 
 export default async function ComercioPedidosPage() {
     const supabase = await createClient()
-
+    const comercio = await supabase.auth.getUser();
+    console.log(comercio.data.user?.user_metadata);
     // TODO: Obtener idComercio de la sesión de Supabase
     const idComercio = null
 

@@ -69,7 +69,7 @@ export function CheckinContent({ initialRoute }: CheckinContentProps) {
             ) : (
                 <div className="space-y-6">
                     <Badge variant="outline" className="text-lg px-3 py-1">
-                        Ruta: {currentRoute.nombreRuta}
+                        {currentRoute.nombreRuta}
                     </Badge>
 
                     <RouteStatusCard

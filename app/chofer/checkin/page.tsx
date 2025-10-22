@@ -62,7 +62,6 @@ export default async function ChoferCheckinPage() {
                             <h1 className="text-3xl font-bold text-foreground">Check-in en Sucursal</h1>
                             <p className="mt-2 text-muted-foreground">Marca la llegada a cada sucursal de tu ruta</p>
                         </div>
-
                         <CheckinContent initialRoute={currentRoute} />
                     </div>
                 </div>

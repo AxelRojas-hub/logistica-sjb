@@ -22,29 +22,18 @@
 - [ ] handleSelectOrder
 - [ ] updateOrderStatus
 
-# Chofer
-
-## app/chofer/checkin/components
-
-- [x] Obtener ruta actual desde la BD
-- [x] Checkear como persistir los estados de checkin
-
-## app/chofer/ruta
-
-- [x] Obtener datos de ruta desde la BD
-- [x] Asignar con datos de la session
-
 # Comercio
 
 ## app/comercio/pedidos
 
-- [ ] Obtener pedidos desde la BD
-- [ ] Asignar con datos de la session
-- [ ] Registrar/Cancelar pedido -> Checkear estado de contrato
+- [ ] Obtener pedidos desde la BD [Axel]
+- [ ] Asignar con datos de la session [Axel]
+- [ ] Registrar/Cancelar pedido -> Hace falta checkear estado de contrato para hacer esta tarea
 
 ## app/comercio/contrato
 
-- [ ] Obtener contrato y servicios disponibles desde la BD
+- [ ] Obtener contrato disponibles desde la BD
+- [ ] Obtener servicios disponibles desde la BD
 
 ## app/comercio/facturas
 
@@ -53,3 +42,19 @@
 # Fix
 
 - [ ] Hay funcion duplicada para obtener la ruta con tramos, en /admin se usa getRutaConTramos y en /chofer se usa getRutaConTramo. Unificar.
+
+---
+
+# Terminado
+
+## Chofer
+
+### app/chofer/checkin/components
+
+- [x] Obtener ruta actual desde la BD
+- [x] Checkear como persistir los estados de checkin
+
+### app/chofer/ruta
+
+- [x] Obtener datos de ruta desde la BD
+- [x] Asignar con datos de la session
