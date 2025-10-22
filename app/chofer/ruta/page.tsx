@@ -2,10 +2,11 @@ import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { RouteInfoCard, RoutePageHeader } from "./components"
+import { RouteInfoCard } from "./components"
 import { createClient } from "@/lib/supabaseServer"
 import { getRutaConTramo } from "@/lib/models/Ruta"
 import type { RutaConTramos, Tramo } from "@/lib/types"
+import { getEnvioAsignadoByLegajo } from "@/lib/models/Envio"
 
 interface TramoConEstado extends Tramo {
     estado: "completado" | "actual" | "pendiente"
@@ -18,9 +19,12 @@ interface RutaConEstado extends RutaConTramos {
 
 export default async function ChoferRutaPage() {
     const supabase = await createClient()
-
+    const user = await supabase.auth.getUser();
+    const legajo = user.data!.user!.user_metadata.legajo;
+    const envioAsignado = await getEnvioAsignadoByLegajo(legajo, supabase);
+    const idRuta = envioAsignado.id_ruta;
     // Obtener la ruta con ID 1 y sus tramos
-    const rutaData = await getRutaConTramo(supabase, 1)
+    const rutaData = await getRutaConTramo(supabase, idRuta)
 
     let currentRoute: RutaConEstado | null = null
 
@@ -62,7 +66,9 @@ export default async function ChoferRutaPage() {
                         </div>
 
                         <div className="space-y-6">
-                            <RoutePageHeader />
+                            <div className="flex justify-between items-center">
+                                <h2 className="text-2xl font-semibold text-foreground">Ruta Asignada</h2>
+                            </div>
                             <RouteInfoCard currentRoute={currentRoute} />
                         </div>
                     </div>

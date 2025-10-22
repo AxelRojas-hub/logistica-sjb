@@ -67,6 +67,7 @@ export default function CreateAccountForm({ sucursales }: CreateAccountFormProps
                     data: {
                         rol,
                         nombre,
+                        legajo: nuevoLegajo
                     },
                 },
             });

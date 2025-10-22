@@ -4,7 +4,7 @@
 
 - [x] Obtener comercios desde la BD
 - [x] Detalle del comercio
-    - Revisar que informacion mostrar
+  - Revisar que informacion mostrar
 - [ ] Historial de pedidos del comercio
 
 ## app/admin/envios
@@ -18,6 +18,7 @@
 - [x] Obtener choferes desde la BD
 
 ## app/admin/pedidos
+
 - [ ] handleSelectOrder
 - [ ] updateOrderStatus
 
@@ -31,7 +32,7 @@
 ## app/chofer/ruta
 
 - [x] Obtener datos de ruta desde la BD
-- [ ] Asignar con datos de la session
+- [x] Asignar con datos de la session
 
 # Comercio
 
@@ -48,3 +49,7 @@
 ## app/comercio/facturas
 
 - [ ] Obtener facturas desde la BD
+
+# Fix
+
+- [ ] Hay funcion duplicada para obtener la ruta con tramos, en /admin se usa getRutaConTramos y en /chofer se usa getRutaConTramo. Unificar.
