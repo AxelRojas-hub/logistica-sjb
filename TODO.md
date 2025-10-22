@@ -15,11 +15,9 @@
 ## app/admin/envios/crear
 
 - [ ] Obtener pedidos desde la BD
-- [ ] Obtener choferes desde la BD
-- [ ] Obtener sucursales desde la BD
+- [x] Obtener choferes desde la BD
 
 ## app/admin/pedidos
-
 - [ ] handleSelectOrder
 - [ ] updateOrderStatus
 
