@@ -2,8 +2,9 @@ import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Eye, FileText, ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import { Comercio, Contrato, Factura } from "@/lib/types"
+import { Comercio, Contrato, Factura, Pedido } from "@/lib/types"
 import { createClient } from "@/lib/supabaseServer"
+import { getPedidosByComercio } from "@/lib/models/Pedido"
 import { ComerciosTable } from "./components"
 
 interface ComercioWithDetails extends Comercio {
@@ -11,6 +12,7 @@ interface ComercioWithDetails extends Comercio {
     nombreResponsable?: string
     contrato?: Contrato
     facturas: Factura[]
+    pedidos: Pedido[]
 }
 
 export default async function AdminComerciosPage() {
@@ -63,6 +65,9 @@ export default async function AdminComerciosPage() {
                 .select("*")
                 .eq("id_comercio", comercio.id_comercio)
 
+
+            const pedidos = await getPedidosByComercio(supabase, comercio.id_comercio)
+
             return {
                 idComercio: comercio.id_comercio,
                 idContrato: comercio.id_contrato,
@@ -75,6 +80,7 @@ export default async function AdminComerciosPage() {
                 nombreResponsable,
                 contrato,
                 facturas: facturas || [],
+                pedidos: pedidos
             }
         })
     )
