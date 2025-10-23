@@ -7,14 +7,16 @@ import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Eye, FileText, AlertTriangle } from "lucide-react"
-import { Comercio, Contrato, Factura } from "@/lib/types"
+import { Comercio, Contrato, Factura, Pedido } from "@/lib/types"
 import { ComercioDetailsDialog } from "./ComercioDetailsDialog"
+import { ComercioHistorialPedidosDialog } from "./ComercioHistorialPedidosDialog"
 
 interface ComercioWithDetails extends Comercio {
     email?: string
     nombreResponsable?: string
     contrato?: Contrato
     facturas: Factura[]
+    pedidos: Pedido[]
 }
 
 interface ComerciosTableProps {
@@ -24,10 +26,16 @@ interface ComerciosTableProps {
 export function ComerciosTable({ comercios }: ComerciosTableProps) {
     const [selectedComercio, setSelectedComercio] = useState<ComercioWithDetails | null>(null)
     const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false)
+    const [isHistorialPedidosDialogOpen, setIsHistorialPedidosDialogOpen] = useState(false)
 
     const handleViewDetails = (comercio: ComercioWithDetails) => {
         setSelectedComercio(comercio)
         setIsDetailsDialogOpen(true)
+    }
+
+    const handleViewHistorialPedidos = (comercio: ComercioWithDetails) =>{
+        setSelectedComercio(comercio)
+        setIsHistorialPedidosDialogOpen(true)
     }
 
     const getStatusColor = (status: string) => {
@@ -157,7 +165,7 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                                             </Tooltip>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button variant="outline" size="sm">
+                                                    <Button variant="outline"size="sm" onClick={() => handleViewHistorialPedidos(comercio)}>
                                                         <FileText className="h-4 w-4" />
                                                     </Button>
                                                 </TooltipTrigger>
@@ -178,6 +186,12 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                 comercio={selectedComercio}
                 isOpen={isDetailsDialogOpen}
                 onOpenChange={setIsDetailsDialogOpen}
+            />
+
+            <ComercioHistorialPedidosDialog
+                comercio={selectedComercio}
+                isOpen={isHistorialPedidosDialogOpen}
+                onOpenChange={setIsHistorialPedidosDialogOpen}
             />
         </TooltipProvider>
     )
