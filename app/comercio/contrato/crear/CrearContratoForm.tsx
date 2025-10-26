@@ -333,16 +333,6 @@ export default function CrearContratoForm({ servicios }: CrearContratoFormProps)
                             {loading ? "Procesando..." : "Proceder al Pago"}
                         </Button>
                     </div>
-
-                    {/* Nota sobre MercadoPago */}
-                    <Card className="bg-muted/50">
-                        <CardContent className="pt-6">
-                            <p className="text-sm text-muted-foreground text-center">
-                                <strong>Nota:</strong> El pago se procesará a través de MercadoPago.
-                                La integración se implementará próximamente.
-                            </p>
-                        </CardContent>
-                    </Card>
                 </form>
             </div>
         </div>
