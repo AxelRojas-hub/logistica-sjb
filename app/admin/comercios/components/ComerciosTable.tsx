@@ -33,7 +33,7 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
         setIsDetailsDialogOpen(true)
     }
 
-    const handleViewHistorialPedidos = (comercio: ComercioWithDetails) =>{
+    const handleViewHistorialPedidos = (comercio: ComercioWithDetails) => {
         setSelectedComercio(comercio)
         setIsHistorialPedidosDialogOpen(true)
     }
@@ -80,9 +80,10 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                             <TableRow>
                                 <TableHead>Nombre</TableHead>
                                 <TableHead>Contacto</TableHead>
-                                <TableHead>Contrato</TableHead>
-                                <TableHead>Estado</TableHead>
-                                <TableHead>Acciones</TableHead>
+                                <TableHead className="text-center">Contrato</TableHead>
+                                <TableHead className="text-center">Estado Comercio</TableHead>
+                                <TableHead className="text-center">Deuda</TableHead>
+                                <TableHead className="text-center">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
@@ -96,14 +97,6 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                                             >
                                                 {comercio.nombreComercio}
                                             </p>
-                                            <div className="flex items-center gap-2 mt-1">
-                                                <Badge
-                                                    className={getStatusColor(comercio.estadoComercio)}
-                                                    variant="outline"
-                                                >
-                                                    {comercio.estadoComercio}
-                                                </Badge>
-                                            </div>
                                         </div>
                                     </TableCell>
                                     <TableCell>
@@ -122,18 +115,28 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                                             </p>
                                         </div>
                                     </TableCell>
-                                    <TableCell>
-                                        <div>
+                                    <TableCell className="text-center">
+                                        <div className="flex flex-col items-center">
                                             <p className="text-sm font-medium">
-                                                {comercio.contrato?.duracionContratoMeses || "N/A"}
+                                                {comercio.contrato?.duracionContratoMeses ? `${comercio.contrato.duracionContratoMeses} meses` : "N/A"}
                                             </p>
                                             <p className="text-xs text-muted-foreground">
                                                 {comercio.contrato?.estadoContrato || "N/A"}
                                             </p>
                                         </div>
                                     </TableCell>
-                                    <TableCell>
-                                        <div>
+                                    <TableCell className="text-center">
+                                        <div className="flex justify-center">
+                                            <Badge
+                                                className={getStatusColor(comercio.estadoComercio)}
+                                                variant="outline"
+                                            >
+                                                {comercio.estadoComercio}
+                                            </Badge>
+                                        </div>
+                                    </TableCell>
+                                    <TableCell className="text-center">
+                                        <div className="flex flex-col items-center">
                                             <p className="text-sm font-medium">
                                                 ${calculateDeudaTotal(comercio.facturas).toLocaleString()}
                                             </p>
@@ -147,8 +150,8 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                                             </div>
                                         </div>
                                     </TableCell>
-                                    <TableCell>
-                                        <div className="flex gap-1">
+                                    <TableCell className="text-center">
+                                        <div className="flex gap-1 justify-center">
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
                                                     <Button
@@ -165,7 +168,7 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                                             </Tooltip>
                                             <Tooltip>
                                                 <TooltipTrigger asChild>
-                                                    <Button variant="outline"size="sm" onClick={() => handleViewHistorialPedidos(comercio)}>
+                                                    <Button variant="outline" size="sm" onClick={() => handleViewHistorialPedidos(comercio)}>
                                                         <FileText className="h-4 w-4" />
                                                     </Button>
                                                 </TooltipTrigger>

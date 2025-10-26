@@ -55,7 +55,7 @@ export default async function AdminComerciosPage() {
                     tipoCobro: contratoData.tipo_cobro,
                     descuento: contratoData.descuento,
                     estadoContrato: contratoData.estado_contrato,
-                    duracionContratoMeses: contratoData.duracion_contrato,
+                    duracionContratoMeses: contratoData.duracion_contrato_meses,
                     fechaFinContrato: contratoData.fecha_fin_contrato,
                 }
             }
