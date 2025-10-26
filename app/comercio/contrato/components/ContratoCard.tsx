@@ -3,6 +3,8 @@ import type { Contrato } from "@/lib/types"
 import { ContratoStatusBadge } from "./ContratoStatusBadge"
 import { DetalleContrato } from "./DetalleContrato"
 import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { Plus } from "lucide-react"
 
 interface ContratoCardProps {
     contrato: Contrato | null
@@ -12,8 +14,17 @@ export function ContratoCard({ contrato }: ContratoCardProps) {
     if (!contrato) {
         return (
             <Card>
-                <CardContent className="py-8 text-center text-muted-foreground">
+                <CardContent className=" flex flex-col justify-center gap-4 items-center py-8 text-center text-muted-foreground">
                     No hay contrato activo actualmente
+                    <Link href="/comercio/contrato/crear">
+                        <Button
+                            variant="default"
+                            className="flex items-center gap-2"
+                        >
+                            <Plus className="h-4 w-4" />
+                            Crear contrato
+                        </Button>
+                    </Link>
                 </CardContent>
             </Card>
         )

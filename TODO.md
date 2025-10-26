@@ -33,29 +33,20 @@
 
 ## app/comercio/contrato
 
-- [ ] Obtener contrato disponibles desde la BD
-- [ ] Obtener servicios disponibles desde la BD
+- [x] Obtener contrato disponibles desde la BD
+- [x] Obtener servicios disponibles desde la BD
+- [x] Crear formulario de nuevo contrato
+- [ ] Implementar pasarela de MercadoPago en formulario de creación de contrato
+- [ ] Condicionar creación de contrato a respuesta exitosa de MercadoPago
+- [ ] Implementar botón "Renovar Contrato" en ContratoCard
+- [ ] Implementar botón "Modificar Plan" en ContratoCard
 
 ## app/comercio/facturas
 
 - [ ] Obtener facturas desde la BD
 
+---
+
 # Fix
 
 - [ ] Hay funcion duplicada para obtener la ruta con tramos, en /admin se usa getRutaConTramos y en /chofer se usa getRutaConTramo. Unificar.
-
----
-
-# Terminado
-
-## Chofer
-
-### app/chofer/checkin/components
-
-- [x] Obtener ruta actual desde la BD
-- [x] Checkear como persistir los estados de checkin
-
-### app/chofer/ruta
-
-- [x] Obtener datos de ruta desde la BD
-- [x] Asignar con datos de la session
