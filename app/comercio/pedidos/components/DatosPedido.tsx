@@ -12,16 +12,21 @@ interface Sucursal {
 }
 
 interface NewOrderForm {
+    // Datos del destinatario
     dniCliente: number
     nombreCliente: string
     telefonoCliente: string
     emailCliente: string
     direccionCliente: string
+    
+    // Datos del pedido
     ciudadDestino: string
     idSucursalDestino: number
     peso: number
     fechaLimiteEntrega: string
-    tipoTransporte: number | null
+    
+    // Datos para pedido_servicio
+    tipoTransporte: number | null 
     serviciosOpcionales: number[]
 }
 

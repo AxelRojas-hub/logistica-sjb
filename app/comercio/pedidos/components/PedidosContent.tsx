@@ -21,8 +21,8 @@ interface NewOrderForm {
     peso: number
     fechaLimiteEntrega: string
     
-    // Servicios dinámicos
-    tipoTransporte: number | null
+    // Datos para pedido_servicio
+    tipoTransporte: number | null 
     serviciosOpcionales: number[]
 }
 
@@ -235,7 +235,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                                         Comercio Deshabilitado
                                     </h3>
                                     <div className="mt-2 text-sm text-red-700">
-                                        <p>Su cuenta está deshabilitada por facturas pendientes de pago. No puede registrar nuevos pedidos hasta que sea reactivado.</p>
+                                        <p>Su cuenta está deshabilitada por facturas pendientes de pago. No puede registrar nuevos pedidos o cancelarlos hasta que sea reactivado.</p>
                                         <p>Vaya a la sección <span className="font-bold" >Facturas</span> para realizar su pago y reactivar el servicio.</p>
                                     </div>
                                 </div>

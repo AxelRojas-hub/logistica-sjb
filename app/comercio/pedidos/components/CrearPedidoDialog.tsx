@@ -24,22 +24,22 @@ interface Servicio {
 }
 
 interface NewOrderForm {
-    // Datos del destinatario (→ cliente_destinatario)
+    // Datos del destinatario
     dniCliente: number
     nombreCliente: string
     telefonoCliente: string
     emailCliente: string
     direccionCliente: string
     
-    // Datos del pedido (→ pedido)
+    // Datos del pedido
     ciudadDestino: string
     idSucursalDestino: number
     peso: number
     fechaLimiteEntrega: string
     
-    // Servicios dinámicos (→ pedido_servicio)
-    tipoTransporte: number | null // ID del servicio de transporte (radio)
-    serviciosOpcionales: number[] // Array de IDs de servicios opcionales (checkboxes)
+    // Datos para pedido_servicio
+    tipoTransporte: number | null 
+    serviciosOpcionales: number[]
 }
 
 interface CreateOrderDialogProps {
@@ -48,7 +48,7 @@ interface CreateOrderDialogProps {
     loading?: boolean
     error?: string
     fieldErrors?: Record<string, string>
-    onSuccess?: () => void // Nueva prop para limpiar el formulario
+    onSuccess?: () => void
 }
 
 export function CreateOrderDialog({ 
@@ -114,7 +114,7 @@ export function CreateOrderDialog({
         }
     }
 
-    // Cargar todas las sucursales (simplificado)
+    // Cargar todas las sucursales
     const fetchSucursales = useCallback(async () => {
         setLoadingSucursales(true)
         try {
@@ -136,9 +136,8 @@ export function CreateOrderDialog({
     useEffect(() => {
         fetchServicios()
         fetchSucursales()
-    }, [fetchSucursales]) // Cargar servicios y sucursales al montar
+    }, [fetchSucursales])
 
-    // Seleccionar transporte por defecto cuando se cargan los servicios
     useEffect(() => {
         if (servicios.length > 0) {
             const servicioTransporte = servicios.find(s => 
@@ -155,8 +154,6 @@ export function CreateOrderDialog({
     }, [servicios, newOrder.tipoTransporte])
 
 
-
-    // Limpiar formulario cuando se abre el dialog
     useEffect(() => {
         if (isOpen) {
 
@@ -226,7 +223,7 @@ export function CreateOrderDialog({
                         onCiudadChange={handleCiudadChange}
                     />
 
-                    {/* Servicios dinámicos */}
+                    {/* Datos de los servicios */}
                     <ServiciosSection 
                         servicios={servicios}
                         newOrder={newOrder}
@@ -234,10 +231,7 @@ export function CreateOrderDialog({
                         loading={loading}
                     />
 
-                    {/* Sección de botón de crear pedido */}
                     <div className="space-y-4 pt-4 border-t">
-
-                        {/* Mostrar error si existe */}
                         {error && (
                             <div className="p-3 bg-red-50 border border-red-200 rounded-md dark:bg-red-950/50 dark:border-red-800">
                                 <p className="text-sm text-red-600 dark:text-red-400 text-center">
