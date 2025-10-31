@@ -9,9 +9,10 @@ interface OrdersTableProps {
     orders: Pedido[]
     onViewOrder: (order: Pedido) => void
     onCancelOrder: (orderId: number) => void
+    comercioHabilitado?: boolean
 }
 
-export function OrdersTable({ orders, onViewOrder, onCancelOrder }: OrdersTableProps) {
+export function OrdersTable({ orders, onViewOrder, onCancelOrder, comercioHabilitado = true }: OrdersTableProps) {
     return (
         <Card className="overflow-hidden">
             <Table>
@@ -52,6 +53,7 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder }: OrdersTableP
                                         <Button
                                             variant="destructive"
                                             size="sm"
+                                            disabled={!comercioHabilitado}
                                             onClick={() => onCancelOrder(order.idPedido)}
                                         >
                                             <X className="h-4 w-4" />

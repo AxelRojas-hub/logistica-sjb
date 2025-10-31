@@ -86,3 +86,15 @@ export async function getComercioByName(nombreComercio: string): Promise<Comerci
         return null
     }
 }
+
+export function mapRowToComercio(row: Record<string, unknown>): Comercio {
+    return {
+        idComercio: row.id_comercio as number,
+        idContrato: row.id_contrato as number,
+        idCuentaComercio: row.id_cuenta_comercio as number,
+        idSucursalOrigen: row.id_sucursal_origen as number,
+        nombreComercio: row.nombre_comercio as string,
+        domicilioFiscal: row.domicilio_fiscal as string,
+        estadoComercio: row.estado_comercio as Comercio['estadoComercio']
+    }
+}

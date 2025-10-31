@@ -43,3 +43,36 @@ export async function getPedidos(supabase: SupabaseClient): Promise<Pedido[]> {
 
     return (data || []).map(mapRowToPedido)
 }
+
+interface CreatePedidoData {
+    idComercio: number
+    dniCliente: number
+    idSucursalDestino: number
+    precio: number
+    fechaLimiteEntrega: string
+}
+
+export async function createPedido(supabase: SupabaseClient, pedidoData: CreatePedidoData): Promise<Pedido | null> {
+    const { data, error } = await supabase
+        .from("pedido")
+        .insert({
+            id_comercio: pedidoData.idComercio,
+            dni_cliente: pedidoData.dniCliente,
+            id_sucursal_destino: pedidoData.idSucursalDestino,
+            precio: pedidoData.precio,
+            fecha_limite_entrega: pedidoData.fechaLimiteEntrega,
+            estado_pedido: "en_preparacion",
+            id_envio: null,
+            id_factura: null,
+            fecha_entrega: null,
+        })
+        .select()
+        .single()
+
+    if (error) {
+        console.error("Error al crear pedido:", error)
+        return null
+    }
+
+    return data ? mapRowToPedido(data) : null
+}
