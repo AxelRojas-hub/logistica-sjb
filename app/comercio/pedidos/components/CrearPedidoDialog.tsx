@@ -1,83 +1,251 @@
+"use client"
 import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import {
-    Dialog,
-    DialogContent,
-    DialogHeader,
-    DialogTitle,
-    DialogTrigger,
+import { 
+    Dialog, 
+    DialogContent, 
+    DialogHeader, 
+    DialogTitle, 
+    DialogTrigger 
 } from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
+import { useEffect, useState, useCallback } from "react"
+import { DatosDestinatario, DatosPedido, ServiciosSection } from "."
+
+interface Sucursal {
+    idSucursal: number
+    direccionSucursal: string
+    ciudadSucursal: string
+}
+
+interface Servicio {
+    id_servicio: number
+    nombre_servicio: string
+    costo_servicio: number
+}
 
 interface NewOrderForm {
+    // Datos del destinatario
     dniCliente: number
+    nombreCliente: string
+    telefonoCliente: string
+    emailCliente: string
+    direccionCliente: string
+    
+    // Datos del pedido
+    ciudadDestino: string
     idSucursalDestino: number
-    precio: number
+    peso: number
     fechaLimiteEntrega: string
+    
+    // Datos para pedido_servicio
+    tipoTransporte: number | null 
+    serviciosOpcionales: number[]
 }
 
 interface CreateOrderDialogProps {
-    newOrder: NewOrderForm
-    setNewOrder: (order: NewOrderForm) => void
-    onCreateOrder: () => void
+    onCreateOrder: (order: NewOrderForm) => Promise<boolean>
+    disabled?: boolean
+    loading?: boolean
+    error?: string
+    fieldErrors?: Record<string, string>
+    onSuccess?: () => void
 }
 
-export function CreateOrderDialog({ newOrder, setNewOrder, onCreateOrder }: CreateOrderDialogProps) {
+export function CreateOrderDialog({ 
+    onCreateOrder, 
+    disabled = false,
+    loading = false,
+    error,
+    fieldErrors = {},
+    onSuccess
+}: CreateOrderDialogProps) {
+    const [newOrder, setNewOrder] = useState<NewOrderForm>({
+        dniCliente: 0,
+        nombreCliente: "",
+        telefonoCliente: "",
+        emailCliente: "",
+        direccionCliente: "",
+        ciudadDestino: "",
+        idSucursalDestino: 0,
+        peso: 0,
+        fechaLimiteEntrega: "",
+        tipoTransporte: null,
+        serviciosOpcionales: [],
+
+    })
+
+    const [servicios, setServicios] = useState<Servicio[]>([])
+    const [sucursales, setSucursales] = useState<Sucursal[]>([])
+    const [loadingSucursales, setLoadingSucursales] = useState(false)
+    const [isOpen, setIsOpen] = useState(false)
+
+    const limpiarFormulario = useCallback(() => {
+        const servicioTransporte = servicios.find(s => 
+            s.nombre_servicio.toLowerCase().includes('transporte')
+        )
+        
+        const transportePorDefecto = servicioTransporte?.id_servicio || null
+        
+        setNewOrder({
+            dniCliente: 0,
+            nombreCliente: "",
+            telefonoCliente: "",
+            emailCliente: "",
+            direccionCliente: "",
+            ciudadDestino: "",
+            idSucursalDestino: 0,
+            peso: 0,
+            fechaLimiteEntrega: "",
+            tipoTransporte: transportePorDefecto,
+            serviciosOpcionales: []
+        })
+    }, [servicios])
+
+    const fetchServicios = async () => {
+
+        try {
+            const response = await fetch('/api/servicios')
+            if (response.ok) {
+                const data = await response.json()
+                setServicios(data)
+            }
+        } catch (error) {
+            console.error("Error al cargar servicios:", error)
+        }
+    }
+
+    // Cargar todas las sucursales
+    const fetchSucursales = useCallback(async () => {
+        setLoadingSucursales(true)
+        try {
+            const response = await fetch('/api/sucursales')
+            
+            if (response.ok) {
+                const data = await response.json()
+                setSucursales(data)
+            } else {
+                console.error('Error al cargar sucursales:', response.statusText)
+            }
+        } catch (error) {
+            console.error("Error al cargar sucursales:", error)
+        } finally {
+            setLoadingSucursales(false)
+        }
+    }, [])
+
+    useEffect(() => {
+        fetchServicios()
+        fetchSucursales()
+    }, [fetchSucursales])
+
+    useEffect(() => {
+        if (servicios.length > 0) {
+            const servicioTransporte = servicios.find(s => 
+                s.nombre_servicio.toLowerCase().includes('transporte')
+            )
+            
+            if (servicioTransporte && newOrder.tipoTransporte === null) {
+                setNewOrder(prev => ({
+                    ...prev,
+                    tipoTransporte: servicioTransporte.id_servicio
+                }))
+            }
+        }
+    }, [servicios, newOrder.tipoTransporte])
+
+
+    useEffect(() => {
+        if (isOpen) {
+
+            limpiarFormulario()
+        }
+    }, [isOpen, limpiarFormulario])
+    
+    const handleCiudadChange = (ciudadNombre: string) => {
+        const sucursal = sucursales.find(s => s.ciudadSucursal === ciudadNombre)
+        if (sucursal) {
+            setNewOrder({ 
+                ...newOrder, 
+                ciudadDestino: ciudadNombre,
+                idSucursalDestino: sucursal.idSucursal
+            })
+        }
+    }
+
+    const handleSubmit = async () => {
+        const resultado = await onCreateOrder(newOrder)
+        
+        if (resultado === true && onSuccess) {
+            onSuccess()
+            setIsOpen(false)
+        }
+    }
+
     return (
-        <Dialog>
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
             <DialogTrigger asChild>
-                <Button className="flex items-center gap-2">
+                <Button 
+                    className="flex items-center gap-2"
+                    disabled={disabled}
+                >
                     <Plus className="h-4 w-4" />
                     Registrar Pedido
                 </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+            <DialogContent 
+                className="w-full !max-w-[85vw] max-h-[90vh] overflow-y-auto"
+                aria-describedby="dialog-description"
+            >
                 <DialogHeader>
                     <DialogTitle>Registrar nuevo Pedido</DialogTitle>
+                    <div id="dialog-description" className="sr-only">
+                        Formulario para registrar un nuevo pedido de entrega con datos del destinatario y servicios
+                    </div>
                 </DialogHeader>
-                <div className="grid gap-4">
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">DNI Cliente *</label>
-                            <Input
-                                type="number"
-                                placeholder="12345678"
-                                value={newOrder.dniCliente || ""}
-                                onChange={(e) => setNewOrder({ ...newOrder, dniCliente: Number(e.target.value) })}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Sucursal Destino *</label>
-                            <Input
-                                type="number"
-                                placeholder="1"
-                                value={newOrder.idSucursalDestino || ""}
-                                onChange={(e) => setNewOrder({ ...newOrder, idSucursalDestino: Number(e.target.value) })}
-                            />
-                        </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Precio *</label>
-                            <Input
-                                type="number"
-                                placeholder="15000"
-                                value={newOrder.precio || ""}
-                                onChange={(e) => setNewOrder({ ...newOrder, precio: Number(e.target.value) })}
-                            />
-                        </div>
-                        <div className="space-y-2">
-                            <label className="text-sm font-medium">Fecha Límite Entrega *</label>
-                            <Input
-                                type="date"
-                                value={newOrder.fechaLimiteEntrega}
-                                onChange={(e) => setNewOrder({ ...newOrder, fechaLimiteEntrega: e.target.value })}
-                            />
-                        </div>
-                    </div>
-                    <div className="flex gap-2 pt-4">
-                        <Button onClick={onCreateOrder} className="flex-1">
-                            Crear Pedido
+                
+                <div className="grid gap-6">
+                    {/* Datos del destinatario */}
+                    <DatosDestinatario 
+                        newOrder={newOrder}
+                        setNewOrder={setNewOrder}
+                        loading={loading}
+                        fieldErrors={fieldErrors}
+                    />
+
+                    {/* Datos del pedido */}
+                    <DatosPedido 
+                        newOrder={newOrder}
+                        setNewOrder={setNewOrder}
+                        sucursales={sucursales}
+                        loading={loading}
+                        loadingSucursales={loadingSucursales}
+                        fieldErrors={fieldErrors}
+                        onCiudadChange={handleCiudadChange}
+                    />
+
+                    {/* Datos de los servicios */}
+                    <ServiciosSection 
+                        servicios={servicios}
+                        newOrder={newOrder}
+                        setNewOrder={setNewOrder}
+                        loading={loading}
+                    />
+
+                    <div className="space-y-4 pt-4 border-t">
+                        {error && (
+                            <div className="p-3 bg-red-50 border border-red-200 rounded-md dark:bg-red-950/50 dark:border-red-800">
+                                <p className="text-sm text-red-600 dark:text-red-400 text-center">
+                                    {error}
+                                </p>
+                            </div>
+                        )}
+
+                        <Button 
+                            onClick={handleSubmit}
+                            className="w-full h-12 text-base font-semibold"
+                            disabled={loading}
+                        >
+                            {loading ? "Creando pedido..." : "Crear Pedido"}
                         </Button>
                     </div>
                 </div>

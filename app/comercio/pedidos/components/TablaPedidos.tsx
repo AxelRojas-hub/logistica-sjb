@@ -1,17 +1,32 @@
+"use client"
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Eye, X } from "lucide-react"
 import type { Pedido } from "@/lib/types"
 import { OrderStatusBadge } from "./PedidoStatusBadge"
+import { useState } from "react"
+import {
+    AlertDialog,
+    AlertDialogTrigger,
+    AlertDialogContent,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogFooter,
+    AlertDialogCancel,
+    AlertDialogAction,
+    AlertDialogDescription,
+} from "@/components/ui/alert-dialog"
 
 interface OrdersTableProps {
     orders: Pedido[]
     onViewOrder: (order: Pedido) => void
     onCancelOrder: (orderId: number) => void
+    comercioHabilitado?: boolean
 }
 
-export function OrdersTable({ orders, onViewOrder, onCancelOrder }: OrdersTableProps) {
+export function OrdersTable({ orders, onViewOrder, onCancelOrder, comercioHabilitado = true }: OrdersTableProps) {
+    const [cancelId, setCancelId] = useState<number | null>(null)
     return (
         <Card className="overflow-hidden">
             <Table>
@@ -49,13 +64,43 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder }: OrdersTableP
                                         <Eye className="h-4 w-4" />
                                     </Button>
                                     {order.estadoPedido === "en_preparacion" && (
-                                        <Button
-                                            variant="destructive"
-                                            size="sm"
-                                            onClick={() => onCancelOrder(order.idPedido)}
-                                        >
-                                            <X className="h-4 w-4" />
-                                        </Button>
+                                        <AlertDialog>
+                                            <AlertDialogTrigger asChild>
+                                                <Button
+                                                    variant="destructive"
+                                                    size="sm"
+                                                    disabled={!comercioHabilitado}
+                                                    onClick={() => setCancelId(order.idPedido)}
+                                                >
+                                                    <X className="h-4 w-4" />
+                                                </Button>
+                                            </AlertDialogTrigger>
+                                            <AlertDialogContent>
+                                                <AlertDialogHeader>
+                                                    <AlertDialogTitle>
+                                                        ¿Seguro que desea cancelar el pedido?
+                                                    </AlertDialogTitle>
+                                                    <AlertDialogDescription>
+                                                        Esta acción NO se puede deshacer.
+                                                    </AlertDialogDescription>
+                                                </AlertDialogHeader>
+                                                <AlertDialogFooter>
+                                                    <AlertDialogCancel onClick={() => setCancelId(null)}>
+                                                        No
+                                                    </AlertDialogCancel>
+                                                    <AlertDialogAction
+                                                        onClick={() => {
+                                                            if (cancelId !== null) {
+                                                                onCancelOrder(cancelId)
+                                                                setCancelId(null)
+                                                            }
+                                                        }}
+                                                    >
+                                                        Sí, cancelar
+                                                    </AlertDialogAction>
+                                                </AlertDialogFooter>
+                                            </AlertDialogContent>
+                                        </AlertDialog>
                                     )}
                                 </div>
                             </TableCell>
