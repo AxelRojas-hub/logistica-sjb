@@ -8,9 +8,9 @@ import Link from "next/link"
 
 export default async function ComercioPage() {
     return (
-        <div className="min-h-screen bg-background pt-4 flex flex-col">
+        <div className="h-[85dvh] bg-background pt-4 flex flex-col items-center justify-center">
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-                <div className="mb-8">
+                <div className="mb-8 text-center">
                     <h1 className="text-3xl font-bold text-foreground">Panel de Comercio</h1>
                     <p className="mt-2 text-muted-foreground">Selecciona una opción para continuar</p>
                 </div>

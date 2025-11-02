@@ -12,9 +12,9 @@ import Link from "next/link"
 export default function AdminPage() {
     return (
         <TooltipProvider>
-            <div className="min-h-screen bg-background pt-4 flex flex-col">
+            <div className="min-h-[85dvh] bg-background pt-4 flex flex-col">
                 <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8">
-                    <div className="mb-8">
+                    <div className="mb-8 text-center">
                         <h1 className="text-3xl font-bold text-foreground">Panel de Administración</h1>
                         <p className="mt-2 text-muted-foreground">Selecciona una opción para continuar</p>
                     </div>
@@ -56,7 +56,7 @@ export default function AdminPage() {
                                     <CardContent className="flex flex-col items-center justify-center p-8 text-center h-full">
                                         <Users className="h-12 w-12 text-red-600 mb-4" />
                                         <h3 className="text-xl font-semibold text-foreground mb-2">Cuentas</h3>
-                                        <p className="text-muted-foreground">Gestiona cuentas de choferes y admins</p>
+                                        <p className="text-muted-foreground">Gestiona cuentas de choferes y administradores</p>
                                     </CardContent>
                                 </Card>
                             </Link>
