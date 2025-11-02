@@ -186,9 +186,11 @@ export async function getRutaConTramo(supabase: SupabaseClient, idRuta: number):
         })
         .filter((tramo): tramo is Tramo => tramo !== null)
 
+    // Construir el camino ordenado de tramos
+    const tramosOrdenados = construirCaminoRuta(tramos)
     return {
         idRuta: ruta.idRuta,
         nombreRuta: ruta.nombreRuta,
-        tramos,
+        tramos: tramosOrdenados,
     }
 }

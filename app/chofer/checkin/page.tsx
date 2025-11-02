@@ -22,23 +22,31 @@ export default async function ChoferCheckinPage() {
     const user = await supabase.auth.getUser();
     const legajo = user.data!.user!.user_metadata.legajo;
     const envioAsignado = await getEnvioAsignadoByLegajo(legajo, supabase);
-    const idSucursalActual = envioAsignado.id_sucursal_actual;
-    const idRuta = envioAsignado.id_ruta;
-    const rutaData = await getRutaConTramo(supabase, idRuta)
-    const tramoActual = rutaData!.tramos.findIndex((tramo) => { return tramo.idSucursalOrigen === idSucursalActual })
+
     let currentRoute: RutaConEstado | null = null
 
-    if (rutaData && rutaData.tramos.length > 0) {
-        // Mapear los tramos a TramoConEstado con estados
-        const tramosConEstado: TramoConEstado[] = rutaData.tramos.map((tramo, index) => ({
-            ...tramo,
-            estado: index === tramoActual ? "actual" : "pendiente" as const
-        }))
+    if (envioAsignado) {
+        const idSucursalActual = envioAsignado.id_sucursal_actual;
+        const idRuta = envioAsignado.id_ruta;
+        const rutaData = await getRutaConTramo(supabase, idRuta)
 
-        currentRoute = {
-            ...rutaData,
-            tramos: tramosConEstado,
-            tramoActual
+        if (rutaData && rutaData.tramos.length > 0) {
+            //Checkear cuál es el tramo actual según la sucursal actual del envío
+            let tramoActual = 0;
+            if (idSucursalActual !== rutaData.tramos[0].idSucursalOrigen) {
+                tramoActual = rutaData.tramos.findIndex((tramo) => tramo.idSucursalOrigen === idSucursalActual);
+            }
+
+            const tramosConEstado: TramoConEstado[] = rutaData.tramos.map((tramo, index) => ({
+                ...tramo,
+                estado: index === tramoActual ? "actual" : "pendiente" as const
+            }))
+
+            currentRoute = {
+                ...rutaData,
+                tramos: tramosConEstado,
+                tramoActual
+            }
         }
     }
 

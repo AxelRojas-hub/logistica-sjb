@@ -46,7 +46,7 @@ export function RouteStatusCard({
                                 <BranchItem
                                     key={`${tramo.nroTramo}-${index}`}
                                     branch={{
-                                        nombre: tramo.nombreSucursalDestino || `Sucursal ${tramo.idSucursalDestino}`,
+                                        nombre: tramo.nombreSucursalOrigen || `Sucursal ${tramo.idSucursalOrigen}`,
                                         hora: `${tramo.duracionEstimadaMin} min`,
                                         estado: tramo.estado
                                     }}
