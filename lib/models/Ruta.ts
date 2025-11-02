@@ -2,7 +2,11 @@ import { Ruta, Tramo } from "@/lib/types"
 import { SupabaseClient } from "@supabase/supabase-js"
 import { RutaConTramos } from "@/lib/types"
 
-
+/**
+ * Obtiene las rutas con sus tramos asociados desde la base de datos
+ * @param supabase Cliente de Supabase
+ * @returns Lista de TODAS las rutas con sus tramos
+ */
 export async function getRutasConTramos(supabase: SupabaseClient): Promise<RutaConTramos[]> {
     // Obtener rutas
     const { data: rutasData, error: rutasError } = await supabase

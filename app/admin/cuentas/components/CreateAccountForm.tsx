@@ -133,6 +133,7 @@ export default function CreateAccountForm({ sucursales }: CreateAccountFormProps
             setIdSucursal("");
         } catch (err) {
             setError("Error de red. Intenta de nuevo.");
+            console.error(err);
         } finally {
             setLoading(false);
         }

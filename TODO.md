@@ -44,9 +44,3 @@
 ## app/comercio/facturas
 
 - [ ] Obtener facturas desde la BD
-
----
-
-# Fix
-
-- [ ] Hay funcion duplicada para obtener la ruta con tramos, en /admin se usa getRutaConTramos y en /chofer se usa getRutaConTramo. Unificar.
