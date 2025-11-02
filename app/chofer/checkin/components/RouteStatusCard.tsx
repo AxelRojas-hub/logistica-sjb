@@ -19,6 +19,15 @@ interface RouteStatusCardProps {
     isLastTramo: () => boolean
 }
 
+function formatDuration(minutes: number): string {
+    if (minutes < 60) {
+        return `${minutes} min`
+    }
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+}
+
 export function RouteStatusCard({
     currentRoute,
     onCheckIn,
@@ -47,7 +56,7 @@ export function RouteStatusCard({
                                     key={`${tramo.nroTramo}-${index}`}
                                     branch={{
                                         nombre: tramo.nombreSucursalOrigen || `Sucursal ${tramo.idSucursalOrigen}`,
-                                        hora: `${tramo.duracionEstimadaMin} min`,
+                                        hora: formatDuration(tramo.duracionEstimadaMin),
                                         estado: tramo.estado
                                     }}
                                     index={index}

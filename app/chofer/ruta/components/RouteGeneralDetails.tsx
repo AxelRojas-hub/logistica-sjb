@@ -13,9 +13,19 @@ interface RouteGeneralDetailsProps {
     currentRoute: RutaConEstado
 }
 
+function formatDuration(minutes: number): string {
+    if (minutes < 60) {
+        return `${minutes} min`
+    }
+    const hours = Math.floor(minutes / 60)
+    const mins = minutes % 60
+    return mins > 0 ? `${hours}h ${mins}m` : `${hours}h`
+}
+
 export function RouteGeneralDetails({ currentRoute }: RouteGeneralDetailsProps) {
     const tramoActualIndex = currentRoute.tramoActual ?? -1
     const proxTramo = currentRoute.tramos[tramoActualIndex + 1]
+    const totalDuration = currentRoute.tramos.reduce((acc, t) => acc + t.duracionEstimadaMin, 0)
 
     return (
         <div className="space-y-3">
@@ -38,7 +48,7 @@ export function RouteGeneralDetails({ currentRoute }: RouteGeneralDetailsProps) 
                 <div className="flex justify-between">
                     <span className="text-gray-600">Duración total estimada:</span>
                     <span className="font-medium">
-                        {currentRoute.tramos.reduce((acc, t) => acc + t.duracionEstimadaMin, 0)} min
+                        {formatDuration(totalDuration)}
                     </span>
                 </div>
             </div>
