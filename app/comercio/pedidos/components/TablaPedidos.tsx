@@ -36,7 +36,6 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder, comercioHabili
                         <TableHead className="w-[120px]">DNI Cliente</TableHead>
                         <TableHead className="w-[120px]">Estado</TableHead>
                         <TableHead className="w-[150px]">Entrega Límite</TableHead>
-                        <TableHead className="w-[120px]">Precio</TableHead>
                         <TableHead className="w-[120px]">Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -50,9 +49,6 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder, comercioHabili
                             </TableCell>
                             <TableCell>
                                 {order.fechaLimiteEntrega ? new Date(order.fechaLimiteEntrega).toLocaleDateString() : "—"}
-                            </TableCell>
-                            <TableCell className="font-bold">
-                                ${order.precio.toLocaleString()}
                             </TableCell>
                             <TableCell>
                                 <div className="flex gap-1">
