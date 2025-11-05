@@ -38,6 +38,8 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+    const [pedidoAEditar, setPedidoAEditar] = useState<Pedido | null>(null)
+    const [showEditDialog, setShowEditDialog] = useState(false)
 
 
     const validateField = (fieldName: keyof NewOrderForm, value: unknown): string | null => {
@@ -143,7 +145,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                 estadoPedido: "en_preparacion" as EstadoPedido,
                 precio: 0,
                 fechaEntrega: null,
-                fechaLimiteEntrega: orderData.fechaLimiteEntrega,
+                fechaLimiteEntrega: `${orderData.fechaLimiteEntrega}T00:00:00+00:00`,
             }
 
             setOrders(prev => [...prev, nuevoPedido])
@@ -195,6 +197,75 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
         }
     }
 
+    const handleEditOrder = (pedido: Pedido) => {
+        setPedidoAEditar(pedido)
+        setShowEditDialog(true)
+    }
+
+    const handleUpdateOrder = async (orderData: NewOrderForm): Promise<boolean> => {
+        if (!pedidoAEditar) return false
+
+        const errors: Record<string, string> = {}
+        const ciudadError = validateField('ciudadDestino', orderData.ciudadDestino)
+        if (ciudadError) errors['ciudadDestino'] = ciudadError
+        
+        const fechaError = validateField('fechaLimiteEntrega', orderData.fechaLimiteEntrega)
+        if (fechaError) errors['fechaLimiteEntrega'] = fechaError
+        
+        if (Object.keys(errors).length > 0) {
+            setFieldErrors(errors)
+            setError("Por favor corrija los errores en el formulario")
+            return false
+        }
+
+        setLoading(true)
+        try {
+            const updateData = {
+                idPedido: pedidoAEditar.idPedido,
+                ciudadDestino: orderData.ciudadDestino,
+                idSucursalDestino: orderData.idSucursalDestino,
+                fechaLimiteEntrega: orderData.fechaLimiteEntrega
+            }
+            
+            const response = await fetch (`/api/pedidos/update`, {
+                method: 'POST',
+                headers:{
+                    'Content-Type':'application/json',
+                },
+                body: JSON.stringify(updateData)
+            })
+
+            const result = await response.json()
+
+            if(!response.ok || !result.success) {
+                setError(result.message || "Error al actualizar el pedido")
+                return false
+            }
+
+            setOrders(orders.map(order =>
+                order.idPedido === pedidoAEditar.idPedido 
+                    ? { 
+                        ...order,
+                        idSucursalDestino: orderData.idSucursalDestino,
+                        fechaLimiteEntrega: `${orderData.fechaLimiteEntrega}T00:00:00+00:00`
+                    } 
+                    : order
+            ))
+            
+            setError("")
+            setFieldErrors({})
+            
+            return true
+
+        } catch (error){
+            console.error("Error al actualizar pedido:", error)
+            setError("Error de conexión. Intente nuevamente.")
+            return false
+        } finally {
+            setLoading(false)
+        }
+    }
+
     const handleViewOrder = (order: Pedido) => {
         setSelectedOrder(order)
         setShowDetailsDialog(true)
@@ -235,7 +306,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                                         Comercio Deshabilitado
                                     </h3>
                                     <div className="mt-2 text-sm text-red-700">
-                                        <p>Su cuenta está deshabilitada por facturas pendientes de pago. No puede registrar nuevos pedidos o cancelarlos hasta que sea reactivado.</p>
+                                        <p>Su cuenta está deshabilitada por facturas pendientes de pago. No puede registrar, cancelar o modificar pedidos hasta que sea reactivado.</p>
                                         <p>Vaya a la sección <span className="font-bold" >Facturas</span> para realizar su pago y reactivar el servicio.</p>
                                     </div>
                                 </div>
@@ -262,6 +333,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                         orders={orders}
                         onViewOrder={handleViewOrder}
                         onCancelOrder={handleCancelOrder}
+                        onEditOrder={handleEditOrder}
                         comercioHabilitado={comercio.estadoComercio === "habilitado"}
                     />
 
@@ -270,6 +342,24 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                         isOpen={showDetailsDialog}
                         onOpenChange={setShowDetailsDialog}
                     />
+
+                    <CreateOrderDialog
+                        open={showEditDialog}
+                        onOpenChange={setShowEditDialog}
+                        onCreateOrder={handleUpdateOrder}
+                        initialValues={pedidoAEditar}
+                        modoEdicion={true}
+                        disabled={loading}
+                        loading={loading}
+                        error={error}
+                        fieldErrors={fieldErrors}
+                        onSuccess={() => {
+                            setShowEditDialog(false)
+                            setPedidoAEditar(null)
+                            handleOrderSuccess()
+                        }}
+                    />
+
                 </div>
             </div>
         </div>

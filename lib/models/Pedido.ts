@@ -22,6 +22,7 @@ export async function getPedidosByComercio(supabase: SupabaseClient, idComercio:
         .from("pedido")
         .select("*")
         .eq("id_comercio", idComercio)
+        .order("id_pedido", { ascending: false })
 
     if (error) {
         console.error("Error al obtener pedidos por comercio:", error)
@@ -35,6 +36,7 @@ export async function getPedidos(supabase: SupabaseClient): Promise<Pedido[]> {
     const { data, error } = await supabase
         .from("pedido")
         .select("*")
+        .order("id_pedido", { ascending: false })
 
     if (error) {
         console.error("Error al obtener pedidos:", error)

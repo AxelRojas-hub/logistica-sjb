@@ -74,13 +74,29 @@ export function OrderDetailsDialog({ order, isOpen, onOpenChange }: OrderDetails
                         <div>
                             <h4 className="font-medium mb-1">Fecha de Entrega</h4>
                             <p className="text-sm">
-                                {order.fechaEntrega ? new Date(order.fechaEntrega).toLocaleDateString() : "No entregado aún"}
+                                {order.fechaEntrega ? (() => {
+                                    const fechaString = order.fechaEntrega
+                                    if (fechaString.includes('T')) {
+                                        const fechaParte = fechaString.split('T')[0]
+                                        const [year, month, day] = fechaParte.split('-')
+                                        return `${day}/${month}/${year}`
+                                    }
+                                    return new Date(fechaString).toLocaleDateString()
+                                })() : "No entregado aún"}
                             </p>
                         </div>
                         <div>
                             <h4 className="font-medium mb-1">Fecha Límite Entrega</h4>
                             <p className="text-sm">
-                                {order.fechaLimiteEntrega ? new Date(order.fechaLimiteEntrega).toLocaleDateString() : "No especificada"}
+                                {order.fechaLimiteEntrega ? (() => {
+                                    const fechaString = order.fechaLimiteEntrega
+                                    if (fechaString.includes('T')) {
+                                        const fechaParte = fechaString.split('T')[0]
+                                        const [year, month, day] = fechaParte.split('-')
+                                        return `${day}/${month}/${year}`
+                                    }
+                                    return new Date(fechaString).toLocaleDateString()
+                                })() : "No especificada"}
                             </p>
                         </div>
                     </div>

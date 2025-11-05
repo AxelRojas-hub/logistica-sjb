@@ -38,6 +38,7 @@ interface DatosPedidoProps {
     loadingSucursales: boolean
     fieldErrors: Record<string, string>
     onCiudadChange: (ciudad: string) => void
+    isFieldDisabled?: (fieldName: string) => boolean
 }
 
 export function DatosPedido({ 
@@ -45,9 +46,10 @@ export function DatosPedido({
     setNewOrder, 
     sucursales, 
     loading, 
-    loadingSucursales, 
+    loadingSucursales,
     fieldErrors,
-    onCiudadChange 
+    onCiudadChange,
+    isFieldDisabled = () => false
 }: DatosPedidoProps) {
     const ciudadesUnicas = useMemo(() => {
         return Array.from(new Set(sucursales.map(s => s.ciudadSucursal)))
@@ -65,7 +67,7 @@ export function DatosPedido({
                     <Select
                         value={newOrder.ciudadDestino}
                         onValueChange={onCiudadChange}
-                        disabled={loading || loadingSucursales}
+                        disabled={loading || loadingSucursales || isFieldDisabled('ciudadDestino')}
                     >
                         <SelectTrigger className={fieldErrors.ciudadDestino ? "border-red-500 focus:border-red-500" : ""}>
                             <SelectValue placeholder={
@@ -120,7 +122,7 @@ export function DatosPedido({
                         placeholder="2.5"
                         value={newOrder.peso || ""}
                         onChange={(e) => setNewOrder({ ...newOrder, peso: Number(e.target.value) })}
-                        disabled={loading}
+                        disabled={loading || isFieldDisabled('peso')}
                         className={fieldErrors.peso ? "border-red-500 focus:border-red-500" : ""}
                     />
                     {fieldErrors.peso && (
@@ -135,7 +137,7 @@ export function DatosPedido({
                         type="date"
                         value={newOrder.fechaLimiteEntrega}
                         onChange={(e) => setNewOrder({ ...newOrder, fechaLimiteEntrega: e.target.value })}
-                        disabled={loading}
+                        disabled={loading || isFieldDisabled('fechaLimiteEntrega')}
                         className={fieldErrors.fechaLimiteEntrega ? "border-red-500 focus:border-red-500" : ""}
                     />
                     {fieldErrors.fechaLimiteEntrega && (
