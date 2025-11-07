@@ -34,13 +34,15 @@ interface ServiciosSectionProps {
     newOrder: NewOrderForm
     setNewOrder: (order: NewOrderForm) => void
     loading: boolean
+    isFieldDisabled?: (fieldName: string) => boolean
 }
 
 export function ServiciosSection({ 
     servicios, 
     newOrder, 
     setNewOrder, 
-    loading 
+    loading,
+    isFieldDisabled = () => false
 }: ServiciosSectionProps) {
     // Servicios separados por tipo
     const servicioTransporte = servicios.find(s => 
@@ -68,7 +70,7 @@ export function ServiciosSection({
                         <RadioGroup 
                             value={newOrder.tipoTransporte?.toString() || servicioTransporte.id_servicio.toString()} 
                             onValueChange={(value) => actualizarServicios(Number(value), newOrder.serviciosOpcionales)}
-                            disabled={loading}
+                            disabled={loading || isFieldDisabled('tipoTransporte')}
                         >
                             <div className="flex items-center justify-between">
                                 <div className="flex items-center space-x-2">
@@ -105,7 +107,7 @@ export function ServiciosSection({
                                                 : newOrder.serviciosOpcionales.filter(id => id !== servicio.id_servicio)
                                             actualizarServicios(newOrder.tipoTransporte, nuevosOpcionales)
                                         }}
-                                        disabled={loading}
+                                        disabled={loading || isFieldDisabled('serviciosOpcionales')}
                                     />
                                     <Label 
                                         htmlFor={`servicio-${servicio.id_servicio}`}

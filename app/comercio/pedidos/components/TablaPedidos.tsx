@@ -2,7 +2,7 @@
 import { Button } from "@/components/ui/button"
 import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { Eye, X } from "lucide-react"
+import { Eye, X, Pencil } from "lucide-react"
 import type { Pedido } from "@/lib/types"
 import { OrderStatusBadge } from "./PedidoStatusBadge"
 import { useState } from "react"
@@ -22,10 +22,11 @@ interface OrdersTableProps {
     orders: Pedido[]
     onViewOrder: (order: Pedido) => void
     onCancelOrder: (orderId: number) => void
+    onEditOrder: (order: Pedido) => void
     comercioHabilitado?: boolean
 }
 
-export function OrdersTable({ orders, onViewOrder, onCancelOrder, comercioHabilitado = true }: OrdersTableProps) {
+export function OrdersTable({ orders, onViewOrder, onCancelOrder , onEditOrder, comercioHabilitado = true }: OrdersTableProps) {
     const [cancelId, setCancelId] = useState<number | null>(null)
     return (
         <Card className="overflow-hidden">
@@ -36,7 +37,6 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder, comercioHabili
                         <TableHead className="w-[120px]">DNI Cliente</TableHead>
                         <TableHead className="w-[120px]">Estado</TableHead>
                         <TableHead className="w-[150px]">Entrega Límite</TableHead>
-                        <TableHead className="w-[120px]">Precio</TableHead>
                         <TableHead className="w-[120px]">Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -49,10 +49,16 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder, comercioHabili
                                 <OrderStatusBadge status={order.estadoPedido} />
                             </TableCell>
                             <TableCell>
-                                {order.fechaLimiteEntrega ? new Date(order.fechaLimiteEntrega).toLocaleDateString() : "—"}
-                            </TableCell>
-                            <TableCell className="font-bold">
-                                ${order.precio.toLocaleString()}
+                                {order.fechaLimiteEntrega ? (() => {
+                                    // Evitar problemas de zona horaria al mostrar fecha
+                                    const fechaString = order.fechaLimiteEntrega
+                                    if (fechaString.includes('T')) {
+                                        const fechaParte = fechaString.split('T')[0]
+                                        const [year, month, day] = fechaParte.split('-')
+                                        return `${day}/${month}/${year}`
+                                    }
+                                    return new Date(fechaString).toLocaleDateString()
+                                })() : "—"}
                             </TableCell>
                             <TableCell>
                                 <div className="flex gap-1">
@@ -63,6 +69,16 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder, comercioHabili
                                     >
                                         <Eye className="h-4 w-4" />
                                     </Button>
+                                    {order.estadoPedido === "en_preparacion" && (
+                                    <Button
+                                    variant="secondary"
+                                    size="sm"
+                                    disabled={!comercioHabilitado}
+                                    onClick={()=> onEditOrder(order)}
+                                    >
+                                    <Pencil className="h-4 w-4" />
+                                    </Button>
+                                    ) } 
                                     {order.estadoPedido === "en_preparacion" && (
                                         <AlertDialog>
                                             <AlertDialogTrigger asChild>

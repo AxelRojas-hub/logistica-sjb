@@ -27,13 +27,15 @@ interface DatosDestinatarioProps {
     setNewOrder: (order: NewOrderForm) => void
     loading: boolean
     fieldErrors: Record<string, string>
+    isFieldDisabled?: (fieldName: string) => boolean
 }
 
 export function DatosDestinatario({ 
     newOrder, 
     setNewOrder, 
-    loading, 
-    fieldErrors 
+    loading,
+    fieldErrors,
+    isFieldDisabled = () => false
 }: DatosDestinatarioProps) {
     return (
         <section className="space-y-4">
@@ -47,7 +49,7 @@ export function DatosDestinatario({
                         placeholder="12345678"
                         value={newOrder.dniCliente || ""}
                         onChange={(e) => setNewOrder({ ...newOrder, dniCliente: Number(e.target.value) })}
-                        disabled={loading}
+                        disabled={loading || isFieldDisabled('dniCliente')}
                         className={fieldErrors.dniCliente ? "border-red-500 focus:border-red-500" : ""}
                     />
                     {fieldErrors.dniCliente && (
@@ -62,7 +64,7 @@ export function DatosDestinatario({
                         placeholder="Juan Pérez"
                         value={newOrder.nombreCliente}
                         onChange={(e) => setNewOrder({ ...newOrder, nombreCliente: e.target.value })}
-                        disabled={loading}
+                        disabled={loading || isFieldDisabled('nombreCliente')}
                         className={fieldErrors.nombreCliente ? "border-red-500 focus:border-red-500" : ""}
                     />
                     {fieldErrors.nombreCliente && (
@@ -79,7 +81,7 @@ export function DatosDestinatario({
                         placeholder="+54 9 11 1234-5678"
                         value={newOrder.telefonoCliente}
                         onChange={(e) => setNewOrder({ ...newOrder, telefonoCliente: e.target.value })}
-                        disabled={loading}
+                        disabled={loading || isFieldDisabled('telefonoCliente')}
                         className={fieldErrors.telefonoCliente ? "border-red-500 focus:border-red-500" : ""}
                     />
                     {fieldErrors.telefonoCliente && (
@@ -94,7 +96,7 @@ export function DatosDestinatario({
                         placeholder="usuario@ejemplo.com"
                         value={newOrder.emailCliente}
                         onChange={(e) => setNewOrder({ ...newOrder, emailCliente: e.target.value })}
-                        disabled={loading}
+                        disabled={loading || isFieldDisabled('emailCliente')}
                         className={fieldErrors.emailCliente ? "border-red-500 focus:border-red-500" : ""}
                     />
                     {fieldErrors.emailCliente && (
@@ -110,7 +112,7 @@ export function DatosDestinatario({
                     placeholder="Calle SJB 123"
                     value={newOrder.direccionCliente}
                     onChange={(e) => setNewOrder({ ...newOrder, direccionCliente: e.target.value })}
-                    disabled={loading}
+                    disabled={loading || isFieldDisabled('direccionCliente')}
                     className={fieldErrors.direccionCliente ? "border-red-500 focus:border-red-500" : ""}
                 />
                 {fieldErrors.direccionCliente && (
