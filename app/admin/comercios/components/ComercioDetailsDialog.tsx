@@ -20,22 +20,10 @@ interface ComercioDetailsDialogProps {
 
 const getStatusColor = (status: string) => {
     switch (status) {
-        case "En ruta":
-            return "bg-blue-100 text-blue-800"
-        case "En sucursal":
-            return "bg-green-100 text-green-800"
-        case "pendiente":
-            return "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/50 dark:text-yellow-300"
-        case "en proceso":
-            return "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
-        case "completado":
-            return "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
-        case "en_transito":
-            return "bg-blue-100 text-blue-800 dark:bg-blue-900/50 dark:text-blue-300"
-        case "entregado":
-            return "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
-        case "cancelado":
-            return "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
+        case "habilitado":
+            return "bg-green-300 text-green-800"
+        case "deshabilitado":
+            return "bg-red-300 text-red-800"
         default:
             return "bg-muted text-muted-foreground"
     }

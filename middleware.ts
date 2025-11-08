@@ -38,8 +38,8 @@ export async function middleware(request: NextRequest) {
 
     const { pathname } = request.nextUrl
 
-    // Redirigir a login si no está autenticado
-    if (!user && pathname !== '/') {
+    // Permitir acceso a rutas públicas sin autenticación
+    if (!user && !pathname.startsWith('/auth') && pathname !== '/') {
         return NextResponse.redirect(new URL('/', request.url))
     }
 
