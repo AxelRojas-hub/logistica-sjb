@@ -17,30 +17,45 @@ import {
     ArrowLeft
 } from "lucide-react"
 import Link from "next/link"
-import { Comercio, Factura } from "@/lib/types"
+
+interface ComercioMorosoFormateado {
+    id_comercio: number;
+    nombre_comercio: string;
+    nombre_responsable: string;
+    email_comercio: string;
+    cantidad_facturas_vencidas: number;
+    total_adeudado: number;
+    fecha_vencimiento_mas_antigua: string;
+}
 
 export default function AdminReportesPage() {
     const [diasMorosidad, setDiasMorosidad] = useState<string>("30")
     const [isReporteOpen, setIsReporteOpen] = useState(false)
-    const [comerciosMorosos, setComeriosMorosos] = useState<any[]>([])
+    const [comerciosMorosos, setComeriosMorosos] = useState<ComercioMorosoFormateado[]>([])
     const { toast } = useToast()
 
     const obtenerComerciosMorosos = async (dias: number) => {
         try {
-            const response = await fetch(`/api/reportes/comercios-morosos?dias=${dias}`)
+            console.log('Solicitando reporte para días:', dias);
+            const response = await fetch(`/api/reportes/comercios-morosos?dias=${dias}`);
+            
             if (!response.ok) {
-                throw new Error("Error al obtener los datos")
+                const errorData = await response.json();
+                console.error('Error detallado:', errorData);
+                throw new Error(errorData.error || "Error al obtener los datos");
             }
-            const data = await response.json()
-            return data
+            
+            const data = await response.json();
+            console.log('Datos recibidos:', data);
+            return data;
         } catch (error) {
-            console.error("Error:", error)
+            console.error("Error completo:", error);
             toast({
-                title: "Error",
-                description: "No se pudieron obtener los datos de comercios morosos",
+                title: "Error en la consulta",
+                description: error instanceof Error ? error.message : "No se pudieron obtener los datos de comercios morosos",
                 variant: "destructive",
-            })
-            return []
+            });
+            return [];
         }
     }
 

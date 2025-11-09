@@ -3,13 +3,22 @@
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
-import { Comercio, Factura } from "@/lib/types"
 
-interface ComercioMoroso extends Comercio {
-    facturas: Factura[]
-    deudaTotal: number
-    diasMorosidad: number
-    email?: string
+function calcularDiasMorosidad(fechaVencimiento: string): number {
+    const fechaVenc = new Date(fechaVencimiento);
+    const hoy = new Date();
+    const diferencia = hoy.getTime() - fechaVenc.getTime();
+    return Math.floor(diferencia / (1000 * 60 * 60 * 24));
+}
+
+interface ComercioMoroso {
+    id_comercio: number;
+    nombre_comercio: string;
+    nombre_responsable: string;
+    email_comercio: string;
+    cantidad_facturas_vencidas: number;
+    total_adeudado: number;
+    fecha_vencimiento_mas_antigua: string;
 }
 
 interface ComerciosMorososDialogProps {
@@ -49,24 +58,24 @@ export function ComerciosMorososDialog({
                     </TableHeader>
                     <TableBody>
                         {comercios.map((comercio) => (
-                            <TableRow key={comercio.idComercio}>
-                                <TableCell className="font-medium">{comercio.nombreComercio}</TableCell>
+                            <TableRow key={comercio.id_comercio}>
+                                <TableCell className="font-medium">{comercio.nombre_comercio}</TableCell>
                                 <TableCell>
                                     <div>
-                                        <p className="text-sm">{comercio.email}</p>
-                                        <p className="text-xs text-muted-foreground">{comercio.domicilioFiscal}</p>
+                                        <p className="text-sm">{comercio.email_comercio}</p>
+                                        <p className="text-sm">{comercio.nombre_responsable}</p>
                                     </div>
                                 </TableCell>
                                 <TableCell className="text-right font-medium">
-                                    ${comercio.deudaTotal.toLocaleString()}
+                                    ${comercio.total_adeudado.toLocaleString()}
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    <Badge variant={comercio.diasMorosidad > 60 ? "destructive" : "default"}>
-                                        {comercio.diasMorosidad} días
+                                    <Badge variant={calcularDiasMorosidad(comercio.fecha_vencimiento_mas_antigua) > 60 ? "destructive" : "default"}>
+                                        {calcularDiasMorosidad(comercio.fecha_vencimiento_mas_antigua)} días
                                     </Badge>
                                 </TableCell>
                                 <TableCell className="text-center">
-                                    {comercio.facturas.filter(f => f.estadoPago === "vencido").length}
+                                    {comercio.cantidad_facturas_vencidas}
                                 </TableCell>
                             </TableRow>
                         ))}
