@@ -106,10 +106,11 @@ export const config = {
         /*
          * Coincide con todas las rutas de solicitud excepto las que comienzan con:
          * - api (rutas de API)
+         * - auth (rutas de autenticación)
          * - _next/static (archivos estáticos)
          * - _next/image (archivos de optimización de imágenes)
          * - favicon.ico (archivo favicon)
          */
-        '/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+        '/((?!api|auth|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
     ],
 }
