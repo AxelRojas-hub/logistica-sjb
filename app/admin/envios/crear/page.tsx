@@ -34,7 +34,7 @@ export default async function AdminCrearEnvioPage() {
     return (
         <TooltipProvider>
             <div className="min-h-screen bg-background pt-4 flex flex-col">
-                <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8">
+                <div className="max-w-7xl w-full mx-auto px-2 sm:px-4 lg:px-8 py-8">
                     <PageHeader />
 
                     <CrearEnvioContent rutas={rutas} choferes={choferes} />

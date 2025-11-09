@@ -230,7 +230,7 @@ export default function RegisterPage() {
                         </Button>
                     </form>
                     <div className="mt-4 text-center text-sm">
-                        <span className="text-muted-foreground">¿Ya tienes cuenta? </span>
+                        <span className="text-muted-foreground">¿Ya tiene una cuenta? </span>
                         <Link href="/" className="text-blue-600 hover:underline">
                             Inicia sesión
                         </Link>

@@ -126,9 +126,9 @@ export default function LoginForm() {
                         </Button>
                     </form>
                     <div className="mt-4 text-center text-sm">
-                        <span className="text-muted-foreground">¿No tienes cuenta? </span>
+                        <span className="text-muted-foreground">Si no tiene una cuenta, </span>
                         <Link href="/auth/register" className="text-blue-600 hover:underline">
-                            Regístrate
+                            Regístrese
                         </Link>
                     </div>
                 </CardContent>
