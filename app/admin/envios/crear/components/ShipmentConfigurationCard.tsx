@@ -1,7 +1,8 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { Building, Users, Truck } from "lucide-react"
+import { Building, Users, Truck, TrendingUp, MapPin } from "lucide-react"
+import { SucursalFrecuente } from "../page"
 
 interface ShipmentConfigurationCardProps {
     selectedRoute: string
@@ -10,6 +11,7 @@ interface ShipmentConfigurationCardProps {
     onDriverChange: (value: string) => void
     rutas: { id: string; nombre: string }[]
     choferes: { id: string; nombre: string }[]
+    sucursalDestinoMasFrecuente?: SucursalFrecuente | null
 }
 
 export function ShipmentConfigurationCard({
@@ -18,7 +20,8 @@ export function ShipmentConfigurationCard({
     selectedDriver,
     onDriverChange,
     rutas,
-    choferes
+    choferes,
+    sucursalDestinoMasFrecuente
 }: ShipmentConfigurationCardProps) {
     return (
         <Card className="h-[580px]">
@@ -37,6 +40,9 @@ export function ShipmentConfigurationCard({
                                 <SelectValue placeholder="Selecciona una ruta" />
                             </SelectTrigger>
                             <SelectContent>
+                                <SelectItem value="none">
+                                    <span className="text-muted-foreground">Selecciona una ruta</span>
+                                </SelectItem>
                                 {rutas.map((route) => (
                                     <SelectItem key={route.id} value={route.id}>
                                         {route.nombre}
@@ -45,6 +51,20 @@ export function ShipmentConfigurationCard({
                             </SelectContent>
                         </Select>
                     </div>
+
+                    {sucursalDestinoMasFrecuente && (
+                        <div className="mt-4 p-3 bg-muted/50 rounded-lg border">
+                            <div className="flex items-center gap-2 text-sm font-medium text-foreground mb-2">
+                                <TrendingUp className="h-4 w-4 text-green-600" />
+                                Destino más frecuente
+                            </div>
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                                <MapPin className="h-3 w-3" />
+                                <span className="font-medium">{sucursalDestinoMasFrecuente.ciudadSucursal}</span>
+                                <span className="text-xs">({sucursalDestinoMasFrecuente.cantidadPedidos} pedidos)</span>
+                            </div>
+                        </div>
+                    )}
                 </div>
 
                 <div className="space-y-4 border-t pt-6">
@@ -64,6 +84,9 @@ export function ShipmentConfigurationCard({
                                 <SelectValue placeholder="Selecciona un chofer" />
                             </SelectTrigger>
                             <SelectContent>
+                                <SelectItem value="none">
+                                    <span className="text-muted-foreground">Selecciona un chofer</span>
+                                </SelectItem>
                                 {choferes.map((driver) => (
                                     <SelectItem key={driver.id} value={driver.id}>
                                         {driver.nombre}
@@ -76,7 +99,7 @@ export function ShipmentConfigurationCard({
                     <div className="pt-4">
                         <Button
                             className="w-full"
-                            disabled={!selectedRoute || !selectedDriver}
+                            disabled={!selectedRoute || !selectedDriver || selectedRoute === "none" || selectedDriver === "none"}
                             onClick={() => {
                                 alert(`Envío creado con ruta ${selectedRoute} y chofer ${selectedDriver}`)
                             }}

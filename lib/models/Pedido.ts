@@ -1,6 +1,11 @@
 import { Pedido } from "@/lib/types"
 import { SupabaseClient } from "@supabase/supabase-js"
 
+export interface PedidoConDetalles extends Pedido {
+    nombreComercio?: string
+    ciudadDestino?: string
+}
+
 
 function mapRowToPedido(row: Record<string, unknown>): Pedido {
     return {
@@ -14,6 +19,19 @@ function mapRowToPedido(row: Record<string, unknown>): Pedido {
         precio: row.precio as number,
         fechaEntrega: row.fecha_entrega as string | null,
         fechaLimiteEntrega: row.fecha_limite_entrega as string | null,
+    }
+}
+
+function mapRowToPedidoConDetalles(row: Record<string, unknown>): PedidoConDetalles {
+    const pedidoBase = mapRowToPedido(row)
+
+    const comercio = row.comercio as Record<string, unknown> | null
+    const sucursal = row.sucursal as Record<string, unknown> | null
+
+    return {
+        ...pedidoBase,
+        nombreComercio: comercio?.nombre_comercio as string | undefined,
+        ciudadDestino: sucursal?.ciudad_sucursal as string | undefined,
     }
 }
 
@@ -77,4 +95,44 @@ export async function createPedido(supabase: SupabaseClient, pedidoData: CreateP
     }
 
     return data ? mapRowToPedido(data) : null
+}
+
+export async function getPedidosPendientesPorSucursalAdmin(supabase: SupabaseClient, legajoAdmin: number): Promise<PedidoConDetalles[]> {
+    // sucursal del admin
+    const { data: adminData, error: adminError } = await supabase
+        .from("administrador")
+        .select("id_sucursal")
+        .eq("legajo_empleado", legajoAdmin)
+        .single()
+
+    if (adminError || !adminData) {
+        console.error("Error al obtener datos del administrador:", adminError)
+        return []
+    }
+
+    const { data, error } = await supabase
+        .from("pedido")
+        .select(`
+            *,
+            comercio!inner(
+                id_comercio,
+                id_sucursal_origen,
+                nombre_comercio
+            ),
+            sucursal(
+                id_sucursal,
+                ciudad_sucursal
+            )
+        `)
+        .eq("estado_pedido", "en_preparacion")
+        .eq("comercio.id_sucursal_origen", adminData.id_sucursal)
+        .is("id_envio", null)
+        .order("id_pedido", { ascending: false })
+
+    if (error) {
+        console.error("Error al obtener pedidos pendientes por sucursal admin:", error)
+        return []
+    }
+
+    return (data || []).map(mapRowToPedidoConDetalles)
 }

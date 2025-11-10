@@ -2,13 +2,17 @@
 
 import { useState } from "react"
 import { ShipmentConfigurationCard, IncludedOrdersCard } from "./components"
+import { PedidoConDetalles } from "@/lib/models/Pedido"
+import { SucursalFrecuente } from "./page"
 
 interface CrearEnvioContentProps {
     rutas: { id: string; nombre: string }[]
     choferes: { id: string; nombre: string }[]
+    pedidosPendientes: PedidoConDetalles[]
+    sucursalDestinoMasFrecuente: SucursalFrecuente | null
 }
 
-export function CrearEnvioContent({ rutas, choferes }: CrearEnvioContentProps) {
+export function CrearEnvioContent({ rutas, choferes, pedidosPendientes, sucursalDestinoMasFrecuente }: CrearEnvioContentProps) {
     const [selectedRoute, setSelectedRoute] = useState<string>("")
     const [selectedDriver, setSelectedDriver] = useState<string>("")
 
@@ -21,9 +25,10 @@ export function CrearEnvioContent({ rutas, choferes }: CrearEnvioContentProps) {
                 onDriverChange={setSelectedDriver}
                 rutas={rutas}
                 choferes={choferes}
+                sucursalDestinoMasFrecuente={sucursalDestinoMasFrecuente}
             />
 
-            <IncludedOrdersCard />
+            <IncludedOrdersCard pedidosPendientes={pedidosPendientes} />
         </div>
     )
 }
