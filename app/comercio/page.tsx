@@ -17,7 +17,7 @@ export default async function ComercioPage() {
                 </div>
 
                     <div className="mb-6 flex justify-end max-w-6xl w-full mx-auto px-2">
-                        <Link href="/manuales/G8_Manual de usuario - Administrador-1.pdf" target="_blank" rel="noopener noreferrer">
+                        <Link href="/manuales/G8_Manual de usuario - Comercio.pdf" target="_blank" rel="noopener noreferrer">
                             <Button variant="outline" className="text-muted-foreground hover:text-foreground border-muted hover:border-foreground transition-colors">
                                 <svg
                                     xmlns="http://www.w3.org/2000/svg"
