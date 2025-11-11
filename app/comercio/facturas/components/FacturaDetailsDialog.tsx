@@ -49,16 +49,6 @@ export function FacturaDetailsDialog({ invoice, open, onOpenChange }: FacturaDet
                             </p>
                         </div>
                     </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <h4 className="font-medium mb-1">ID Comercio</h4>
-                            <p className="text-sm">{invoice.idComercio}</p>
-                        </div>
-                        <div>
-                            <h4 className="font-medium mb-1">ID Factura</h4>
-                            <p className="text-sm">{invoice.idFactura}</p>
-                        </div>
-                    </div>
                     {invoice.nroPago && (
                         <div>
                             <h4 className="font-medium mb-1">Número de Pago</h4>

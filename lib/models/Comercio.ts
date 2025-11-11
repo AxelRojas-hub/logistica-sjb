@@ -63,10 +63,25 @@ export async function getComercioByName(nombreComercio: string): Promise<Comerci
         }
 
         // Obtener facturas
-        const { data: facturas } = await supabase
+        const { data: facturasRaw } = await supabase
             .from("factura")
             .select("*")
             .eq("id_comercio", comercio.id_comercio)
+            .order("fecha_emision", { ascending: false })
+
+        // Mapear facturas de snake_case a camelCase
+        const facturas = facturasRaw?.map(factura => ({
+            idFactura: factura.id_factura,
+            idComercio: factura.id_comercio,
+            nroFactura: factura.nro_factura,
+            fechaInicio: factura.fecha_inicio,
+            importeTotal: factura.importe_total,
+            fechaFin: factura.fecha_fin,
+            fechaEmision: factura.fecha_emision,
+            nroPago: factura.nro_pago,
+            estadoPago: factura.estado_pago,
+            fechaPago: factura.fecha_pago,
+        })) || []
 
         return {
             idComercio: comercio.id_comercio,
@@ -79,7 +94,7 @@ export async function getComercioByName(nombreComercio: string): Promise<Comerci
             email,
             nombreResponsable,
             contrato,
-            facturas: facturas || [],
+            facturas,
         }
     } catch (error) {
         console.error(`Error obteniendo comercio "${nombreComercio}":`, error)

@@ -22,10 +22,6 @@ export function FacturaPageHeader() {
                     </Button>
                 </Link>
             </div>
-
-            <div className="flex justify-between items-center">
-                <h2 className="text-2xl font-semibold text-foreground">Mis Facturas</h2>
-            </div>
         </div>
     )
 }

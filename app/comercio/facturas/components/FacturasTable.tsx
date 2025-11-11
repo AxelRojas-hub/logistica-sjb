@@ -28,29 +28,29 @@ export function FacturasTable({ invoices }: FacturasTableProps) {
                 <Table>
                     <TableHeader>
                         <TableRow>
-                            <TableHead>Nro Factura</TableHead>
-                            <TableHead>Fecha Emisión</TableHead>
-                            <TableHead>Periodo</TableHead>
-                            <TableHead>Estado Pago</TableHead>
-                            <TableHead>Importe Total</TableHead>
-                            <TableHead>Acciones</TableHead>
+                            <TableHead className="text-center">Nro Factura</TableHead>
+                            <TableHead className="text-center">Fecha Emisión</TableHead>
+                            <TableHead className="text-center">Periodo</TableHead>
+                            <TableHead className="text-center">Estado Pago</TableHead>
+                            <TableHead >Importe Total</TableHead>
+                            <TableHead className="text-center">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
                         {invoices.map((invoice) => (
                             <TableRow key={invoice.idFactura} className="hover:bg-accent/50">
-                                <TableCell className="font-medium">{invoice.nroFactura}</TableCell>
-                                <TableCell>{new Date(invoice.fechaEmision).toLocaleDateString()}</TableCell>
-                                <TableCell>
+                                <TableCell className="text-center font-medium">{invoice.nroFactura}</TableCell>
+                                <TableCell className="text-center">{new Date(invoice.fechaEmision).toLocaleDateString()}</TableCell>
+                                <TableCell className="text-center">
                                     {new Date(invoice.fechaInicio).toLocaleDateString()} - {new Date(invoice.fechaFin).toLocaleDateString()}
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="flex items-center justify-center">
                                     <FacturaStatusBadge status={invoice.estadoPago} />
                                 </TableCell>
                                 <TableCell className="font-bold text-lg">
                                     ${invoice.importeTotal.toLocaleString()}
                                 </TableCell>
-                                <TableCell>
+                                <TableCell className="flex justify-center">
                                     <FacturaActionsCell
                                         invoice={invoice}
                                         onViewInvoice={handleViewFactura}
