@@ -1,10 +1,13 @@
 "use client"
 
+import { useState } from "react"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { ComerciosMorososDialog } from "./components/ComerciosMorososDialog"
+import { useToast } from "@/components/ui/use-toast"
 import {
     Download,
     Truck,
@@ -15,7 +18,61 @@ import {
 } from "lucide-react"
 import Link from "next/link"
 
+interface ComercioMorosoFormateado {
+    id_comercio: number;
+    nombre_comercio: string;
+    nombre_responsable: string;
+    email_comercio: string;
+    cantidad_facturas_vencidas: number;
+    total_adeudado: number;
+    fecha_vencimiento_mas_antigua: string;
+}
+
 export default function AdminReportesPage() {
+    const [diasMorosidad, setDiasMorosidad] = useState<string>("30")
+    const [isReporteOpen, setIsReporteOpen] = useState(false)
+    const [comerciosMorosos, setComeriosMorosos] = useState<ComercioMorosoFormateado[]>([])
+    const { toast } = useToast()
+
+    const obtenerComerciosMorosos = async (dias: number) => {
+        try {
+            console.log('Solicitando reporte para días:', dias);
+            const response = await fetch(`/api/reportes/comercios-morosos?dias=${dias}`);
+            
+            if (!response.ok) {
+                const errorData = await response.json();
+                console.error('Error detallado:', errorData);
+                throw new Error(errorData.error || "Error al obtener los datos");
+            }
+            
+            const data = await response.json();
+            console.log('Datos recibidos:', data);
+            return data;
+        } catch (error) {
+            console.error("Error completo:", error);
+            toast({
+                title: "Error en la consulta",
+                description: error instanceof Error ? error.message : "No se pudieron obtener los datos de comercios morosos",
+                variant: "destructive",
+            });
+            return [];
+        }
+    }
+
+    const handleGenerarReporte = async () => {
+        const comercios = await obtenerComerciosMorosos(Number(diasMorosidad))
+        setComeriosMorosos(comercios)
+        setIsReporteOpen(true)
+    }
+
+    const handleExportarExcel = () => {
+        // Implementar la exportación a Excel
+        toast({
+            title: "Exportación iniciada",
+            description: "El reporte se está generando...",
+        })
+    }
+
     return (
         <TooltipProvider>
             <div className="min-h-screen bg-background pt-4 flex flex-col">
@@ -52,7 +109,7 @@ export default function AdminReportesPage() {
                                 <CardContent className="space-y-4">
                                     <div className="space-y-2">
                                         <label className="text-sm font-medium">Filtros</label>
-                                        <Select>
+                                        <Select value={diasMorosidad} onValueChange={setDiasMorosidad}>
                                             <SelectTrigger>
                                                 <SelectValue placeholder="Seleccionar período" />
                                             </SelectTrigger>
@@ -63,7 +120,7 @@ export default function AdminReportesPage() {
                                             </SelectContent>
                                         </Select>
                                     </div>
-                                    <Button className="w-full">
+                                    <Button className="w-full" onClick={handleGenerarReporte}>
                                         <Download className="h-4 w-4 mr-2" />
                                         Generar Reporte
                                     </Button>
@@ -106,6 +163,14 @@ export default function AdminReportesPage() {
                                 </CardContent>
                             </Card>
                         </div>
+
+                        <ComerciosMorososDialog
+                            isOpen={isReporteOpen}
+                            onOpenChange={setIsReporteOpen}
+                            comercios={comerciosMorosos}
+                            dias={Number(diasMorosidad)}
+                            onExportReport={handleExportarExcel}
+                        />
 
                         {/* Quick Stats */}
                         <div className="grid gap-4 md:grid-cols-4">

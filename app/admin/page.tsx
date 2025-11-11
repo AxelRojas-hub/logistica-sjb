@@ -1,5 +1,6 @@
 import { Card, CardContent } from "@/components/ui/card"
 import { TooltipProvider } from "@/components/ui/tooltip"
+import { Button } from "@/components/ui/button"
 import {
     Truck,
     Building2,
@@ -19,7 +20,30 @@ export default function AdminPage() {
                         <p className="mt-2 text-muted-foreground">Selecciona una opción para continuar</p>
                     </div>
 
-                    <div className="flex-1 flex items-center justify-center">
+                    <div className="mb-6 flex justify-end max-w-6xl w-full mx-auto px-2">
+                        <Link href="/manuales/G8_Manual de usuario - Administrador-1.pdf" target="_blank" rel="noopener noreferrer">
+                            <Button variant="outline" className="text-muted-foreground hover:text-foreground border-muted hover:border-foreground transition-colors">
+                                <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width="16"
+                                    height="16"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="currentColor"
+                                    strokeWidth="2"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                    className="h-4 w-4 mr-2"
+                                >
+                                    <path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/>
+                                    <path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/>
+                                </svg>
+                                Manual de usuario
+                            </Button>
+                        </Link>
+                    </div>
+
+                    <div className="flex-1 flex items-center justify-center">                        
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
                             <Link href="/admin/envios">
                                 <Card className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-blue-500 h-full">

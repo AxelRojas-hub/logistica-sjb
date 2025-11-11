@@ -70,35 +70,11 @@ export async function POST(req: Request) {
             );
         }
 
-        // 3. Crear contrato (estado suspendido por defecto)
-        const { data: contratoData, error: contratoError } = await supabaseAdmin
-            .from("contrato")
-            .insert({
-                tipo_cobro: "credito",
-                descuento: 0,
-                estado_contrato: "suspendido",
-                duracion_contrato_meses: 3,
-            })
-            .select("id_contrato")
-            .single();
-
-        if (contratoError || !contratoData) {
-            console.error("Contrato error:", contratoError);
-            // Limpiar
-            await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
-            await supabaseAdmin.from("cuenta_comercio").delete().eq("id_cuenta_comercio", cuentaComercioData.id_cuenta_comercio);
-            return NextResponse.json(
-                { ok: false, error: contratoError?.message || "Error al crear el contrato" },
-                { status: 400 }
-            );
-        }
-
-        // 4. Crear registro en comercio (estado deshabilitado por defecto)
+        // 3. Crear registro en comercio (estado deshabilitado por defecto)
         const { data: comercioData, error: comercioError } = await supabaseAdmin
             .from("comercio")
             .insert({
                 id_cuenta_comercio: cuentaComercioData.id_cuenta_comercio,
-                id_contrato: contratoData.id_contrato,
                 id_sucursal_origen: idSucursal,
                 nombre_comercio: nombreComercio,
                 domicilio_fiscal: domicilioFiscal,
@@ -112,7 +88,6 @@ export async function POST(req: Request) {
             // Limpiar
             await supabaseAdmin.auth.admin.deleteUser(authData.user.id);
             await supabaseAdmin.from("cuenta_comercio").delete().eq("id_cuenta_comercio", cuentaComercioData.id_cuenta_comercio);
-            await supabaseAdmin.from("contrato").delete().eq("id_contrato", contratoData.id_contrato);
             return NextResponse.json(
                 { ok: false, error: comercioError.message || "Error al crear el comercio" },
                 { status: 400 }
