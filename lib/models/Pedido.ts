@@ -136,3 +136,46 @@ export async function getPedidosPendientesPorSucursalAdmin(supabase: SupabaseCli
 
     return (data || []).map(mapRowToPedidoConDetalles)
 }
+
+export async function getPedidosPendientesConSucursalAdmin(supabase: SupabaseClient, legajoAdmin: number): Promise<{ pedidos: PedidoConDetalles[], idSucursalOrigen: number }> {
+    // sucursal del admin
+    const { data: adminData, error: adminError } = await supabase
+        .from("administrador")
+        .select("id_sucursal")
+        .eq("legajo_empleado", legajoAdmin)
+        .single()
+
+    if (adminError || !adminData) {
+        console.error("Error al obtener datos del administrador:", adminError)
+        return { pedidos: [], idSucursalOrigen: 0 }
+    }
+
+    const idSucursalOrigen = adminData.id_sucursal
+
+    const { data, error } = await supabase
+        .from("pedido")
+        .select(`
+            *,
+            comercio!inner(
+                id_comercio,
+                id_sucursal_origen,
+                nombre_comercio
+            ),
+            sucursal(
+                id_sucursal,
+                ciudad_sucursal
+            )
+        `)
+        .eq("estado_pedido", "en_preparacion")
+        .eq("comercio.id_sucursal_origen", idSucursalOrigen)
+        .is("id_envio", null)
+        .order("id_pedido", { ascending: false })
+
+    if (error) {
+        console.error("Error al obtener pedidos pendientes por sucursal admin:", error)
+        return { pedidos: [], idSucursalOrigen }
+    }
+
+    const pedidos = (data || []).map(mapRowToPedidoConDetalles)
+    return { pedidos, idSucursalOrigen }
+}

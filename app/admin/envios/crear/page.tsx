@@ -3,7 +3,7 @@ import { PageHeader } from "./components"
 import { CrearEnvioContent } from "./crearEnvioContent"
 import { createClient } from "@/lib/supabaseServer"
 import { getRutasConTramos } from "@/lib/models/Ruta"
-import { getPedidosPendientesPorSucursalAdmin, PedidoConDetalles } from "@/lib/models/Pedido"
+import { getPedidosPendientesConSucursalAdmin, PedidoConDetalles } from "@/lib/models/Pedido"
 
 export interface SucursalFrecuente {
     idSucursal: number
@@ -54,11 +54,15 @@ export default async function AdminCrearEnvioPage() {
         throw new Error("No se pudo obtener el legajo del administrador")
     }
 
+    // Obtener pedidos pendientes y sucursal de origen del administrador en una sola consulta optimizada
+    const { pedidos: pedidosPendientes, idSucursalOrigen } = await getPedidosPendientesConSucursalAdmin(supabase, legajoAdmin)
+
     const rutasConTramos = await getRutasConTramos(supabase)
     const rutas: { id: string; nombre: string }[] = rutasConTramos.map((r) => ({
         id: r.idRuta.toString(),
         nombre: r.nombreRuta,
     }))
+    console.log(rutasConTramos[0].tramos)
 
     const { data: choferesData, error: choferesError } = await supabase
         .from("empleado")
@@ -76,13 +80,9 @@ export default async function AdminCrearEnvioPage() {
         })
     )
 
-    // Obtener pedidos pendientes de la sucursal del administrador
-    const pedidosPendientes = await getPedidosPendientesPorSucursalAdmin(supabase, legajoAdmin)
-
-    // Calcular la sucursal destino más frecuente
     const sucursalDestinoMasFrecuente = calcularSucursalDestinoMasFrecuente(pedidosPendientes)
 
-
+    const rutaElegida = null;
     return (
         <TooltipProvider>
             <div className="min-h-screen bg-background pt-4 flex flex-col">
