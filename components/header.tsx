@@ -22,6 +22,7 @@ import {
     AlertDialogTitle,
 } from "@/components/ui/alert-dialog"
 import { supabaseClient } from "@/lib/supabaseClient"
+import Image from "next/image"
 
 export function Header() {
     const router = useRouter()
@@ -65,7 +66,7 @@ export function Header() {
                             onClick={handleHomeClick}
                             className="flex items-center gap-2 hover:bg-accent"
                         >
-                            <Home className="h-5 w-5" />
+                            <Image src="/logo.svg" alt="Logistica SJB" width={40} height={40} />
                             <h1 className="text-xl font-bold text-foreground">Logística SJB</h1>
                         </Button>
                     </div>
