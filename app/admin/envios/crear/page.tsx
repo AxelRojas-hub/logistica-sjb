@@ -2,8 +2,9 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { PageHeader } from "./components"
 import { CrearEnvioContent } from "./crearEnvioContent"
 import { createClient } from "@/lib/supabaseServer"
-import { getRutasConTramos } from "@/lib/models/Ruta"
+import { getRutasConTramos, rutaContieneSucursales } from "@/lib/models/Ruta"
 import { getPedidosPendientesConSucursalAdmin, PedidoConDetalles } from "@/lib/models/Pedido"
+import { RutaConTramos } from "@/lib/types"
 
 export interface SucursalFrecuente {
     idSucursal: number
@@ -58,16 +59,16 @@ export default async function AdminCrearEnvioPage() {
     const { pedidos: pedidosPendientes, idSucursalOrigen } = await getPedidosPendientesConSucursalAdmin(supabase, legajoAdmin)
 
     const rutasConTramos = await getRutasConTramos(supabase)
-    const rutas: { id: string; nombre: string }[] = rutasConTramos.map((r) => ({
-        id: r.idRuta.toString(),
-        nombre: r.nombreRuta,
-    }))
-    console.log(rutasConTramos[0].tramos)
 
     const { data: choferesData, error: choferesError } = await supabase
         .from("empleado")
-        .select("*")
+        .select(`
+            legajo_empleado,
+            nombre_empleado,
+            chofer!inner(estado_chofer)
+        `)
         .eq("rol", "chofer")
+        .eq("chofer.estado_chofer", "libre")
 
     if (choferesError) {
         console.error("Error al obtener choferes:", choferesError)
@@ -82,7 +83,13 @@ export default async function AdminCrearEnvioPage() {
 
     const sucursalDestinoMasFrecuente = calcularSucursalDestinoMasFrecuente(pedidosPendientes)
 
-    const rutaElegida = null;
+    // Seleccionar la ruta que contenga tanto la sucursal de origen como la de destino más frecuente
+    let rutaElegida: RutaConTramos | undefined = undefined
+    if (sucursalDestinoMasFrecuente && idSucursalOrigen) {
+        rutaElegida = rutasConTramos.find(ruta =>
+            rutaContieneSucursales(ruta, idSucursalOrigen, sucursalDestinoMasFrecuente.idSucursal)
+        )
+    }
     return (
         <TooltipProvider>
             <div className="min-h-screen bg-background pt-4 flex flex-col">
@@ -90,10 +97,11 @@ export default async function AdminCrearEnvioPage() {
                     <PageHeader />
 
                     <CrearEnvioContent
-                        rutas={rutas}
                         choferes={choferes}
                         pedidosPendientes={pedidosPendientes}
                         sucursalDestinoMasFrecuente={sucursalDestinoMasFrecuente}
+                        rutaElegida={rutaElegida || null}
+                        idSucursalOrigen={idSucursalOrigen}
                     />
                 </div>
             </div>

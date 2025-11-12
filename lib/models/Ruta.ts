@@ -196,50 +196,20 @@ export async function getRutaConTramo(supabase: SupabaseClient, idRuta: number):
 }
 
 /**
- * Calcula la distancia total en kilómetros entre dos sucursales
- * Busca en todas las rutas y suma la distancia de los tramos desde origen hasta destino
- * @param supabase Cliente de Supabase
+ * Verifica si una ruta contiene ambas sucursales (origen y destino)
+ * @param ruta La ruta con tramos a verificar
  * @param idSucursalOrigen ID de la sucursal de origen
  * @param idSucursalDestino ID de la sucursal de destino
- * @returns Distancia en kilómetros, o 0 si no hay ruta
+ * @returns true si la ruta contiene ambas sucursales, false en caso contrario
  */
-export async function calcularDistanciaEntreSucursales(
-    supabase: SupabaseClient,
-    idSucursalOrigen: number,
-    idSucursalDestino: number
-): Promise<number> {
-    
-    //TODO: Implementar lógica para envío locales, ¿debería ser solo el precio base o un precio especial?
-    // Si origen y destino son iguales, distancia es 0
-    if (idSucursalOrigen === idSucursalDestino) {
-        return 0
-    }
+export function rutaContieneSucursales(ruta: RutaConTramos, idSucursalOrigen: number, idSucursalDestino: number): boolean {
+    const sucursalesEnRuta = new Set<number>()
 
-    const rutasConTramos = await getRutasConTramos(supabase)
+    // Agregar todas las sucursales (origen y destino) de todos los tramos
+    ruta.tramos.forEach(tramo => {
+        sucursalesEnRuta.add(tramo.idSucursalOrigen)
+        sucursalesEnRuta.add(tramo.idSucursalDestino)
+    })
 
-    for (const ruta of rutasConTramos) {
-        const tramosOrdenados = construirCaminoRuta(ruta.tramos)
-
-        let posicionOrigen = -1
-        for (let i = 0; i < tramosOrdenados.length; i++) {
-            if (tramosOrdenados[i].idSucursalOrigen === idSucursalOrigen) {
-                posicionOrigen = i
-                break
-            }
-        }
-
-        if (posicionOrigen !== -1) {
-            let distanciaTotal = 0
-            for (let i = posicionOrigen; i < tramosOrdenados.length; i++) {
-                distanciaTotal += tramosOrdenados[i].distanciaKm
-                
-                if (tramosOrdenados[i].idSucursalDestino === idSucursalDestino) {
-                    return distanciaTotal
-                }
-            }
-        }
-    }
-
-    // Si no se encuentra ruta entre sucursales
-    return 0
+    return sucursalesEnRuta.has(idSucursalOrigen) && sucursalesEnRuta.has(idSucursalDestino)
 }

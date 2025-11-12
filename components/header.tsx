@@ -11,13 +11,25 @@ import {
     DropdownMenuItem,
     DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 import { supabaseClient } from "@/lib/supabaseClient"
+import Image from "next/image"
 
 export function Header() {
     const router = useRouter()
     const pathname = usePathname()
     const { theme, setTheme } = useTheme()
     const [mounted, setMounted] = useState(false)
+    const [showLogoutDialog, setShowLogoutDialog] = useState(false)
 
     useEffect(() => {
         setMounted(true)
@@ -27,10 +39,15 @@ export function Header() {
         router.push("/")
     }
 
-    const handleLogout = async () => {
+    const handleLogoutClick = () => {
+        setShowLogoutDialog(true)
+    }
+
+    const handleConfirmLogout = async () => {
         await supabaseClient.auth.signOut()
         router.push("/")
         router.refresh()
+        setShowLogoutDialog(false)
     }
 
     // No mostrar header en la página principal
@@ -49,7 +66,7 @@ export function Header() {
                             onClick={handleHomeClick}
                             className="flex items-center gap-2 hover:bg-accent"
                         >
-                            <Home className="h-5 w-5" />
+                            <Image src="/logo.svg" alt="Logistica SJB" width={40} height={40} />
                             <h1 className="text-xl font-bold text-foreground">Logística SJB</h1>
                         </Button>
                     </div>
@@ -60,7 +77,7 @@ export function Header() {
                         <Button
                             variant="outline"
                             size="sm"
-                            onClick={handleLogout}
+                            onClick={handleLogoutClick}
                             className="flex items-center gap-2"
                             title="Cerrar sesión"
                         >
@@ -101,6 +118,24 @@ export function Header() {
                     </div>
                 </div>
             </div>
+
+            {/* Modal de confirmación de logout */}
+            <AlertDialog open={showLogoutDialog} onOpenChange={setShowLogoutDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Cerrar sesión</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ¿Estás seguro que querés cerrar sesión?
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleConfirmLogout}>
+                            Cerrar sesión
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </header>
     )
 }

@@ -4,31 +4,30 @@ import { useState } from "react"
 import { ShipmentConfigurationCard, IncludedOrdersCard } from "./components"
 import { PedidoConDetalles } from "@/lib/models/Pedido"
 import { SucursalFrecuente } from "./page"
+import { RutaConTramos } from "@/lib/types"
 
 interface CrearEnvioContentProps {
-    rutas: { id: string; nombre: string }[]
     choferes: { id: string; nombre: string }[]
     pedidosPendientes: PedidoConDetalles[]
     sucursalDestinoMasFrecuente: SucursalFrecuente | null
+    rutaElegida: RutaConTramos | null
+    idSucursalOrigen: number
 }
 
-export function CrearEnvioContent({ rutas, choferes, pedidosPendientes, sucursalDestinoMasFrecuente }: CrearEnvioContentProps) {
-    const [selectedRoute, setSelectedRoute] = useState<string>("")
+export function CrearEnvioContent({ choferes, pedidosPendientes, sucursalDestinoMasFrecuente, rutaElegida, idSucursalOrigen }: CrearEnvioContentProps) {
     const [selectedDriver, setSelectedDriver] = useState<string>("")
 
     return (
         <div className="grid gap-6 lg:grid-cols-2">
             <ShipmentConfigurationCard
-                selectedRoute={selectedRoute}
-                onRouteChange={setSelectedRoute}
                 selectedDriver={selectedDriver}
                 onDriverChange={setSelectedDriver}
-                rutas={rutas}
                 choferes={choferes}
                 sucursalDestinoMasFrecuente={sucursalDestinoMasFrecuente}
-            />
-
-            <IncludedOrdersCard pedidosPendientes={pedidosPendientes} />
+                rutaElegida={rutaElegida}
+                pedidosPendientes={pedidosPendientes}
+                idSucursalOrigen={idSucursalOrigen}
+            />            <IncludedOrdersCard pedidosPendientes={pedidosPendientes} />
         </div>
     )
 }

@@ -5,6 +5,16 @@ import { Badge } from "@/components/ui/badge"
 import { RouteStatusCard } from "./components"
 import type { RutaConTramos, Tramo } from "@/lib/types"
 import { updateEnvioSucursalActual, finalizarEnvio } from "./actions"
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+} from "@/components/ui/alert-dialog"
 
 interface TramoConEstado extends Tramo {
     estado: "completado" | "actual" | "pendiente"
@@ -49,6 +59,11 @@ export function CheckinContent({ initialRoute }: CheckinContentProps) {
     const [pendingSucursal, setPendingSucursal] = useState<number | null>(null)
     const [isPending, startTransition] = useTransition()
 
+    // Estados para los modales de confirmación
+    const [showCheckinDialog, setShowCheckinDialog] = useState(false)
+    const [showFinishDialog, setShowFinishDialog] = useState(false)
+    const [pendingTramoIndex, setPendingTramoIndex] = useState<number | null>(null)
+
     // actualiza la sucursal cuando cambia pendingSucursal
     useEffect(() => {
         if (pendingSucursal === null) return
@@ -63,11 +78,17 @@ export function CheckinContent({ initialRoute }: CheckinContentProps) {
     }, [pendingSucursal])
 
     const handleCheckIn = (tramoIndex: number) => {
+        setPendingTramoIndex(tramoIndex)
+        setShowCheckinDialog(true)
+    }
+
+    const handleConfirmCheckIn = () => {
+        if (pendingTramoIndex === null) return
 
         setCurrentRoute(prev => {
             if (!prev) return null
 
-            const tramoActual = prev.tramos[tramoIndex]
+            const tramoActual = prev.tramos[pendingTramoIndex]
             const idSucursalActual = tramoActual.idSucursalOrigen
 
             setPendingSucursal(idSucursalActual)
@@ -75,23 +96,30 @@ export function CheckinContent({ initialRoute }: CheckinContentProps) {
             return {
                 ...prev,
                 tramos: prev.tramos.map((tramo, index) => {
-                    if (index === tramoIndex) {
+                    if (index === pendingTramoIndex) {
                         // El tramo clickeado ahora es el actual
                         return { ...tramo, estado: "actual" as const }
                     }
-                    if (index < tramoIndex) {
+                    if (index < pendingTramoIndex) {
                         // Todos los tramos anteriores son completados
                         return { ...tramo, estado: "completado" as const }
                     }
                     // Los tramos posteriores son pendientes
                     return { ...tramo, estado: "pendiente" as const }
                 }),
-                tramoActual: tramoIndex
+                tramoActual: pendingTramoIndex
             }
         })
+
+        setShowCheckinDialog(false)
+        setPendingTramoIndex(null)
     }
 
     const handleFinishRoute = () => {
+        setShowFinishDialog(true)
+    }
+
+    const handleConfirmFinishRoute = () => {
         setCurrentRoute(null)
 
         startTransition(async () => {
@@ -101,6 +129,8 @@ export function CheckinContent({ initialRoute }: CheckinContentProps) {
                 console.error("Error al finalizar envío:", error)
             }
         })
+
+        setShowFinishDialog(false)
     }
 
     const getNextTramo = (): Tramo | null => {
@@ -136,6 +166,46 @@ export function CheckinContent({ initialRoute }: CheckinContentProps) {
                     />
                 </div>
             )}
+
+            {/* Modal de confirmación para check-in */}
+            <AlertDialog open={showCheckinDialog} onOpenChange={setShowCheckinDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Confirmar llegada</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            {pendingTramoIndex !== null && currentRoute &&
+                                `¿Querés confirmar que llegaste a ${currentRoute.tramos[pendingTramoIndex].nombreSucursalOrigen}? Esto no se puede deshacer.`
+                            }
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={() => setPendingTramoIndex(null)}>
+                            Cancelar
+                        </AlertDialogCancel>
+                        <AlertDialogAction onClick={handleConfirmCheckIn}>
+                            Confirmar llegada
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
+
+            {/* Modal de confirmación para finalizar ruta */}
+            <AlertDialog open={showFinishDialog} onOpenChange={setShowFinishDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>Finalizar recorrido</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            ¿Querés finalizar el recorrido de la ruta? Esto no se puede deshacer.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                        <AlertDialogAction onClick={handleConfirmFinishRoute}>
+                            Finalizar recorrido
+                        </AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </>
     )
 }

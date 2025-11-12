@@ -22,8 +22,8 @@ export default async function ChoferRutaPage() {
     const user = await supabase.auth.getUser();
     const legajo = user.data!.user!.user_metadata.legajo;
     const envioAsignado = await getEnvioAsignadoByLegajo(legajo, supabase);
-    const idRuta = envioAsignado.id_ruta;
-    const rutaData = await getRutaConTramo(supabase, idRuta)
+    const idRuta = envioAsignado?.id_ruta;
+    const rutaData = envioAsignado ? await getRutaConTramo(supabase, idRuta) : null;
 
     let currentRoute: RutaConEstado | null = null
 
