@@ -8,11 +8,29 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Card, CardContent } from "@/components/ui/card"
 import { Truck, MapPin, Search, PackageX } from "lucide-react"
 
+interface Envio {
+    id_envio: number
+    estado_envio: string
+    legajo_empleado: number
+    id_ruta: number
+    id_sucursal_actual: number
+}
+
+interface Ruta {
+    idRuta: number
+    nombreRuta: string
+}
+
+interface Sucursal {
+    idSucursal: number
+    ciudadSucursal: string
+}
+
 interface EnviosTableProps {
-    envios: any[]
-    empleadoMap: Map<any, string>
-    rutaMap: Map<any, any>
-    sucursalMap: Map<any, any>
+    envios: Envio[]
+    empleadoMap: Map<number, string>
+    rutaMap: Map<number, Ruta>
+    sucursalMap: Map<number, Sucursal>
 }
 
 export function EnviosTable({ envios, empleadoMap, rutaMap, sucursalMap }: EnviosTableProps) {
