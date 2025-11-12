@@ -1,5 +1,3 @@
-"use client"
-
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
@@ -7,18 +5,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { TooltipProvider } from "@/components/ui/tooltip"
 import {
     Download,
-    Truck,
-    Building2,
-    AlertTriangle,
-    Calendar,
     ArrowLeft
 } from "lucide-react"
 import Link from "next/link"
+import { getQuickStats } from "@/lib/models/Stats"
+import { QuickStats } from "./components"
 
-export default function AdminReportesPage() {
+export default async function AdminReportesPage() {
+    const stats = await getQuickStats();
+
     return (
         <TooltipProvider>
-            <div className="min-h-screen bg-background pt-4 flex flex-col">
+            <div className="min-h-[85dvh] bg-background pt-4 flex flex-col">
                 <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8">
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-foreground">Reportes y Análisis</h1>
@@ -39,10 +37,6 @@ export default function AdminReportesPage() {
                     </div>
 
                     <div className="space-y-6">
-                        <div className="flex justify-between items-center">
-                            <h2 className="text-2xl font-semibold text-foreground">Generador de Reportes</h2>
-                        </div>
-
                         <div className="grid gap-6 md:grid-cols-2">
                             <Card>
                                 <CardHeader>
@@ -108,63 +102,7 @@ export default function AdminReportesPage() {
                         </div>
 
                         {/* Quick Stats */}
-                        <div className="grid gap-4 md:grid-cols-4">
-                            <Card>
-                                <CardContent className="p-6">
-                                    <div className="flex items-center">
-                                        <div className="p-2 bg-blue-100 rounded-lg">
-                                            <Truck className="h-6 w-6 text-blue-600" />
-                                        </div>
-                                        <div className="ml-4">
-                                            <p className="text-sm font-medium text-gray-600">Envíos Activos</p>
-                                            <p className="text-2xl font-bold text-foreground">24</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardContent className="p-6">
-                                    <div className="flex items-center">
-                                        <div className="p-2 bg-green-100 rounded-lg">
-                                            <Building2 className="h-6 w-6 text-green-600" />
-                                        </div>
-                                        <div className="ml-4">
-                                            <p className="text-sm font-medium text-gray-600">Comercios Activos</p>
-                                            <p className="text-2xl font-bold text-foreground">156</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardContent className="p-6">
-                                    <div className="flex items-center">
-                                        <div className="p-2 bg-red-100 rounded-lg">
-                                            <AlertTriangle className="h-6 w-6 text-red-600" />
-                                        </div>
-                                        <div className="ml-4">
-                                            <p className="text-sm font-medium text-gray-600">Comercios Morosos</p>
-                                            <p className="text-2xl font-bold text-foreground">8</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-
-                            <Card>
-                                <CardContent className="p-6">
-                                    <div className="flex items-center">
-                                        <div className="p-2 bg-yellow-100 rounded-lg">
-                                            <Calendar className="h-6 w-6 text-yellow-600" />
-                                        </div>
-                                        <div className="ml-4">
-                                            <p className="text-sm font-medium text-gray-600">Pedidos Hoy</p>
-                                            <p className="text-2xl font-bold text-foreground">89</p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        </div>
+                        <QuickStats stats={stats} />
                     </div>
                 </div>
             </div>
