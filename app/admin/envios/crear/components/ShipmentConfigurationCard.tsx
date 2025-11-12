@@ -8,6 +8,8 @@ import { RutaConTramos } from "@/lib/types"
 import { construirCaminoRuta } from "@/lib/models/Ruta"
 import { PedidoConDetalles } from "@/lib/models/Pedido"
 import { useState } from "react"
+import { useRouter } from "next/navigation"
+import { toast } from "sonner"
 
 interface ShipmentConfigurationCardProps {
     selectedDriver: string
@@ -29,6 +31,7 @@ export function ShipmentConfigurationCard({
     idSucursalOrigen
 }: ShipmentConfigurationCardProps) {
     const [isCreating, setIsCreating] = useState(false)
+    const router = useRouter()
     const tramosOrdenados = rutaElegida ? construirCaminoRuta(rutaElegida.tramos) : []
 
     // Filtrar pedidos cuyo destino coincida con los tramos de la ruta seleccionada
@@ -67,18 +70,14 @@ export function ShipmentConfigurationCard({
             const result = await response.json()
 
             if (response.ok) {
-                console.log("Envío creado exitosamente:", result)
-                alert(`¡Envío creado exitosamente! ID: ${result.idEnvio}, Pedidos actualizados: ${result.pedidosActualizados}`)
-
-                // Aquí podrías redirigir o actualizar la interfaz
-                // Por ejemplo: router.push("/admin/envios")
+                toast.success(`¡Envío creado exitosamente!`)
+                // Refrescar la página para actualizar los datos usando Next.js router
+                router.refresh()
             } else {
-                console.error("Error al crear envío:", result)
-                alert(`Error al crear envío: ${result.error}`)
+                toast.error(`Error al crear envío: ${result.error}`)
             }
         } catch (error) {
-            console.error("Error de red:", error)
-            alert("Error de conexión. Por favor, intenta nuevamente.")
+            toast.error("Error de conexión. Por favor, intenta nuevamente.")
         } finally {
             setIsCreating(false)
         }
@@ -105,7 +104,7 @@ export function ShipmentConfigurationCard({
                                         {rutaElegida.nombreRuta}
                                     </div>
                                     <p className="text-xs text-green-700 dark:text-green-300">
-                                        Ruta seleccionada automáticamente
+                                        Incluye {pedidosIncluidos.length} pedidos en total.
                                     </p>
                                 </div>
 
