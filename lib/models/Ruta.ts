@@ -194,3 +194,22 @@ export async function getRutaConTramo(supabase: SupabaseClient, idRuta: number):
         tramos: tramosOrdenados,
     }
 }
+
+/**
+ * Verifica si una ruta contiene ambas sucursales (origen y destino)
+ * @param ruta La ruta con tramos a verificar
+ * @param idSucursalOrigen ID de la sucursal de origen
+ * @param idSucursalDestino ID de la sucursal de destino
+ * @returns true si la ruta contiene ambas sucursales, false en caso contrario
+ */
+export function rutaContieneSucursales(ruta: RutaConTramos, idSucursalOrigen: number, idSucursalDestino: number): boolean {
+    const sucursalesEnRuta = new Set<number>()
+
+    // Agregar todas las sucursales (origen y destino) de todos los tramos
+    ruta.tramos.forEach(tramo => {
+        sucursalesEnRuta.add(tramo.idSucursalOrigen)
+        sucursalesEnRuta.add(tramo.idSucursalDestino)
+    })
+
+    return sucursalesEnRuta.has(idSucursalOrigen) && sucursalesEnRuta.has(idSucursalDestino)
+}
