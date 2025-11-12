@@ -8,9 +8,10 @@ interface OrdersTableProps {
     orders: Pedido[]
     onUpdateStatus: (orderId: number, newStatus: EstadoPedido) => void
     onSelectOrder: (order: Pedido) => void
+    idSucursalAdmin: number | null
 }
 
-export default function OrdersTable({ orders, onUpdateStatus, onSelectOrder }: OrdersTableProps) {
+export default function OrdersTable({ orders, onUpdateStatus, onSelectOrder, idSucursalAdmin }: OrdersTableProps) {
     return (
         <Card className="overflow-hidden">
             <Table>
@@ -39,6 +40,7 @@ export default function OrdersTable({ orders, onUpdateStatus, onSelectOrder }: O
                                     order={order}
                                     onUpdateStatus={onUpdateStatus}
                                     onSelectOrder={onSelectOrder}
+                                    idSucursalAdmin={idSucursalAdmin}
                                 />
                             </TableCell>
                         </TableRow>

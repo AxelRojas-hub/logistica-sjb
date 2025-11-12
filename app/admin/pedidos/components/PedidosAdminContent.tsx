@@ -10,19 +10,31 @@ import { ActionGlossary, OrdersTable } from "."
 
 interface PedidosAdminContentProps {
     pedidos: Pedido[]
+    idSucursalAdmin: number | null
 }
 
-export function PedidosAdminContent({ pedidos: initialPedidos }: PedidosAdminContentProps) {
+export function PedidosAdminContent({ pedidos: initialPedidos, idSucursalAdmin }: PedidosAdminContentProps) {
     const [orders, setOrders] = useState<Pedido[]>(initialPedidos)
 
-    const handleUpdateOrderStatus = (orderId: number, newStatus: EstadoPedido) => {
-        setOrders(orders.map(order =>
-            order.idPedido === orderId ? { ...order, estadoPedido: newStatus } : order
-        ))
+    const handleUpdateOrderStatus = async (orderId: number, newStatus: EstadoPedido) => {
+        const response = await fetch("/api/pedidos/marcar-entregado", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ idPedido: orderId })
+        })
+
+        const result = await response.json()
+        
+        if (result.success) {
+            setOrders(orders.map(order =>
+                order.idPedido === orderId ? { ...order, estadoPedido: newStatus } : order
+            ))
+        } else {
+            alert(result.message) //TODO: No debería ser un alert!!!!
+        }
     }
 
     const handleSelectOrder = (order: Pedido) => {
-        // TODO: Implementar selección de pedido
         console.log("Selected order:", order)
     }
 
@@ -45,13 +57,13 @@ export function PedidosAdminContent({ pedidos: initialPedidos }: PedidosAdminCon
                         <h1 className="text-3xl font-bold text-foreground">Gestión de Pedidos</h1>
                         <p className="mt-2 text-muted-foreground">Administra y controla todos los pedidos de tu sucursal</p>
                     </div>
-
                     <div className="space-y-6">
                         <ActionGlossary />
                         <OrdersTable
                             orders={orders}
                             onUpdateStatus={handleUpdateOrderStatus}
                             onSelectOrder={handleSelectOrder}
+                            idSucursalAdmin={idSucursalAdmin}
                         />
                     </div>
                 </div>

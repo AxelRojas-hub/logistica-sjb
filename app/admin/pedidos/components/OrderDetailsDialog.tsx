@@ -1,4 +1,3 @@
-import { Button } from "@/components/ui/button"
 import {
     Dialog,
     DialogContent,
@@ -6,17 +5,18 @@ import {
     DialogTitle,
     DialogTrigger,
 } from "@/components/ui/dialog"
-import { CheckCircle, X } from "lucide-react"
-import type { Pedido, EstadoPedido } from "@/lib/types"
+import type { Pedido } from "@/lib/types"
+import type { PedidoConDetalles } from "@/lib/models/Pedido"
 import OrderStatusBadge from "./OrderStatusBadge"
 
 interface OrderDetailsDialogProps {
     order: Pedido
-    onUpdateStatus: (orderId: number, newStatus: EstadoPedido) => void
     children: React.ReactNode
 }
 
-export default function OrderDetailsDialog({ order, onUpdateStatus, children }: OrderDetailsDialogProps) {
+export default function OrderDetailsDialog({ order, children }: OrderDetailsDialogProps) {
+    const pedidoConDetalles = order as PedidoConDetalles
+    const direccionSucursal = pedidoConDetalles.direccionSucursalDestino || `ID Sucursal: ${order.idSucursalDestino}`
     return (
         <Dialog>
             <DialogTrigger asChild>
@@ -48,7 +48,7 @@ export default function OrderDetailsDialog({ order, onUpdateStatus, children }: 
                         </div>
                         <div>
                             <h4 className="font-medium mb-1">Sucursal Destino</h4>
-                            <p className="text-sm">ID: {order.idSucursalDestino}</p>
+                            <p className="text-sm">{direccionSucursal}</p>
                         </div>
                     </div>
                     <div className="grid grid-cols-2 gap-4">
