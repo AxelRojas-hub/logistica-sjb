@@ -451,11 +451,11 @@ export function CreateOrderDialog({
                                             <div className="flex items-center gap-2">
                                                 {descuentoPorcentaje > 0 && (
                                                     <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
-                                                        ${precioSinDescuento?.toFixed(2)}
+                                                        ${precioSinDescuento?.toLocaleString()}
                                                     </span>
                                                 )}
                                                 <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                                                    ${precioCalculado.toFixed(2)}
+                                                    ${precioCalculado.toLocaleString()}
                                                 </span>
                                             </div>
                                         ) : (
@@ -470,7 +470,7 @@ export function CreateOrderDialog({
                                         {descuentoPorcentaje > 0 && (
                                             <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded dark:bg-green-950/30 dark:border-green-800">
                                                 <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                                                    ¡Descuento del {descuentoPorcentaje}% aplicado! Ahorrás ${(precioSinDescuento! - precioCalculado).toFixed(2)} en transporte
+                                                    ¡Descuento del {descuentoPorcentaje}% aplicado! Ahorrás ${(precioSinDescuento! - precioCalculado).toLocaleString()} en transporte
                                                 </p>
                                             </div>
                                         )}

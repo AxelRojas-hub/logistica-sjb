@@ -169,6 +169,7 @@ export async function POST(request: NextRequest) {
             message: "Pedido creado exitosamente",
             data: {
                 pedidoId: idPedidoCreado,
+                precio: calculoPrecio.precioFinal,
                 cliente: clienteData,
                 pedido: pedidoData,
                 servicios: serviciosData

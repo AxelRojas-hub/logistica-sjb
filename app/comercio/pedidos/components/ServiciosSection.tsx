@@ -86,7 +86,7 @@ export function ServiciosSection({
                                     </Label>
                                 </div>
                                 <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
-                                    ${servicioTransporte.costo_servicio.toFixed(2)} (base)
+                                    ${servicioTransporte.costo_servicio.toLocaleString()} (base)
                                 </span>
                             </div>
                         </RadioGroup>
@@ -120,7 +120,7 @@ export function ServiciosSection({
                                     </Label>
                                 </div>
                                 <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                                    +${servicio.costo_servicio.toFixed(2)}
+                                    +${servicio.costo_servicio.toLocaleString()}
                                 </span>
                             </div>
                         ))}

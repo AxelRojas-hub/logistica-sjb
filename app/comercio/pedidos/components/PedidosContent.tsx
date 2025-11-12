@@ -143,7 +143,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                 idSucursalDestino: orderData.idSucursalDestino,
                 dniCliente: orderData.dniCliente,
                 estadoPedido: "en_preparacion" as EstadoPedido,
-                precio: 0,
+                precio: result.data.precio || 0,
                 fechaEntrega: null,
                 fechaLimiteEntrega: `${orderData.fechaLimiteEntrega}T00:00:00+00:00`,
             }
