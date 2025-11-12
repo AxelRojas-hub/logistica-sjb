@@ -166,7 +166,7 @@ export function CreateOrderDialog({
     const fetchSucursales = useCallback(async () => {
         setLoadingSucursales(true)
         try {
-            const response = await fetch('/api/sucursales')
+            const response = await fetch('/api/sucursales/alcanzables')
             
             if (response.ok) {
                 const data = await response.json()
@@ -179,7 +179,7 @@ export function CreateOrderDialog({
         } finally {
             setLoadingSucursales(false)
         }
-    }, [])
+    }, [modoEdicion])
 
     useEffect(() => {
         fetchServicios()

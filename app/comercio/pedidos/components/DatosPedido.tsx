@@ -104,7 +104,7 @@ export function DatosPedido({
                         type="text"
                         value={(() => {
                             const sucursal = sucursales.find(s => s.ciudadSucursal === newOrder.ciudadDestino)
-                            return sucursal ? `${sucursal.ciudadSucursal} - ${sucursal.direccionSucursal}` : ""
+                            return sucursal ? `${sucursal.direccionSucursal}` : ""
                         })()}
                         disabled={true}
                         className="bg-gray-50"
