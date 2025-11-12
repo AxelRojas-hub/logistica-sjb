@@ -85,6 +85,9 @@ export function ServiciosSection({
                                         {servicioTransporte.nombre_servicio}
                                     </Label>
                                 </div>
+                                <span className="text-sm font-semibold text-blue-600 dark:text-blue-400">
+                                    ${servicioTransporte.costo_servicio.toFixed(2)} (base)
+                                </span>
                             </div>
                         </RadioGroup>
                     </div>
@@ -116,6 +119,9 @@ export function ServiciosSection({
                                         {servicio.nombre_servicio}
                                     </Label>
                                 </div>
+                                <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                                    +${servicio.costo_servicio.toFixed(2)}
+                                </span>
                             </div>
                         ))}
                     </div>
