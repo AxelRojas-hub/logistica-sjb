@@ -1,6 +1,5 @@
 import { Pedido } from "@/lib/types"
 import { SupabaseClient } from "@supabase/supabase-js"
-import { calcularDistanciaEntreSucursales } from "./Ruta"
 
 export interface PedidoConDetalles extends Pedido {
     nombreComercio?: string

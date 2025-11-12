@@ -181,7 +181,7 @@ export function CreateOrderDialog({
         } finally {
             setLoadingSucursales(false)
         }
-    }, [modoEdicion])
+    }, [])
 
     useEffect(() => {
         fetchServicios()
