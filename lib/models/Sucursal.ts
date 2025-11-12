@@ -29,14 +29,16 @@ export async function getSucursales(supabase: SupabaseClient): Promise<Sucursal[
 
 /**
  * Obtiene las sucursales alcanzables desde una sucursal de origen
- * Incluye la sucursal de origen y las sucursales que están DESPUÉS en las rutas
+ * Considera el orden de los tramos en las rutas para devolver solo
+ * las sucursales que están DESPUÉS de la sucursal de origen
  */
 export async function getSucursalesAlcanzables(supabase: SupabaseClient, idSucursalOrigen: number): Promise<Sucursal[]> {
     const rutasConTramos = await getRutasConTramos(supabase)
-    
-    const sucursalesAlcanzablesSet = new Set<number>([idSucursalOrigen])
-    
+
+    const sucursalesAlcanzablesSet = new Set<number>()
+
     for (const ruta of rutasConTramos) {
+
         const tramosOrdenados = construirCaminoRuta(ruta.tramos)
         
         let posicionOrigen = -1
@@ -52,6 +54,10 @@ export async function getSucursalesAlcanzables(supabase: SupabaseClient, idSucur
                 sucursalesAlcanzablesSet.add(tramosOrdenados[i].idSucursalDestino)
             }
         }
+    }
+    
+    if (sucursalesAlcanzablesSet.size === 0) {
+        return []
     }
     
     const { data: sucursalesData, error: sucursalesError } = await supabase
