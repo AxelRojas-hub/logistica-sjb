@@ -19,7 +19,7 @@ export default function OrderActionsCell({ order, onUpdateStatus, onSelectOrder 
                 </Button>
             </OrderDetailsDialog>
 
-            {order.estadoPedido === "en_preparacion" && (
+            {/* {order.estadoPedido === "en_preparacion" && (
                 <Tooltip>
                     <TooltipTrigger asChild>
                         <Button
@@ -34,7 +34,7 @@ export default function OrderActionsCell({ order, onUpdateStatus, onSelectOrder 
                         <p>Marcar en tránsito</p>
                     </TooltipContent>
                 </Tooltip>
-            )}
+            )} */}
 
             {order.estadoPedido === "en_camino" && (
                 <Tooltip>
@@ -50,24 +50,6 @@ export default function OrderActionsCell({ order, onUpdateStatus, onSelectOrder 
                     </TooltipTrigger>
                     <TooltipContent>
                         <p>Marcar como entregado</p>
-                    </TooltipContent>
-                </Tooltip>
-            )}
-
-            {order.estadoPedido === "en_preparacion" && (
-                <Tooltip>
-                    <TooltipTrigger asChild>
-                        <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onUpdateStatus(order.idPedido, "en_sucursal")}
-                            className="border-blue-500 hover:bg-blue-50"
-                        >
-                            <Building className="h-4 w-4 text-blue-600" />
-                        </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                        <p>Marcar en sucursal</p>
                     </TooltipContent>
                 </Tooltip>
             )}

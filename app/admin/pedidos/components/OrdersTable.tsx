@@ -33,7 +33,7 @@ export default function OrdersTable({ orders, onUpdateStatus, onSelectOrder }: O
                                 <OrderStatusBadge status={order.estadoPedido} />
                             </TableCell>
                             <TableCell className="text-center">{order.dniCliente}</TableCell>
-                            <TableCell className="text-center">${order.precio.toLocaleString()}</TableCell>
+                            <TableCell className="text-right">${order.precio.toLocaleString()}</TableCell>
                             <TableCell className="text-center">
                                 <OrderActionsCell
                                     order={order}

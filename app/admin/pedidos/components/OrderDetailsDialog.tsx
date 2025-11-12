@@ -73,32 +73,6 @@ export default function OrderDetailsDialog({ order, onUpdateStatus, children }: 
                             <p className="text-sm">{new Date(order.fechaLimiteEntrega).toLocaleDateString()}</p>
                         </div>
                     )}
-                    <div className="flex gap-2 pt-4 border-t">
-                        <Button
-                            variant="outline"
-                            onClick={() => onUpdateStatus(order.idPedido, "en_camino")}
-                            disabled={order.estadoPedido === "entregado" || order.estadoPedido === "cancelado"}
-                        >
-                            Marcar en Tránsito
-                        </Button>
-                        <Button
-                            variant="default"
-                            onClick={() => onUpdateStatus(order.idPedido, "entregado")}
-                            disabled={order.estadoPedido === "entregado" || order.estadoPedido === "cancelado"}
-                            className="bg-green-600 hover:bg-green-700"
-                        >
-                            <CheckCircle className="h-4 w-4 mr-2" />
-                            Marcar Entregado
-                        </Button>
-                        <Button
-                            variant="destructive"
-                            onClick={() => onUpdateStatus(order.idPedido, "cancelado")}
-                            disabled={order.estadoPedido === "entregado" || order.estadoPedido === "cancelado"}
-                        >
-                            <X className="h-4 w-4 mr-2" />
-                            Cancelar
-                        </Button>
-                    </div>
                 </div>
             </DialogContent>
         </Dialog>
