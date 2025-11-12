@@ -194,3 +194,52 @@ export async function getRutaConTramo(supabase: SupabaseClient, idRuta: number):
         tramos: tramosOrdenados,
     }
 }
+
+/**
+ * Calcula la distancia total en kilómetros entre dos sucursales
+ * Busca en todas las rutas y suma la distancia de los tramos desde origen hasta destino
+ * @param supabase Cliente de Supabase
+ * @param idSucursalOrigen ID de la sucursal de origen
+ * @param idSucursalDestino ID de la sucursal de destino
+ * @returns Distancia en kilómetros, o 0 si no hay ruta
+ */
+export async function calcularDistanciaEntreSucursales(
+    supabase: SupabaseClient,
+    idSucursalOrigen: number,
+    idSucursalDestino: number
+): Promise<number> {
+    
+    //TODO: Implementar lógica para envío locales, ¿debería ser solo el precio base o un precio especial?
+    // Si origen y destino son iguales, distancia es 0
+    if (idSucursalOrigen === idSucursalDestino) {
+        return 0
+    }
+
+    const rutasConTramos = await getRutasConTramos(supabase)
+
+    for (const ruta of rutasConTramos) {
+        const tramosOrdenados = construirCaminoRuta(ruta.tramos)
+
+        let posicionOrigen = -1
+        for (let i = 0; i < tramosOrdenados.length; i++) {
+            if (tramosOrdenados[i].idSucursalOrigen === idSucursalOrigen) {
+                posicionOrigen = i
+                break
+            }
+        }
+
+        if (posicionOrigen !== -1) {
+            let distanciaTotal = 0
+            for (let i = posicionOrigen; i < tramosOrdenados.length; i++) {
+                distanciaTotal += tramosOrdenados[i].distanciaKm
+                
+                if (tramosOrdenados[i].idSucursalDestino === idSucursalDestino) {
+                    return distanciaTotal
+                }
+            }
+        }
+    }
+
+    // Si no se encuentra ruta entre sucursales
+    return 0
+}

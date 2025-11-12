@@ -87,6 +87,8 @@ export function CreateOrderDialog({
     const [sucursales, setSucursales] = useState<Sucursal[]>([])
     const [loadingSucursales, setLoadingSucursales] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
+    const [precioCalculado, setPrecioCalculado] = useState<number | null>(null)
+    const [calculandoPrecio, setCalculandoPrecio] = useState(false)
     const dialogOpen = modoEdicion ? (open ?? false) : isOpen
     const handleOpenChange = modoEdicion ? (onOpenChange ?? setIsOpen) : setIsOpen
 
@@ -208,6 +210,60 @@ export function CreateOrderDialog({
             limpiarFormulario()
         }
     }, [isOpen, limpiarFormulario])
+
+
+    useEffect(() => {
+        const calcularPrecio = async () => {
+            // TODO: Cambiar precio en el modoEdicion
+            if (
+                modoEdicion ||
+                !newOrder.idSucursalDestino ||
+                !newOrder.peso ||
+                newOrder.peso <= 0 ||
+                !newOrder.tipoTransporte
+            ) {
+                setPrecioCalculado(null)
+                return
+            }
+
+            setCalculandoPrecio(true)
+            try {
+                const response = await fetch('/api/pedidos/calcular-precio', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        idSucursalDestino: newOrder.idSucursalDestino,
+                        peso: newOrder.peso,
+                        idServicioTransporte: newOrder.tipoTransporte,
+                        idsServiciosAdicionales: newOrder.serviciosOpcionales,
+                    }),
+                })
+
+                if (response.ok) {
+                    const data = await response.json()
+                    setPrecioCalculado(data.precio)
+                } else {
+                    console.error('Error al calcular precio:', response.statusText)
+                    setPrecioCalculado(null)
+                }
+            } catch (error) {
+                console.error('Error al calcular precio:', error)
+                setPrecioCalculado(null)
+            } finally {
+                setCalculandoPrecio(false)
+            }
+        }
+
+        calcularPrecio()
+    }, [
+        modoEdicion,
+        newOrder.idSucursalDestino,
+        newOrder.peso,
+        newOrder.tipoTransporte,
+        newOrder.serviciosOpcionales,
+    ])
     
     const handleCiudadChange = (ciudadNombre: string) => {
         const sucursal = sucursales.find(s => s.ciudadSucursal === ciudadNombre)
@@ -350,6 +406,30 @@ export function CreateOrderDialog({
                     )}
 
                     <div className="space-y-4 pt-4 border-t">
+                        {!modoEdicion && (
+                            <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-950/30 dark:border-blue-800">
+                                <div className="flex items-center justify-between">
+                                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                        Precio Total Estimado:
+                                    </span>
+                                    <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                                        {calculandoPrecio ? (
+                                            "Calculando..."
+                                        ) : precioCalculado !== null ? (
+                                            `$${precioCalculado.toFixed(2)}`
+                                        ) : (
+                                            "Complete los datos"
+                                        )}
+                                    </span>
+                                </div>
+                                {precioCalculado !== null && !calculandoPrecio && (
+                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                        * Incluye transporte base + costo por distancia y peso + servicios adicionales
+                                    </p>
+                                )}
+                            </div>
+                        )}
+
                         {error && (
                             <div className="p-3 bg-red-50 border border-red-200 rounded-md dark:bg-red-950/50 dark:border-red-800">
                                 <p className="text-sm text-red-600 dark:text-red-400 text-center">
