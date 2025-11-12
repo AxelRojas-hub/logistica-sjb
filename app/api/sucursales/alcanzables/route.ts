@@ -1,13 +1,13 @@
-import { NextRequest, NextResponse } from "next/server"
+import { NextResponse } from "next/server"
 import { createClient } from "@/lib/supabaseServer"
 import { getSucursalesAlcanzables } from "@/lib/models/Sucursal"
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
         const supabase = await createClient()
 
         const { data: { user }, error: authError } = await supabase.auth.getUser()
-        
+
         if (authError || !user) {
             return NextResponse.json(
                 { error: "No autorizado" },
@@ -16,7 +16,7 @@ export async function GET(request: NextRequest) {
         }
 
         const idCuentaComercio = user.user_metadata.idCuentaComercio
-        
+
         const { data: comercioData, error: comercioError } = await supabase
             .from('comercio')
             .select('id_sucursal_origen')

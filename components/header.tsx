@@ -4,7 +4,7 @@ import { useRouter, usePathname } from "next/navigation"
 import { useTheme } from "next-themes"
 import { useEffect, useState } from "react"
 import { Button } from "@/components/ui/button"
-import { Home, Sun, Moon, Monitor, LogOut } from "lucide-react"
+import { Sun, Moon, Monitor, LogOut } from "lucide-react"
 import {
     DropdownMenu,
     DropdownMenuContent,

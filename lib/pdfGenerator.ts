@@ -1,5 +1,5 @@
 import jsPDF from 'jspdf';
-import autoTable from 'jspdf-autotable';
+import autoTable, { jsPDFConstructor } from 'jspdf-autotable';
 import type { Factura } from './types';
 
 interface ComercioInfo {
@@ -14,7 +14,7 @@ interface ComercioInfo {
 }
 
 export async function generateInvoicePDF(factura: Factura, comercio: ComercioInfo) {
-    const doc = new jsPDF();
+    const doc: jsPDFConstructor = new jsPDF();
 
     // Configuración de fuentes y colores
     const primaryColor = '#1f2937'; // gray-800
@@ -118,7 +118,7 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
     });
 
     // Obtener la posición Y después de la tabla
-    const finalY = (doc as any).lastAutoTable.finalY || tableStartY + 60;
+    const finalY = doc.lastAutoTable.finalY || tableStartY + 60;
 
     // Total
     const totalsStartY = finalY + 10;
