@@ -8,7 +8,7 @@ import {
     DialogTrigger 
 } from "@/components/ui/dialog"
 import { Plus } from "lucide-react"
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { DatosDestinatario, DatosPedido, ServiciosSection } from "."
 import type { Pedido} from "@/lib/types"
 
@@ -88,7 +88,10 @@ export function CreateOrderDialog({
     const [loadingSucursales, setLoadingSucursales] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [precioCalculado, setPrecioCalculado] = useState<number | null>(null)
+    const [precioSinDescuento, setPrecioSinDescuento] = useState<number | null>(null)
+    const [descuentoPorcentaje, setDescuentoPorcentaje] = useState<number>(0)
     const [calculandoPrecio, setCalculandoPrecio] = useState(false)
+    const abortControllerRef = useRef<AbortController | null>(null)
     const dialogOpen = modoEdicion ? (open ?? false) : isOpen
     const handleOpenChange = modoEdicion ? (onOpenChange ?? setIsOpen) : setIsOpen
 
@@ -214,6 +217,11 @@ export function CreateOrderDialog({
 
     useEffect(() => {
         const calcularPrecio = async () => {
+            // Cancelar petición anterior si existe
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+            }
+
             // TODO: Cambiar precio en el modoEdicion
             if (
                 modoEdicion ||
@@ -225,6 +233,10 @@ export function CreateOrderDialog({
                 setPrecioCalculado(null)
                 return
             }
+
+            // AbortController para evitar condición de carrera
+            const abortController = new AbortController()
+            abortControllerRef.current = abortController
 
             setCalculandoPrecio(true)
             try {
@@ -239,24 +251,42 @@ export function CreateOrderDialog({
                         idServicioTransporte: newOrder.tipoTransporte,
                         idsServiciosAdicionales: newOrder.serviciosOpcionales,
                     }),
+                    signal: abortController.signal,
                 })
 
                 if (response.ok) {
                     const data = await response.json()
                     setPrecioCalculado(data.precio)
+                    setPrecioSinDescuento(data.precioSinDescuento)
+                    setDescuentoPorcentaje(data.descuentoPorcentaje)
                 } else {
                     console.error('Error al calcular precio:', response.statusText)
                     setPrecioCalculado(null)
+                    setPrecioSinDescuento(null)
+                    setDescuentoPorcentaje(0)
                 }
             } catch (error) {
+                if ((error as Error).name === 'AbortError') {
+                    return
+                }
                 console.error('Error al calcular precio:', error)
                 setPrecioCalculado(null)
+                setPrecioSinDescuento(null)
+                setDescuentoPorcentaje(0)
             } finally {
-                setCalculandoPrecio(false)
+                if (!abortController.signal.aborted) {
+                    setCalculandoPrecio(false)
+                }
             }
         }
 
         calcularPrecio()
+
+        return () => {
+            if (abortControllerRef.current) {
+                abortControllerRef.current.abort()
+            }
+        }
     }, [
         modoEdicion,
         newOrder.idSucursalDestino,
@@ -412,20 +442,42 @@ export function CreateOrderDialog({
                                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
                                         Precio Total Estimado:
                                     </span>
-                                    <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                                    <div className="text-right">
                                         {calculandoPrecio ? (
-                                            "Calculando..."
+                                            <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                                                Calculando...
+                                            </span>
                                         ) : precioCalculado !== null ? (
-                                            `$${precioCalculado.toFixed(2)}`
+                                            <div className="flex items-center gap-2">
+                                                {descuentoPorcentaje > 0 && (
+                                                    <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
+                                                        ${precioSinDescuento?.toFixed(2)}
+                                                    </span>
+                                                )}
+                                                <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                                                    ${precioCalculado.toFixed(2)}
+                                                </span>
+                                            </div>
                                         ) : (
-                                            "Complete los datos"
+                                            <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                                                Complete los datos
+                                            </span>
                                         )}
-                                    </span>
+                                    </div>
                                 </div>
                                 {precioCalculado !== null && !calculandoPrecio && (
-                                    <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                        * Incluye transporte base + costo por distancia y peso + servicios adicionales
-                                    </p>
+                                    <>
+                                        {descuentoPorcentaje > 0 && (
+                                            <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded dark:bg-green-950/30 dark:border-green-800">
+                                                <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                                                    ¡Descuento del {descuentoPorcentaje}% aplicado! Ahorrás ${(precioSinDescuento! - precioCalculado).toFixed(2)} en transporte
+                                                </p>
+                                            </div>
+                                        )}
+                                        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                            * Incluye transporte base + costo por distancia y peso + servicios adicionales
+                                        </p>
+                                    </>
                                 )}
                             </div>
                         )}

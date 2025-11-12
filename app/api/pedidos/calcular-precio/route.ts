@@ -25,7 +25,7 @@ export async function POST(request: Request) {
 
         const { data: comercioData, error: comercioError } = await supabase
             .from("comercio")
-            .select("id_sucursal_origen")
+            .select("id_comercio, id_sucursal_origen")
             .eq("id_cuenta_comercio", idCuentaComercio)
             .single()
 
@@ -36,6 +36,7 @@ export async function POST(request: Request) {
             )
         }
 
+        const idComercio = comercioData.id_comercio
         const idSucursalOrigen = comercioData.id_sucursal_origen
 
         const body = await request.json()
@@ -54,7 +55,6 @@ export async function POST(request: Request) {
             )
         }
 
-        // Obtener costos de los servicios desde la base de datos
         const { data: servicios, error: serviciosError } = await supabase
             .from("servicio")
             .select("id_servicio, costo_servicio")
@@ -84,8 +84,8 @@ export async function POST(request: Request) {
             idSucursalDestino
         )
 
-
-        const precioTotal = calcularPrecioPedido({
+        const calculoPrecio = await calcularPrecioPedido(supabase, {
+            idComercio,
             costoBaseTransporte: servicioTransporte.costo_servicio,
             costosServiciosAdicionales: serviciosAdicionales.map(s => s.costo_servicio),
             distanciaKm,
@@ -93,7 +93,9 @@ export async function POST(request: Request) {
         })
 
         return NextResponse.json({
-            precio: precioTotal,
+            precio: calculoPrecio.precioFinal,
+            precioSinDescuento: calculoPrecio.precioSinDescuento,
+            descuentoPorcentaje: calculoPrecio.descuentoPorcentaje,
             desglose: {
                 costoBaseTransporte: servicioTransporte.costo_servicio,
                 costosServiciosAdicionales: serviciosAdicionales.map(s => s.costo_servicio),

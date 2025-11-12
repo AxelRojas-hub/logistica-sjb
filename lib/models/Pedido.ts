@@ -182,54 +182,88 @@ export async function getPedidosPendientesConSucursalAdmin(supabase: SupabaseCli
 
 
 /**
- * Rangos de peso y tarifas por kilómetro
- * Estructura: [pesoMaximo, costoPorKm]
- */
-//TODO: Definir valores reales en tarifario
-const RANGOS_PESO: Array<[number, number]> = [
-    [5, 10],      // Hasta 5kg: $10/km
-    [10, 15],     // Hasta 10kg: $15/km
-    [20, 20],     // Hasta 20kg: $20/km
-    [50, 25],     // Hasta 50kg: $25/km
-    [Infinity, 30] // Más de 50kg: $30/km
-]
-
-/**
- * Calcula el costo por kilómetro según el peso del pedido
+ * Calcula el costo por kilómetro según el peso del pedido consultando la tabla tarifario
+ * @param supabase Cliente de Supabase
  * @param peso Peso en kilogramos
  * @returns Costo por kilómetro en la moneda base
  */
-export function calcularCostoPorKm(peso: number): number {
-    for (const [pesoMaximo, costo] of RANGOS_PESO) {
-        if (peso <= pesoMaximo) {
-            return costo
-        }
+export async function calcularCostoPorKm(supabase: SupabaseClient, peso: number): Promise<number> {
+    const { data, error } = await supabase
+        .from("tarifario")
+        .select("precio_por_km")
+        .gte("peso_hasta", peso)
+        .order("peso_hasta", { ascending: true })
+        .limit(1)
+        .single()
+
+    if (error || !data) {
+        console.error("Error al obtener tarifa por peso:", error)
+        return -1
     }
-    return RANGOS_PESO[RANGOS_PESO.length - 1][1] // Retornar el último rango por defecto
+
+    return data.precio_por_km as number
+}
+
+export interface CalculoPrecio {
+    precioFinal: number
+    precioSinDescuento: number
+    descuentoPorcentaje: number
 }
 
 /**
- * Calcula el precio total de un pedido
+ * Calcula el precio total de un pedido aplicando el descuento del contrato si existe
+ * @param supabase Cliente de Supabase
  * @param params Parámetros del pedido
+ * @param params.idComercio ID del comercio para obtener el descuento del contrato
  * @param params.costoBaseTransporte Costo base del servicio de transporte
  * @param params.costosServiciosAdicionales Array de costos de servicios adicionales
  * @param params.distanciaKm Distancia en kilómetros entre origen y destino
  * @param params.peso Peso del pedido en kilogramos
- * @returns Precio total del pedido
+ * @returns Objeto con precio final, precio sin descuento y porcentaje de descuento
  */
-export function calcularPrecioPedido(params: {
-    costoBaseTransporte: number
-    costosServiciosAdicionales: number[]
-    distanciaKm: number
-    peso: number
-}): number {
-    const { costoBaseTransporte, costosServiciosAdicionales, distanciaKm, peso } = params
+export async function calcularPrecioPedido(
+    supabase: SupabaseClient,
+    params: {
+        idComercio: number
+        costoBaseTransporte: number
+        costosServiciosAdicionales: number[]
+        distanciaKm: number
+        peso: number
+    }
+): Promise<CalculoPrecio> {
+    const { idComercio, costoBaseTransporte, costosServiciosAdicionales, distanciaKm, peso } = params
 
-
-    const costoPorKm = calcularCostoPorKm(peso)
+    const costoPorKm = await calcularCostoPorKm(supabase, peso)
     const costoTransporte = costoBaseTransporte + (costoPorKm * distanciaKm)
-
     const costoAdicionales = costosServiciosAdicionales.reduce((sum, costo) => sum + costo, 0)
 
-    return costoTransporte + costoAdicionales
+    const precioSinDescuento = costoTransporte + costoAdicionales
+
+    // Obtener descuento del contrato del comercio
+    const { data: comercioData } = await supabase
+        .from("comercio")
+        .select("id_contrato")
+        .eq("id_comercio", idComercio)
+        .single()
+
+    let descuento = 0
+    if (comercioData?.id_contrato) {
+        const { data: contratoData } = await supabase
+            .from("contrato")
+            .select("descuento")
+            .eq("id_contrato", comercioData.id_contrato)
+            .single()
+        
+        descuento = contratoData?.descuento || 0
+    }
+
+    // Aplicar descuento solo al costo de transporte
+    const costoTransporteConDescuento = costoTransporte * (1 - descuento / 100)
+    const precioFinal = costoTransporteConDescuento + costoAdicionales
+    
+    return {
+        precioFinal,
+        precioSinDescuento,
+        descuentoPorcentaje: descuento
+    }
 }
