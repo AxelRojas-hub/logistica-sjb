@@ -1,18 +1,16 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { TooltipProvider } from "@/components/ui/tooltip"
 import {
     Truck,
-    MapPin,
-    ArrowLeft,
-    PackageX
+    ArrowLeft
 } from "lucide-react"
 import Link from "next/link"
 import { createClient } from "@/lib/supabaseServer"
 import { getSucursales } from "@/lib/models/Sucursal"
 import { getRutasConTramos, construirCaminoRuta } from "@/lib/models/Ruta"
 import { getEnviosActivos } from "@/lib/models/Envio"
+import { EnviosTable } from "./components/EnviosTable"
 
 export default async function AdminEnviosPage() {
     const supabase = await createClient()
@@ -27,27 +25,10 @@ export default async function AdminEnviosPage() {
     const { data: empleados } = await supabase.from("empleado").select("legajo_empleado, nombre_empleado")
     const empleadoMap = new Map(empleados?.map((e) => [e.legajo_empleado, e.nombre_empleado]) || [])
 
-    const capitalizeStatus = (status: string) => {
-        return status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
-    }
-
-    const getStatusColor = (status: string) => {
-        switch (status) {
-            case "en_camino":
-                return "bg-blue-100 text-blue-800"
-            case "finalizado":
-                return "bg-green-100 text-green-800"
-            case "planificado":
-                return "bg-yellow-100 text-yellow-800"
-            default:
-                return "bg-muted text-muted-foreground"
-        }
-    }
-
     return (
         <TooltipProvider>
             <div className="min-h-screen bg-background pt-4 flex flex-col">
-                <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8">
+                <div className="max-w-7xl w-full mx-auto px-2 sm:px-4 lg:px-8 py-8">
                     <div className="mb-8">
                         <h1 className="text-3xl font-bold text-foreground">Gestión de Envíos</h1>
                         <p className="mt-2 text-muted-foreground">Monitorea y gestiona todos los envíos del sistema</p>
@@ -80,56 +61,12 @@ export default async function AdminEnviosPage() {
                             </div>
                         </div>
 
-                        {envios.length === 0 ? (
-                            <Card className="col-span-full">
-                                <CardContent className="flex flex-col items-center justify-center py-16">
-                                    <div className="flex flex-col items-center text-center space-y-4">
-                                        <div className="rounded-full bg-muted p-6">
-                                            <PackageX className="h-12 w-12 text-muted-foreground" />
-                                        </div>
-                                        <div className="space-y-2">
-                                            <h3 className="text-lg font-medium text-foreground">No hay envíos activos</h3>
-                                            <p className="text-sm text-muted-foreground max-w-sm">
-                                                No se encontraron envíos en curso.
-                                            </p>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        ) : (
-                            <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-                                {envios.map((envio) => {
-                                    const nombreChofer = empleadoMap.get(envio.legajo_empleado) || "Sin asignar"
-                                    const nombreRuta = rutaMap.get(envio.id_ruta)?.nombreRuta || `Ruta ${envio.id_ruta}`
-                                    const nombreSucursal = sucursalMap.get(envio.id_sucursal_actual)?.ciudadSucursal || `Sucursal ${envio.id_sucursal_actual}`
-
-                                    return (
-                                        <Card key={envio.id_envio} className="hover:shadow-md transition-shadow">
-                                            <CardHeader className="pb-3">
-                                                <div className="flex justify-between items-start">
-                                                    <CardTitle className="text-lg">Envío #{envio.id_envio}</CardTitle>
-                                                    <Badge className={getStatusColor(envio.estado_envio)}>
-                                                        {capitalizeStatus(envio.estado_envio)}
-                                                    </Badge>
-                                                </div>
-                                                <CardDescription>Chofer: {nombreChofer}</CardDescription>
-                                                <CardDescription>Legajo: {envio.legajo_empleado}</CardDescription>
-                                            </CardHeader>
-                                            <CardContent className="space-y-3">
-                                                <div className="flex items-center gap-2 text-sm">
-                                                    <Truck className="h-4 w-4 text-gray-500" />
-                                                    <span>{nombreRuta}</span>
-                                                </div>
-                                                <div className="flex items-center gap-2 text-sm">
-                                                    <MapPin className="h-4 w-4 text-gray-500" />
-                                                    <span>Sucursal actual: {nombreSucursal}</span>
-                                                </div>
-                                            </CardContent>
-                                        </Card>
-                                    )
-                                })}
-                            </div>
-                        )}
+                        <EnviosTable
+                            envios={envios}
+                            empleadoMap={empleadoMap}
+                            rutaMap={rutaMap}
+                            sucursalMap={sucursalMap}
+                        />
 
                         {/* Routes and Branches */}
                         <div className="grid gap-6 md:grid-cols-2">
