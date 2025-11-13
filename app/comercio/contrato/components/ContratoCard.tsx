@@ -44,10 +44,15 @@ export function ContratoCard({ contrato }: ContratoCardProps) {
             <CardContent className="space-y-6">
                 <DetalleContrato contrato={contrato} />
                 <div className="flex gap-2 pt-4 border-t">
-                    <Button className="dark:text-white bg-blue-600 hover:bg-blue-700">
+                    <Button
+                    className="dark:text-white bg-blue-600 hover:bg-blue-700"
+                    disabled={contrato.estadoContrato !== 'vencido'}>
+                        {/* Falta verificar el estado del comercio */}
                         Renovar Contrato
                     </Button>
-                    <Button variant="outline">
+                    <Button
+                    variant="outline"
+                    disabled={contrato.estadoContrato !== 'vigente'}>
                         Modificar Plan
                     </Button>
                 </div>
