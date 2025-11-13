@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
 import type { Pedido, EstadoPedido, Comercio } from "@/lib/types"
-import { CreateOrderDialog, OrderDetailsDialog, OrdersTable } from "."
+import { CreateOrderDialog, EditarPedidoDialog, OrderDetailsDialog, OrdersTable } from "."
 
 interface NewOrderForm {
     // Datos del destinatario
@@ -35,11 +35,10 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
     const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null)
     const [orders, setOrders] = useState<Pedido[]>(initialPedidos)
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
+    const [showEditDialog, setShowEditDialog] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
-    const [pedidoAEditar, setPedidoAEditar] = useState<Pedido | null>(null)
-    const [showEditDialog, setShowEditDialog] = useState(false)
 
 
     const validateField = (fieldName: keyof NewOrderForm, value: unknown): string | null => {
@@ -198,18 +197,19 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
     }
 
     const handleEditOrder = (pedido: Pedido) => {
-        setPedidoAEditar(pedido)
+        setSelectedOrder(pedido)
         setShowEditDialog(true)
     }
 
-    const handleUpdateOrder = async (orderData: NewOrderForm): Promise<boolean> => {
-        if (!pedidoAEditar) return false
-
+    const handleUpdateOrder = async (
+        orderId: number,
+        updates: { ciudadDestino: string; idSucursalDestino: number; fechaLimiteEntrega: string }
+    ): Promise<boolean> => {
         const errors: Record<string, string> = {}
-        const ciudadError = validateField('ciudadDestino', orderData.ciudadDestino)
+        const ciudadError = validateField('ciudadDestino', updates.ciudadDestino)
         if (ciudadError) errors['ciudadDestino'] = ciudadError
         
-        const fechaError = validateField('fechaLimiteEntrega', orderData.fechaLimiteEntrega)
+        const fechaError = validateField('fechaLimiteEntrega', updates.fechaLimiteEntrega)
         if (fechaError) errors['fechaLimiteEntrega'] = fechaError
         
         if (Object.keys(errors).length > 0) {
@@ -221,10 +221,10 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
         setLoading(true)
         try {
             const updateData = {
-                idPedido: pedidoAEditar.idPedido,
-                ciudadDestino: orderData.ciudadDestino,
-                idSucursalDestino: orderData.idSucursalDestino,
-                fechaLimiteEntrega: orderData.fechaLimiteEntrega
+                idPedido: orderId,
+                ciudadDestino: updates.ciudadDestino,
+                idSucursalDestino: updates.idSucursalDestino,
+                fechaLimiteEntrega: updates.fechaLimiteEntrega
             }
             
             const response = await fetch (`/api/pedidos/update`, {
@@ -243,11 +243,11 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
             }
 
             setOrders(orders.map(order =>
-                order.idPedido === pedidoAEditar.idPedido 
+                order.idPedido === orderId 
                     ? { 
                         ...order,
-                        idSucursalDestino: orderData.idSucursalDestino,
-                        fechaLimiteEntrega: `${orderData.fechaLimiteEntrega}T00:00:00+00:00`
+                        idSucursalDestino: updates.idSucursalDestino,
+                        fechaLimiteEntrega: `${updates.fechaLimiteEntrega}T00:00:00+00:00`
                     } 
                     : order
             ))
@@ -343,22 +343,22 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                         onOpenChange={setShowDetailsDialog}
                     />
 
-                    <CreateOrderDialog
-                        open={showEditDialog}
-                        onOpenChange={setShowEditDialog}
-                        onCreateOrder={handleUpdateOrder}
-                        initialValues={pedidoAEditar}
-                        modoEdicion={true}
-                        disabled={loading}
-                        loading={loading}
-                        error={error}
-                        fieldErrors={fieldErrors}
-                        onSuccess={() => {
-                            setShowEditDialog(false)
-                            setPedidoAEditar(null)
-                            handleOrderSuccess()
-                        }}
-                    />
+                    {selectedOrder && showEditDialog && (
+                        <EditarPedidoDialog
+                            pedido={selectedOrder}
+                            open={showEditDialog}
+                            onOpenChange={setShowEditDialog}
+                            onUpdateOrder={handleUpdateOrder}
+                            loading={loading}
+                            error={error}
+                            fieldErrors={fieldErrors}
+                            onSuccess={() => {
+                                setShowEditDialog(false)
+                                setSelectedOrder(null)
+                                handleOrderSuccess()
+                            }}
+                        />
+                    )}
 
                 </div>
             </div>

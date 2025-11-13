@@ -50,10 +50,6 @@ interface CreateOrderDialogProps {
     error?: string
     fieldErrors?: Record<string, string>
     onSuccess?: () => void
-    initialValues?: Pedido | null
-    modoEdicion?: boolean
-    open?: boolean
-    onOpenChange?: (open: boolean) => void
 }
 
 export function CreateOrderDialog({ 
@@ -62,11 +58,7 @@ export function CreateOrderDialog({
     loading = false,
     error,
     fieldErrors = {},
-    onSuccess,
-    initialValues = null,
-    modoEdicion = false,
-    open,
-    onOpenChange
+    onSuccess
 }: CreateOrderDialogProps) {
     const [newOrder, setNewOrder] = useState<NewOrderForm>({
         dniCliente: 0,
@@ -92,47 +84,6 @@ export function CreateOrderDialog({
     const [descuentoPorcentaje, setDescuentoPorcentaje] = useState<number>(0)
     const [calculandoPrecio, setCalculandoPrecio] = useState(false)
     const abortControllerRef = useRef<AbortController | null>(null)
-    const dialogOpen = modoEdicion ? (open ?? false) : isOpen
-    const handleOpenChange = modoEdicion ? (onOpenChange ?? setIsOpen) : setIsOpen
-
-    const isFieldDisabled = (fieldName: string) => {
-        if (!modoEdicion) return false // En modo creación, todos habilitados
-        
-        // En modo edición, solo habilitar estos campos:
-        const camposEditables = ['ciudadDestino', 'idSucursalDestino', 'fechaLimiteEntrega']
-        return !camposEditables.includes(fieldName)
-    }
-    useEffect(() => {
-        if (modoEdicion && initialValues && sucursales.length > 0) {
-            const sucursalDestino = sucursales.find(s => s.idSucursal === initialValues.idSucursalDestino)
-            const ciudadDestino = sucursalDestino?.ciudadSucursal || ""
-            
-            let fechaFormateada = ""
-            if (initialValues.fechaLimiteEntrega) {
-                const fechaString = initialValues.fechaLimiteEntrega
-                if (fechaString.includes('T')) {
-                    fechaFormateada = fechaString.split('T')[0]
-                } else {
-                    fechaFormateada = fechaString.slice(0, 10)
-                }
-            }
-            
-            setNewOrder({
-                ciudadDestino: ciudadDestino,
-                idSucursalDestino: initialValues.idSucursalDestino,
-                fechaLimiteEntrega: fechaFormateada,
-                
-                dniCliente: initialValues.dniCliente,
-                nombreCliente: "",
-                telefonoCliente: "",
-                emailCliente: "",
-                direccionCliente: "",
-                peso: 1,
-                tipoTransporte: null,
-                serviciosOpcionales: []
-            })
-        }
-    }, [modoEdicion, initialValues, sucursales])
 
     const limpiarFormulario = useCallback(() => {
         const servicioTransporte = servicios.find(s => 
@@ -222,9 +173,7 @@ export function CreateOrderDialog({
                 abortControllerRef.current.abort()
             }
 
-            // TODO: Cambiar precio en el modoEdicion
             if (
-                modoEdicion ||
                 !newOrder.idSucursalDestino ||
                 !newOrder.peso ||
                 newOrder.peso <= 0 ||
@@ -288,7 +237,6 @@ export function CreateOrderDialog({
             }
         }
     }, [
-        modoEdicion,
         newOrder.idSucursalDestino,
         newOrder.peso,
         newOrder.tipoTransporte,
@@ -311,132 +259,65 @@ export function CreateOrderDialog({
         
         if (resultado === true && onSuccess) {
             onSuccess()
-            handleOpenChange(false)
+            setIsOpen(false)
         }
     }
 
     return (
-        <Dialog open={dialogOpen} onOpenChange={handleOpenChange}>
-            {!modoEdicion && (
-                <DialogTrigger asChild>
-                    <Button 
-                        className="flex items-center gap-2"
-                        disabled={disabled}
-                    >
-                        <Plus className="h-4 w-4" />
-                        Registrar Pedido
-                    </Button>
-                </DialogTrigger>
-            )}
+        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+            <DialogTrigger asChild>
+                <Button 
+                    className="flex items-center gap-2"
+                    disabled={disabled}
+                >
+                    <Plus className="h-4 w-4" />
+                    Registrar Pedido
+                </Button>
+            </DialogTrigger>
             <DialogContent 
                 className="w-full !max-w-[85vw] max-h-[90vh] overflow-y-auto"
                 aria-describedby="dialog-description"
             >
                 <DialogHeader>
-                    <DialogTitle>
-                        {modoEdicion ? "Editar Pedido" : "Registrar nuevo Pedido"}
-                    </DialogTitle>
+                    <DialogTitle>Registrar nuevo Pedido</DialogTitle>
                     <div id="dialog-description" className="sr-only">
-                        {modoEdicion 
-                            ? "Formulario para editar los datos de un pedido existente"
-                            : "Formulario para registrar un nuevo pedido de entrega con datos del destinatario y servicios"
-                        }
+                        Formulario para registrar un nuevo pedido de entrega con datos del destinatario y servicios
                     </div>
                 </DialogHeader>
                 
                 <div className="grid gap-6">
-                    {!modoEdicion && (
-                        <>
-                            {/* Datos del destinatario */}
-                            <DatosDestinatario 
-                                newOrder={newOrder}
-                                setNewOrder={setNewOrder}
-                                loading={loading}
-                                fieldErrors={fieldErrors}
-                                isFieldDisabled={isFieldDisabled}
-                            />
+                    {/* Datos del destinatario */}
+                    <DatosDestinatario 
+                        newOrder={newOrder}
+                        setNewOrder={setNewOrder}
+                        loading={loading}
+                        fieldErrors={fieldErrors}
+                        isFieldDisabled={() => false}
+                    />
 
-                            {/* Datos del pedido completo */}
-                            <DatosPedido 
-                                newOrder={newOrder}
-                                setNewOrder={setNewOrder}
-                                sucursales={sucursales}
-                                loading={loading}
-                                loadingSucursales={loadingSucursales}
-                                fieldErrors={fieldErrors}
-                                onCiudadChange={handleCiudadChange}
-                                isFieldDisabled={isFieldDisabled}
-                            />
+                    {/* Datos del pedido completo */}
+                    <DatosPedido 
+                        newOrder={newOrder}
+                        setNewOrder={setNewOrder}
+                        sucursales={sucursales}
+                        loading={loading}
+                        loadingSucursales={loadingSucursales}
+                        fieldErrors={fieldErrors}
+                        onCiudadChange={handleCiudadChange}
+                        isFieldDisabled={() => false}
+                    />
 
-                            {/* Datos de los servicios */}
-                            <ServiciosSection 
-                                servicios={servicios}
-                                newOrder={newOrder}
-                                setNewOrder={setNewOrder}
-                                loading={loading}
-                                isFieldDisabled={isFieldDisabled}
-                            />
-                        </>
-                    )}
-
-                    {modoEdicion && (
-                        <>
-                            {/* Solo se muestran los campos modificables */}
-                            <div className="space-y-4">
-                                <h3 className="text-lg font-semibold border-b pb-2">Modificar Pedido</h3>
-                                <p className="text-sm text-gray-600 dark:text-gray-400">
-                                    Solo puedes modificar la ciudad de destino y la fecha límite de entrega.
-                                </p>
-                                
-                                <div className="grid grid-cols-1 gap-4">
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                            Ciudad de destino *
-                                        </label>
-                                        <select
-                                            value={newOrder.ciudadDestino}
-                                            onChange={(e) => handleCiudadChange(e.target.value)}
-                                            disabled={loading || loadingSucursales}
-                                            className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${fieldErrors.ciudadDestino ? 'border-red-500 focus-visible:ring-red-500' : 'border-input'}`}
-                                        >
-                                            <option value="">Seleccionar ciudad</option>
-                                            {Array.from(new Set(sucursales.map(s => s.ciudadSucursal)))
-                                                .filter(ciudad => ciudad && ciudad.trim() !== "")
-                                                .sort()
-                                                .map((ciudad, index) => (
-                                                    <option key={`ciudad-${index}-${ciudad}`} value={ciudad}>
-                                                        {ciudad}
-                                                    </option>
-                                                ))
-                                            }
-                                        </select>
-                                        {fieldErrors.ciudadDestino && (
-                                            <p className="text-sm text-red-600">{fieldErrors.ciudadDestino}</p>
-                                        )}
-                                    </div>
-                                    
-                                    <div className="space-y-2">
-                                        <label className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                                            Fecha límite de entrega *
-                                        </label>
-                                        <input
-                                            type="date"
-                                            value={newOrder.fechaLimiteEntrega}
-                                            onChange={(e) => setNewOrder({ ...newOrder, fechaLimiteEntrega: e.target.value })}
-                                            disabled={loading}
-                                            className={`flex h-10 w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 ${fieldErrors.fechaLimiteEntrega ? 'border-red-500 focus-visible:ring-red-500' : 'border-input'}`}
-                                        />
-                                        {fieldErrors.fechaLimiteEntrega && (
-                                            <p className="text-sm text-red-600">{fieldErrors.fechaLimiteEntrega}</p>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        </>
-                    )}
+                    {/* Datos de los servicios */}
+                    <ServiciosSection 
+                        servicios={servicios}
+                        newOrder={newOrder}
+                        setNewOrder={setNewOrder}
+                        loading={loading}
+                        isFieldDisabled={() => false}
+                    />
 
                     <div className="space-y-4 pt-4 border-t">
-                        {!modoEdicion && (
+                        {(
                             <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-950/30 dark:border-blue-800">
                                 <div className="flex items-center justify-between">
                                     <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
@@ -495,10 +376,7 @@ export function CreateOrderDialog({
                             className="w-full h-12 text-base font-semibold"
                             disabled={loading}
                         >
-                            {loading 
-                                ? (modoEdicion ? "Actualizando pedido..." : "Creando pedido...")
-                                : (modoEdicion ? "Actualizar Pedido" : "Crear Pedido")
-                            }
+                            {loading ? "Creando pedido..." : "Crear Pedido"}
                         </Button>
                     </div>
                 </div>
