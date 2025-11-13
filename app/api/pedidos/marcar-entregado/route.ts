@@ -29,7 +29,7 @@ export async function POST(request: NextRequest) {
 
         const { data: pedido, error: pedidoError } = await supabase
             .from("pedido")
-            .select("estado_pedido, id_sucursal_destino")
+            .select("estado_pedido, id_sucursal_destino, fecha_limite_entrega, precio")
             .eq("id_pedido", idPedido)
             .single()
 
@@ -54,9 +54,22 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Calcular si hay entrega tardía y aplicar descuento
+        const fechaEntrega = new Date()
+        const fechaLimite = new Date(pedido.fecha_limite_entrega)
+        let precioFinal = pedido.precio
+
+        if (fechaEntrega > fechaLimite) {
+            precioFinal = pedido.precio * 0.85 // Descuento del 15%
+        }
+
         const { error: updateError } = await supabase
             .from("pedido")
-            .update({ estado_pedido: "entregado", fecha_entrega: new Date().toISOString() })
+            .update({ 
+                estado_pedido: "entregado", 
+                fecha_entrega: fechaEntrega.toISOString(),
+                precio: precioFinal
+            })
             .eq("id_pedido", idPedido)
 
         if (updateError) {
