@@ -4,7 +4,7 @@ import { ContratoStatusBadge } from "./ContratoStatusBadge"
 import { DetalleContrato } from "./DetalleContrato"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Plus } from "lucide-react"
+import { Plus, RefreshCw, PlusCircle } from "lucide-react"
 
 interface ContratoCardProps {
     contrato: Contrato | null
@@ -47,14 +47,17 @@ export function ContratoCard({ contrato }: ContratoCardProps) {
                     <Button
                     className="dark:text-white bg-blue-600 hover:bg-blue-700"
                     disabled={contrato.estadoContrato !== 'vencido'}>
-                        {/* Falta verificar el estado del comercio */}
+                        <RefreshCw className="h-4 w-4" /> 
                         Renovar Contrato
                     </Button>
-                    <Button
-                    variant="outline"
-                    disabled={contrato.estadoContrato !== 'vigente'}>
-                        Modificar Plan
-                    </Button>
+                    <Link href={`/comercio/contrato/ampliar`}>
+                        <Button
+                        variant="outline"
+                        disabled={contrato.estadoContrato !== 'vigente'}>
+                            <PlusCircle className="h-4 w-4" />
+                            Modificar Plan
+                        </Button>
+                    </Link>
                 </div>
             </CardContent>
         </Card>
