@@ -4,7 +4,7 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import type { Pedido, EstadoPedido, Comercio } from "@/lib/types"
+import type { Pedido, EstadoPedido, Comercio, Sucursal, Servicio } from "@/lib/types"
 import { CreateOrderDialog, EditarPedidoDialog, OrderDetailsDialog, OrdersTable } from "."
 
 interface NewOrderForm {
@@ -29,9 +29,11 @@ interface NewOrderForm {
 interface PedidosContentProps {
     pedidos: Pedido[]
     comercio: Comercio
+    sucursales: Sucursal[]
+    servicios: Servicio[]
 }
 
-export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosContentProps) {
+export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, servicios }: PedidosContentProps) {
     const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null)
     const [orders, setOrders] = useState<Pedido[]>(initialPedidos)
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
@@ -199,6 +201,8 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
     const handleEditOrder = (pedido: Pedido) => {
         setSelectedOrder(pedido)
         setShowEditDialog(true)
+        setError("")
+        setFieldErrors({})
     }
 
     const handleUpdateOrder = async (
@@ -326,6 +330,14 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                             error={error}
                             fieldErrors={fieldErrors}
                             onSuccess={handleOrderSuccess}
+                            onOpenChange={(open) => {
+                                if (open) {
+                                    setError("")
+                                    setFieldErrors({})
+                                }
+                            }}
+                            sucursales={sucursales}
+                            servicios={servicios}
                         />
                     </div>
 
@@ -341,13 +353,20 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                         order={selectedOrder}
                         isOpen={showDetailsDialog}
                         onOpenChange={setShowDetailsDialog}
+                        sucursales={sucursales}
                     />
 
                     {selectedOrder && showEditDialog && (
                         <EditarPedidoDialog
                             pedido={selectedOrder}
                             open={showEditDialog}
-                            onOpenChange={setShowEditDialog}
+                            onOpenChange={(open) => {
+                                setShowEditDialog(open)
+                                if (!open) {
+                                    setError("")
+                                    setFieldErrors({})
+                                }
+                            }}
                             onUpdateOrder={handleUpdateOrder}
                             loading={loading}
                             error={error}
@@ -357,6 +376,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                                 setSelectedOrder(null)
                                 handleOrderSuccess()
                             }}
+                            sucursales={sucursales}
                         />
                     )}
 

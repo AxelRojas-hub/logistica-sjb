@@ -7,15 +7,9 @@ import {
     DialogHeader, 
     DialogTitle
 } from "@/components/ui/dialog"
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState } from "react"
 import { CamposEditablesPedido } from "./CamposEditablesPedido"
-import type { Pedido } from "@/lib/types"
-
-interface Sucursal {
-    idSucursal: number
-    direccionSucursal: string
-    ciudadSucursal: string
-}
+import type { Pedido, Sucursal } from "@/lib/types"
 
 interface EditOrderForm {
     ciudadDestino: string
@@ -32,6 +26,7 @@ interface EditarPedidoDialogProps {
     error?: string
     fieldErrors?: Record<string, string>
     onSuccess?: () => void
+    sucursales: Sucursal[]
 }
 
 export function EditarPedidoDialog({ 
@@ -42,40 +37,14 @@ export function EditarPedidoDialog({
     loading = false,
     error,
     fieldErrors = {},
-    onSuccess
+    onSuccess,
+    sucursales
 }: EditarPedidoDialogProps) {
     const [editForm, setEditForm] = useState<EditOrderForm>({
         ciudadDestino: "",
         idSucursalDestino: 0,
         fechaLimiteEntrega: ""
     })
-
-    const [sucursales, setSucursales] = useState<Sucursal[]>([])
-    const [loadingSucursales, setLoadingSucursales] = useState(false)
-
-    const fetchSucursales = useCallback(async () => {
-        setLoadingSucursales(true)
-        try {
-            const response = await fetch('/api/sucursales/alcanzables')
-            
-            if (response.ok) {
-                const data = await response.json()
-                setSucursales(data)
-            } else {
-                console.error('Error al cargar sucursales:', response.statusText)
-            }
-        } catch (error) {
-            console.error("Error al cargar sucursales:", error)
-        } finally {
-            setLoadingSucursales(false)
-        }
-    }, [])
-
-    useEffect(() => {
-        if (open) {
-            fetchSucursales()
-        }
-    }, [open, fetchSucursales])
 
     useEffect(() => {
         if (pedido && sucursales.length > 0) {
@@ -146,7 +115,7 @@ export function EditarPedidoDialog({
                         fechaLimiteEntrega={editForm.fechaLimiteEntrega}
                         sucursales={sucursales}
                         loading={loading}
-                        loadingSucursales={loadingSucursales}
+                        loadingSucursales={false}
                         fieldErrors={fieldErrors}
                         onCiudadChange={handleCiudadChange}
                         onFechaChange={handleFechaChange}

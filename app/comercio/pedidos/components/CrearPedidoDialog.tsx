@@ -10,19 +10,7 @@ import {
 import { Plus } from "lucide-react"
 import { useEffect, useState, useCallback, useRef } from "react"
 import { DatosDestinatario, DatosPedido, ServiciosSection } from "."
-import type { Pedido} from "@/lib/types"
-
-interface Sucursal {
-    idSucursal: number
-    direccionSucursal: string
-    ciudadSucursal: string
-}
-
-interface Servicio {
-    id_servicio: number
-    nombre_servicio: string
-    costo_servicio: number
-}
+import type { Sucursal, Servicio } from "@/lib/types"
 
 interface NewOrderForm {
     // Datos del destinatario
@@ -50,6 +38,9 @@ interface CreateOrderDialogProps {
     error?: string
     fieldErrors?: Record<string, string>
     onSuccess?: () => void
+    onOpenChange?: (open: boolean) => void
+    sucursales: Sucursal[]
+    servicios: Servicio[]
 }
 
 export function CreateOrderDialog({ 
@@ -58,7 +49,10 @@ export function CreateOrderDialog({
     loading = false,
     error,
     fieldErrors = {},
-    onSuccess
+    onSuccess,
+    onOpenChange,
+    sucursales,
+    servicios
 }: CreateOrderDialogProps) {
     const [newOrder, setNewOrder] = useState<NewOrderForm>({
         dniCliente: 0,
@@ -75,9 +69,6 @@ export function CreateOrderDialog({
 
     })
 
-    const [servicios, setServicios] = useState<Servicio[]>([])
-    const [sucursales, setSucursales] = useState<Sucursal[]>([])
-    const [loadingSucursales, setLoadingSucursales] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
     const [precioCalculado, setPrecioCalculado] = useState<number | null>(null)
     const [precioSinDescuento, setPrecioSinDescuento] = useState<number | null>(null)
@@ -87,10 +78,10 @@ export function CreateOrderDialog({
 
     const limpiarFormulario = useCallback(() => {
         const servicioTransporte = servicios.find(s => 
-            s.nombre_servicio.toLowerCase().includes('transporte')
+            s.nombreServicio.toLowerCase().includes('transporte')
         )
         
-        const transportePorDefecto = servicioTransporte?.id_servicio || null
+        const transportePorDefecto = servicioTransporte?.idServicio || null
         
         setNewOrder({
             dniCliente: 0,
@@ -107,51 +98,16 @@ export function CreateOrderDialog({
         })
     }, [servicios])
 
-    const fetchServicios = async () => {
-        try {
-            const response = await fetch('/api/servicios')
-            if (response.ok) {
-                const data = await response.json()
-                setServicios(data)
-            }
-        } catch (error) {
-            console.error("Error al cargar servicios:", error)
-        }
-    }
-
-    const fetchSucursales = useCallback(async () => {
-        setLoadingSucursales(true)
-        try {
-            const response = await fetch('/api/sucursales/alcanzables')
-            
-            if (response.ok) {
-                const data = await response.json()
-                setSucursales(data)
-            } else {
-                console.error('Error al cargar sucursales:', response.statusText)
-            }
-        } catch (error) {
-            console.error("Error al cargar sucursales:", error)
-        } finally {
-            setLoadingSucursales(false)
-        }
-    }, [])
-
-    useEffect(() => {
-        fetchServicios()
-        fetchSucursales()
-    }, [fetchSucursales])
-
     useEffect(() => {
         if (servicios.length > 0) {
             const servicioTransporte = servicios.find(s => 
-                s.nombre_servicio.toLowerCase().includes('transporte')
+                s.nombreServicio.toLowerCase().includes('transporte')
             )
             
             if (servicioTransporte && newOrder.tipoTransporte === null) {
                 setNewOrder(prev => ({
                     ...prev,
-                    tipoTransporte: servicioTransporte.id_servicio
+                    tipoTransporte: servicioTransporte.idServicio
                 }))
             }
         }
@@ -264,7 +220,10 @@ export function CreateOrderDialog({
     }
 
     return (
-        <Dialog open={isOpen} onOpenChange={setIsOpen}>
+        <Dialog open={isOpen} onOpenChange={(open) => {
+            setIsOpen(open)
+            onOpenChange?.(open)
+        }}>
             <DialogTrigger asChild>
                 <Button 
                     className="flex items-center gap-2"
@@ -301,7 +260,7 @@ export function CreateOrderDialog({
                         setNewOrder={setNewOrder}
                         sucursales={sucursales}
                         loading={loading}
-                        loadingSucursales={loadingSucursales}
+                        loadingSucursales={false}
                         fieldErrors={fieldErrors}
                         onCiudadChange={handleCiudadChange}
                         isFieldDisabled={() => false}
@@ -309,7 +268,11 @@ export function CreateOrderDialog({
 
                     {/* Datos de los servicios */}
                     <ServiciosSection 
-                        servicios={servicios}
+                        servicios={servicios.map(s => ({
+                            id_servicio: s.idServicio,
+                            nombre_servicio: s.nombreServicio,
+                            costo_servicio: s.costoServicio
+                        }))}
                         newOrder={newOrder}
                         setNewOrder={setNewOrder}
                         loading={loading}

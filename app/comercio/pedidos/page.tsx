@@ -1,7 +1,8 @@
 import { createClient } from "@/lib/supabaseServer"
 import { getPedidosByComercio } from "@/lib/models/Pedido"
 import { mapRowToComercio } from "@/lib/models/Comercio"
-import type { Pedido } from "@/lib/types"
+import { getSucursalesAlcanzables } from "@/lib/models/Sucursal"
+import type { Pedido, Servicio, Sucursal } from "@/lib/types"
 import { PedidosContent } from "./components"
 
 export default async function ComercioPedidosPage() {
@@ -14,10 +15,32 @@ export default async function ComercioPedidosPage() {
     const idComercio = comercio.idComercio;
 
     let pedidos: Pedido[] = []
-
     if (idComercio) {
         pedidos = await getPedidosByComercio(supabase, idComercio)
     }
 
-    return <PedidosContent pedidos={pedidos} comercio={comercio} />
+    const sucursales: Sucursal[] = await getSucursalesAlcanzables(
+        supabase,
+        comercio.idSucursalOrigen
+    )
+
+    const { data: serviciosData } = await supabase
+        .from('servicio')
+        .select('*')
+        .order('nombre_servicio')
+
+    const servicios: Servicio[] = serviciosData?.map(s => ({
+        idServicio: s.id_servicio,
+        nombreServicio: s.nombre_servicio,
+        costoServicio: s.costo_servicio
+    })) || []
+
+    return (
+        <PedidosContent 
+            pedidos={pedidos} 
+            comercio={comercio}
+            sucursales={sucursales}
+            servicios={servicios}
+        />
+    )
 }
