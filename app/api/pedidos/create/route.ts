@@ -100,7 +100,9 @@ export async function POST(request: NextRequest) {
             orderData.idSucursalDestino
         )
 
-        const precioCalculado = calcularPrecioPedido({
+        // Calcular precio total
+        const calculoPrecio = await calcularPrecioPedido(supabase, {
+            idComercio: orderData.idComercio,
             costoBaseTransporte: servicioTransporte.costo_servicio,
             costosServiciosAdicionales: serviciosAdicionales.map(s => s.costo_servicio),
             distanciaKm,
@@ -112,7 +114,7 @@ export async function POST(request: NextRequest) {
             id_sucursal_destino: orderData.idSucursalDestino,
             dni_cliente: orderData.dniCliente,
             estado_pedido: 'en_preparacion',
-            precio: precioCalculado,
+            precio: calculoPrecio.precioFinal,
             fecha_limite_entrega: orderData.fechaLimiteEntrega
         }
 
@@ -167,6 +169,7 @@ export async function POST(request: NextRequest) {
             message: "Pedido creado exitosamente",
             data: {
                 pedidoId: idPedidoCreado,
+                precio: calculoPrecio.precioFinal,
                 cliente: clienteData,
                 pedido: pedidoData,
                 servicios: serviciosData
