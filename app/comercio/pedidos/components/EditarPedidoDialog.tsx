@@ -46,6 +46,8 @@ export function EditarPedidoDialog({
         fechaLimiteEntrega: ""
     })
 
+
+
     useEffect(() => {
         if (pedido && sucursales.length > 0) {
             const sucursalDestino = sucursales.find(s => s.idSucursal === pedido.idSucursalDestino)
@@ -122,6 +124,21 @@ export function EditarPedidoDialog({
                     />
 
                     <div className="space-y-4 pt-4 border-t">
+                        {/* Mostrar precio calculado */}
+                        <div className="p-4 bg-blue-50 border border-blue-200 rounded-lg dark:bg-blue-950/30 dark:border-blue-800">
+                            <div className="flex items-center justify-between">
+                                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                                    Precio del Pedido:
+                                </span>
+                                <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                                    ${pedido.precio.toLocaleString("es-AR", {minimumFractionDigits: 2})}
+                                </span>
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                                * El precio se fijó al crear el pedido y no cambia al editar
+                            </p>
+                        </div>
+
                         {error && (
                             <div className="p-3 bg-red-50 border border-red-200 rounded-md dark:bg-red-950/50 dark:border-red-800">
                                 <p className="text-sm text-red-600 dark:text-red-400 text-center">
