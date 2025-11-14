@@ -58,7 +58,8 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
             
             case 'telefonoCliente':
                 if (!value || typeof value !== 'string' || value.trim() === "") return "El teléfono es obligatorio"
-                if (!/^\d{8,15}$/.test(value.replace(/[\s-]/g, ''))) return "El teléfono debe tener entre 8 y 15 dígitos"
+                const digitosLimpios = value.replace(/[+\s-]/g, '')
+                if (!/^\d{8,15}$/.test(digitosLimpios)) return "El teléfono debe tener entre 8 y 15 dígitos"
                 return null
             
             case 'emailCliente':

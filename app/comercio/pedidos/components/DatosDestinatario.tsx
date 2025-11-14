@@ -78,9 +78,14 @@ export function DatosDestinatario({
                     <Input
                         id="telefono"
                         type="tel"
-                        placeholder="+54 9 11 1234-5678"
+                        placeholder="+54 9 11 1234 5678"
                         value={newOrder.telefonoCliente}
-                        onChange={(e) => setNewOrder({ ...newOrder, telefonoCliente: e.target.value })}
+                        onChange={(e) => {
+                            const valor = e.target.value
+                            if (valor === '' || /^[+]?[\d\s-]*$/.test(valor)) {
+                                setNewOrder({ ...newOrder, telefonoCliente: valor })
+                            }
+                        }}
                         disabled={loading || isFieldDisabled('telefonoCliente')}
                         className={fieldErrors.telefonoCliente ? "border-red-500 focus:border-red-500" : ""}
                     />
