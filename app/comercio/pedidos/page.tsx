@@ -24,23 +24,52 @@ export default async function ComercioPedidosPage() {
         comercio.idSucursalOrigen
     )
 
-    const { data: serviciosData } = await supabase
-        .from('servicio')
-        .select('*')
-        .order('nombre_servicio')
+    // Servicios x contrato
+    let servicioTransporte: Servicio | null = null
+    let serviciosOpcionales: Servicio[] = []
 
-    const servicios: Servicio[] = serviciosData?.map(s => ({
-        idServicio: s.id_servicio,
-        nombreServicio: s.nombre_servicio,
-        costoServicio: s.costo_servicio
-    })) || []
+    if (comercio.idContrato) {
+        const { data: contratoServiciosData } = await supabase
+            .from('contrato_servicio')
+            .select(`
+                id_servicio,
+                servicio:id_servicio (
+                    id_servicio,
+                    nombre_servicio,
+                    costo_servicio
+                )
+            `)
+            .eq('id_contrato', comercio.idContrato)
+
+        if (contratoServiciosData) {
+            type ServicioRow = { id_servicio: number; nombre_servicio: string; costo_servicio: number }
+            const serviciosContratados = contratoServiciosData.map(cs => {
+                const servicio = (Array.isArray(cs.servicio) ? cs.servicio[0] : cs.servicio) as ServicioRow
+                return {
+                    idServicio: servicio.id_servicio,
+                    nombreServicio: servicio.nombre_servicio,
+                    costoServicio: servicio.costo_servicio
+                }
+            })
+
+            // Separar transporte de servicios opcionales
+            servicioTransporte = serviciosContratados.find(s => 
+                s.nombreServicio.toLowerCase().includes('transporte')
+            ) || null
+
+            serviciosOpcionales = serviciosContratados.filter(s => 
+                !s.nombreServicio.toLowerCase().includes('transporte')
+            )
+        }
+    }
 
     return (
         <PedidosContent 
             pedidos={pedidos} 
             comercio={comercio}
             sucursales={sucursales}
-            servicios={servicios}
+            servicioTransporte={servicioTransporte}
+            serviciosOpcionales={serviciosOpcionales}
         />
     )
 }

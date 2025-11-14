@@ -40,7 +40,8 @@ interface CreateOrderDialogProps {
     onSuccess?: () => void
     onOpenChange?: (open: boolean) => void
     sucursales: Sucursal[]
-    servicios: Servicio[]
+    servicioTransporte: Servicio | null
+    serviciosOpcionales: Servicio[]
 }
 
 export function CreateOrderDialog({ 
@@ -52,7 +53,8 @@ export function CreateOrderDialog({
     onSuccess,
     onOpenChange,
     sucursales,
-    servicios
+    servicioTransporte,
+    serviciosOpcionales
 }: CreateOrderDialogProps) {
     const [newOrder, setNewOrder] = useState<NewOrderForm>({
         dniCliente: 0,
@@ -77,12 +79,6 @@ export function CreateOrderDialog({
     const abortControllerRef = useRef<AbortController | null>(null)
 
     const limpiarFormulario = useCallback(() => {
-        const servicioTransporte = servicios.find(s => 
-            s.nombreServicio.toLowerCase().includes('transporte')
-        )
-        
-        const transportePorDefecto = servicioTransporte?.idServicio || null
-        
         setNewOrder({
             dniCliente: 0,
             nombreCliente: "",
@@ -93,25 +89,19 @@ export function CreateOrderDialog({
             idSucursalDestino: 0,
             peso: 0,
             fechaLimiteEntrega: "",
-            tipoTransporte: transportePorDefecto,
+            tipoTransporte: servicioTransporte?.idServicio || null,
             serviciosOpcionales: []
         })
-    }, [servicios])
+    }, [servicioTransporte])
 
     useEffect(() => {
-        if (servicios.length > 0) {
-            const servicioTransporte = servicios.find(s => 
-                s.nombreServicio.toLowerCase().includes('transporte')
-            )
-            
-            if (servicioTransporte && newOrder.tipoTransporte === null) {
-                setNewOrder(prev => ({
-                    ...prev,
-                    tipoTransporte: servicioTransporte.idServicio
-                }))
-            }
+        if (servicioTransporte && newOrder.tipoTransporte === null) {
+            setNewOrder(prev => ({
+                ...prev,
+                tipoTransporte: servicioTransporte.idServicio
+            }))
         }
-    }, [servicios, newOrder.tipoTransporte])
+    }, [servicioTransporte, newOrder.tipoTransporte])
 
 
     useEffect(() => {
@@ -268,7 +258,12 @@ export function CreateOrderDialog({
 
                     {/* Datos de los servicios */}
                     <ServiciosSection 
-                        servicios={servicios.map(s => ({
+                        servicioTransporte={servicioTransporte ? {
+                            id_servicio: servicioTransporte.idServicio,
+                            nombre_servicio: servicioTransporte.nombreServicio,
+                            costo_servicio: servicioTransporte.costoServicio
+                        } : null}
+                        serviciosOpcionales={serviciosOpcionales.map(s => ({
                             id_servicio: s.idServicio,
                             nombre_servicio: s.nombreServicio,
                             costo_servicio: s.costoServicio
@@ -295,11 +290,12 @@ export function CreateOrderDialog({
                                             <div className="flex items-center gap-2">
                                                 {descuentoPorcentaje > 0 && (
                                                     <span className="text-sm text-gray-500 dark:text-gray-400 line-through">
-                                                        ${precioSinDescuento?.toLocaleString()}
+                                                        ${precioSinDescuento?.toLocaleString("es-AR", {minimumFractionDigits: 2})}
                                                     </span>
                                                 )}
                                                 <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                                                    ${precioCalculado.toLocaleString()}
+                                                    ${precioCalculado.toLocaleString("es-AR", {minimumFractionDigits: 2})}
+                                                    
                                                 </span>
                                             </div>
                                         ) : (
@@ -314,7 +310,7 @@ export function CreateOrderDialog({
                                         {descuentoPorcentaje > 0 && (
                                             <div className="mt-2 p-2 bg-green-50 border border-green-200 rounded dark:bg-green-950/30 dark:border-green-800">
                                                 <p className="text-sm font-medium text-green-700 dark:text-green-400">
-                                                    ¡Descuento del {descuentoPorcentaje}% aplicado! Ahorrás ${(precioSinDescuento! - precioCalculado).toLocaleString()} en transporte
+                                                    ¡Descuento del {descuentoPorcentaje}% aplicado! Ahorrás ${(precioSinDescuento! - precioCalculado).toLocaleString("es-AR", {minimumFractionDigits: 2})} en transporte
                                                 </p>
                                             </div>
                                         )}

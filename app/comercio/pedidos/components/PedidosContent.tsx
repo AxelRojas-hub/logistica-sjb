@@ -30,10 +30,11 @@ interface PedidosContentProps {
     pedidos: Pedido[]
     comercio: Comercio
     sucursales: Sucursal[]
-    servicios: Servicio[]
+    servicioTransporte: Servicio | null
+    serviciosOpcionales: Servicio[]
 }
 
-export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, servicios }: PedidosContentProps) {
+export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, servicioTransporte, serviciosOpcionales }: PedidosContentProps) {
     const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null)
     const [orders, setOrders] = useState<Pedido[]>(initialPedidos)
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
@@ -80,7 +81,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                 return null
             
             case 'tipoTransporte':
-                if (!value) return "Debe seleccionar un tipo de transporte"
+                if (!value) return "Debe tener el servicio de transporte contratado"
                 return null
             
             case 'fechaLimiteEntrega':
@@ -325,7 +326,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                         <h2 className="text-2xl font-semibold text-foreground">Mis Pedidos</h2>
                         <CreateOrderDialog
                             onCreateOrder={handleCreateOrder}
-                            disabled={comercio.estadoComercio === "deshabilitado" || loading}
+                            disabled={comercio.estadoComercio === "deshabilitado" || loading || !servicioTransporte}
                             loading={loading}
                             error={error}
                             fieldErrors={fieldErrors}
@@ -337,7 +338,8 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                                 }
                             }}
                             sucursales={sucursales}
-                            servicios={servicios}
+                            servicioTransporte={servicioTransporte}
+                            serviciosOpcionales={serviciosOpcionales}
                         />
                     </div>
 
