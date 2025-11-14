@@ -342,7 +342,7 @@ export function CreateOrderDialog({
                         <Button 
                             onClick={handleSubmit}
                             className="w-full h-12 text-base font-semibold"
-                            disabled={loading}
+                            disabled={loading || !servicioTransporte}
                         >
                             {loading ? "Creando pedido..." : "Crear Pedido"}
                         </Button>
