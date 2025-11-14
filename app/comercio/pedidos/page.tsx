@@ -11,7 +11,7 @@ export default async function ComercioPedidosPage() {
     const idCuentaComercio = user.data.user?.user_metadata.idCuentaComercio;
     const { data: comercioData } = await supabase
         .from('comercio')
-        .select('*, contrato(estado_contrato)')
+        .select('*, contrato(estado_contrato, descuento)')
         .eq('id_cuenta_comercio', idCuentaComercio)
         .single();
     
@@ -32,6 +32,8 @@ export default async function ComercioPedidosPage() {
         supabase,
         comercio.idSucursalOrigen
     )
+
+
 
     // Servicios x contrato
     let servicioTransporte: Servicio | null = null

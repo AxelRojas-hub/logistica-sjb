@@ -77,6 +77,7 @@ export function CreateOrderDialog({
     const [descuentoPorcentaje, setDescuentoPorcentaje] = useState<number>(0)
     const [calculandoPrecio, setCalculandoPrecio] = useState(false)
     const abortControllerRef = useRef<AbortController | null>(null)
+    const timeoutRef = useRef<NodeJS.Timeout | null>(null)
 
     const limpiarFormulario = useCallback(() => {
         setNewOrder({
@@ -112,24 +113,28 @@ export function CreateOrderDialog({
     }, [isOpen, limpiarFormulario])
 
 
+    // Calcular precio con debounce para evitar múltiples llamadas
     useEffect(() => {
-        const calcularPrecio = async () => {
-            // Cancelar petición anterior si existe
-            if (abortControllerRef.current) {
-                abortControllerRef.current.abort()
-            }
+        // Limpiar timeout anterior
+        if (timeoutRef.current) {
+            clearTimeout(timeoutRef.current)
+        }
 
-            if (
-                !newOrder.idSucursalDestino ||
-                !newOrder.peso ||
-                newOrder.peso <= 0 ||
-                !newOrder.tipoTransporte
-            ) {
-                setPrecioCalculado(null)
-                return
-            }
+        // Cancelar petición anterior si existe
+        if (abortControllerRef.current) {
+            abortControllerRef.current.abort()
+        }
 
-            // AbortController para evitar condición de carrera
+        // Validar datos mínimos
+        if (!newOrder.idSucursalDestino || !newOrder.peso || newOrder.peso <= 0 || !newOrder.tipoTransporte) {
+            setPrecioCalculado(null)
+            setPrecioSinDescuento(null)
+            setDescuentoPorcentaje(0)
+            return
+        }
+
+        // Debounce: esperar 500ms después del último cambio
+        timeoutRef.current = setTimeout(async () => {
             const abortController = new AbortController()
             abortControllerRef.current = abortController
 
@@ -137,9 +142,7 @@ export function CreateOrderDialog({
             try {
                 const response = await fetch('/api/pedidos/calcular-precio', {
                     method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
+                    headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
                         idSucursalDestino: newOrder.idSucursalDestino,
                         peso: newOrder.peso,
@@ -173,11 +176,12 @@ export function CreateOrderDialog({
                     setCalculandoPrecio(false)
                 }
             }
-        }
-
-        calcularPrecio()
+        }, 500) // 500ms de debounce
 
         return () => {
+            if (timeoutRef.current) {
+                clearTimeout(timeoutRef.current)
+            }
             if (abortControllerRef.current) {
                 abortControllerRef.current.abort()
             }
@@ -283,8 +287,13 @@ export function CreateOrderDialog({
                                     </span>
                                     <div className="text-right">
                                         {calculandoPrecio ? (
-                                            <span className="text-xl font-bold text-blue-600 dark:text-blue-400">
-                                                Calculando...
+                                            <span className="text-xl font-bold text-blue-600 dark:text-blue-400 inline-flex items-center gap-1">
+                                                <span className="animate-pulse">Calculando</span>
+                                                <span className="inline-flex gap-0.5">
+                                                    <span className="animate-bounce" style={{ animationDelay: '0ms' }}>.</span>
+                                                    <span className="animate-bounce" style={{ animationDelay: '150ms' }}>.</span>
+                                                    <span className="animate-bounce" style={{ animationDelay: '300ms' }}>.</span>
+                                                </span>
                                             </span>
                                         ) : precioCalculado !== null ? (
                                             <div className="flex items-center gap-2">
