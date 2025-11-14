@@ -6,6 +6,7 @@ import { TooltipProvider } from "@/components/ui/tooltip"
 import { ArrowLeft } from "lucide-react"
 import type { Pedido, EstadoPedido } from "@/lib/types"
 import Link from "next/link"
+import { toast } from "sonner"
 import { ActionGlossary, OrdersTable } from "."
 
 interface PedidosAdminContentProps {
@@ -26,11 +27,21 @@ export function PedidosAdminContent({ pedidos: initialPedidos, idSucursalAdmin }
         const result = await response.json()
         
         if (result.success) {
+            // Actualizar el pedido con el nuevo precio y fecha de entrega
             setOrders(orders.map(order =>
-                order.idPedido === orderId ? { ...order, estadoPedido: newStatus } : order
+                order.idPedido === orderId 
+                    ? { 
+                        ...order, 
+                        estadoPedido: newStatus, 
+                        precio: result.precioFinal || order.precio,
+                        fechaEntrega: new Date().toISOString()
+                    } 
+                    : order
             ))
+
+            toast.success("Pedido marcado como entregado")
         } else {
-            alert(result.message) //TODO: No debería ser un alert!!!!
+            toast.error(result.message || "Error al marcar pedido como entregado")
         }
     }
 
