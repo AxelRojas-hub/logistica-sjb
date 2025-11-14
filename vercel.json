@@ -1,0 +1,12 @@
+{
+  "crons": [
+    {
+      "path": "/api/brevo/check-delivery-delays",
+      "schedule": "0 9 * * *"
+    },
+    {
+      "path": "/api/brevo/check-payment-overdue",
+      "schedule": "0 9 * * 1"
+    }
+  ]
+}

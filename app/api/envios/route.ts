@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabaseServer"
+import { BrevoService } from "@/lib/services/brevoService"
 
 export async function POST(request: NextRequest) {
     try {
@@ -56,6 +57,16 @@ export async function POST(request: NextRequest) {
                 { error: "Error al actualizar los pedidos", details: errorPedidos.message },
                 { status: 500 }
             )
+        }
+
+        // 3.1 Enviar notificaciones por email para pedidos despachados
+        for (const idPedido of idsPedidos) {
+            try {
+                await BrevoService.notifyOrderDispatched(idPedido)
+            } catch (emailError) {
+                console.error(`Error sending dispatch email for order ${idPedido}:`, emailError)
+                // No interrumpir el flujo principal por errores de email
+            }
         }
 
         // 4. Actualizar el estado del chofer a 'ocupado'
