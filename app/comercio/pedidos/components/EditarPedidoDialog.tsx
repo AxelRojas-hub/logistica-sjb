@@ -135,7 +135,7 @@ export function EditarPedidoDialog({
                                 </span>
                             </div>
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
-                                * El precio se fijó al crear el pedido y no cambia al editar
+                                * El precio se actualizará si la ciudad de destino cambia
                             </p>
                         </div>
 

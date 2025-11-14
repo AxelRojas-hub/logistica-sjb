@@ -253,7 +253,8 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                     ? { 
                         ...order,
                         idSucursalDestino: updates.idSucursalDestino,
-                        fechaLimiteEntrega: `${updates.fechaLimiteEntrega}T00:00:00+00:00`
+                        fechaLimiteEntrega: `${updates.fechaLimiteEntrega}T00:00:00+00:00`,
+                        precio: result.data?.nuevoPrecio ?? order.precio
                     } 
                     : order
             ))

@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabaseServer'
+import { calcularPrecioPedido } from '@/lib/models/Pedido'
+import { calcularDistanciaEntreSucursales } from '@/lib/models/Ruta'
 
 export async function POST(request: NextRequest) {
     try {
@@ -15,7 +17,7 @@ export async function POST(request: NextRequest) {
 
         const { data: pedidoExistente, error: pedidoError } = await supabase
             .from('pedido')
-            .select('id_pedido, estado_pedido')
+            .select('id_pedido, estado_pedido, id_comercio, id_sucursal_destino')
             .eq('id_pedido', idPedido)
             .single()
 
@@ -33,12 +35,67 @@ export async function POST(request: NextRequest) {
             )
         }
 
+        // Recalcular precio si cambió la sucursal destino
+        let nuevoPrecio = null
+        if (pedidoExistente.id_sucursal_destino !== idSucursalDestino) {
+            // Obtener sucursal origen del comercio
+            const { data: comercioData } = await supabase
+                .from('comercio')
+                .select('id_sucursal_origen')
+                .eq('id_comercio', pedidoExistente.id_comercio)
+                .single()
+
+            if (!comercioData) {
+                return NextResponse.json(
+                    { success: false, message: "Error al obtener datos del comercio" },
+                    { status: 500 }
+                )
+            }
+
+            // Obtener servicios del pedido
+            const { data: servicios } = await supabase
+                .from('pedido_servicio')
+                .select('id_servicio, servicio(costo_servicio)')
+                .eq('id_pedido', idPedido)
+
+            const costoBaseTransporte = (servicios?.[0] as unknown as { servicio: { costo_servicio: number } })?.servicio?.costo_servicio || 0
+            const costosAdicionales = servicios?.slice(1).map((s) => (s as unknown as { servicio: { costo_servicio: number } }).servicio?.costo_servicio || 0) || []
+
+            // Calcular distancia
+            const distanciaKm = await calcularDistanciaEntreSucursales(
+                supabase,
+                comercioData.id_sucursal_origen,
+                idSucursalDestino
+            )
+
+            // Peso aleatorio entre 1-10kg
+            const pesoAleatorio = Math.floor(Math.random() * 10) + 1
+
+            // Calcular nuevo precio
+            const calculoPrecio = await calcularPrecioPedido(supabase, {
+                idComercio: pedidoExistente.id_comercio,
+                costoBaseTransporte,
+                costosServiciosAdicionales: costosAdicionales,
+                distanciaKm,
+                peso: pesoAleatorio
+            })
+
+            nuevoPrecio = calculoPrecio.precioFinal
+        }
+
+        // Actualizar pedido
+        const updateData: { id_sucursal_destino: number; fecha_limite_entrega: string; precio?: number } = {
+            id_sucursal_destino: idSucursalDestino,
+            fecha_limite_entrega: fechaLimiteEntrega
+        }
+
+        if (nuevoPrecio !== null) {
+            updateData.precio = nuevoPrecio
+        }
+
         const { error: updateError } = await supabase
             .from('pedido')
-            .update({
-                id_sucursal_destino: idSucursalDestino,
-                fecha_limite_entrega: fechaLimiteEntrega
-            })
+            .update(updateData)
             .eq('id_pedido', idPedido)
 
         if (updateError) {
@@ -51,7 +108,11 @@ export async function POST(request: NextRequest) {
 
         return NextResponse.json({
             success: true,
-            message: "Pedido actualizado correctamente"
+            message: "Pedido actualizado correctamente",
+            data: {
+                precioActualizado: nuevoPrecio !== null,
+                nuevoPrecio
+            }
         })
 
     } catch (error) {
