@@ -11,9 +11,19 @@ import { FacturaDetailsDialog } from "./FacturaDetailsDialog"
 
 interface FacturasTableProps {
     invoices: Factura[]
+    comercioInfo: {
+        nombreComercio: string
+        direccion: string
+        telefono?: string
+        email?: string
+        sucursalOrigen?: {
+            direccionSucursal: string
+            ciudadSucursal: string
+        }
+    }
 }
 
-export function FacturasTable({ invoices }: FacturasTableProps) {
+export function FacturasTable({ invoices, comercioInfo }: FacturasTableProps) {
     const [selectedInvoice, setSelectedInvoice] = useState<Factura | null>(null)
     const [isDialogOpen, setIsDialogOpen] = useState(false)
 
@@ -54,6 +64,7 @@ export function FacturasTable({ invoices }: FacturasTableProps) {
                                     <FacturaActionsCell
                                         invoice={invoice}
                                         onViewInvoice={handleViewFactura}
+                                        comercioInfo={comercioInfo}
                                     />
                                 </TableCell>
                             </TableRow>

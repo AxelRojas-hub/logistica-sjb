@@ -100,6 +100,7 @@ export interface Comercio {
     nombreComercio: string;
     domicilioFiscal: string;
     estadoComercio: EstadoComercio;
+    estadoContrato?: EstadoContrato;
 }
 
 export interface ClienteDestinatario {

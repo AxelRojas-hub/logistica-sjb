@@ -3,26 +3,15 @@
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 import type { Pedido, Sucursal } from "@/lib/types"
 import { OrderStatusBadge } from "./PedidoStatusBadge"
-import { useEffect, useState } from "react"
 
 interface OrderDetailsDialogProps {
     order: Pedido | null
     isOpen: boolean
     onOpenChange: (open: boolean) => void
+    sucursales: Sucursal[]
 }
 
-export function OrderDetailsDialog({ order, isOpen, onOpenChange }: OrderDetailsDialogProps) {
-    const [sucursales, setSucursales] = useState<Sucursal[]>([])
-
-    useEffect(() => {
-        if (isOpen) {
-            fetch('/api/sucursales')
-                .then(res => res.json())
-                .then(data => setSucursales(data))
-                .catch(error => console.error('Error cargando sucursales:', error))
-        }
-    }, [isOpen])
-
+export function OrderDetailsDialog({ order, isOpen, onOpenChange, sucursales }: OrderDetailsDialogProps) {
     const getSucursalNombre = (idSucursal: number): string => {
         const sucursal = sucursales.find(s => s.idSucursal === idSucursal)
         if (sucursal) {

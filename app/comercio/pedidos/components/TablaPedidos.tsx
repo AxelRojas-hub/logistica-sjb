@@ -37,6 +37,7 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder , onEditOrder, 
                         <TableHead className="w-[120px]">DNI Cliente</TableHead>
                         <TableHead className="w-[120px]">Estado</TableHead>
                         <TableHead className="w-[150px]">Entrega Límite</TableHead>
+                        <TableHead className="w-[100px]">Precio</TableHead>
                         <TableHead className="w-[120px]">Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -59,6 +60,9 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder , onEditOrder, 
                                     }
                                     return new Date(fechaString).toLocaleDateString()
                                 })() : "—"}
+                            </TableCell>
+                            <TableCell className="font-medium">
+                                ${order.precio.toLocaleString()}
                             </TableCell>
                             <TableCell>
                                 <div className="flex gap-1">

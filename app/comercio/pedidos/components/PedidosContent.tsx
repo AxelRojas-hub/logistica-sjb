@@ -4,8 +4,8 @@ import { useState } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
-import type { Pedido, EstadoPedido, Comercio } from "@/lib/types"
-import { CreateOrderDialog, OrderDetailsDialog, OrdersTable } from "."
+import type { Pedido, EstadoPedido, Comercio, Sucursal, Servicio } from "@/lib/types"
+import { CreateOrderDialog, EditarPedidoDialog, OrderDetailsDialog, OrdersTable } from "."
 
 interface NewOrderForm {
     // Datos del destinatario
@@ -29,17 +29,19 @@ interface NewOrderForm {
 interface PedidosContentProps {
     pedidos: Pedido[]
     comercio: Comercio
+    sucursales: Sucursal[]
+    servicioTransporte: Servicio | null
+    serviciosOpcionales: Servicio[]
 }
 
-export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosContentProps) {
+export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, servicioTransporte, serviciosOpcionales }: PedidosContentProps) {
     const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null)
     const [orders, setOrders] = useState<Pedido[]>(initialPedidos)
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
+    const [showEditDialog, setShowEditDialog] = useState(false)
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
-    const [pedidoAEditar, setPedidoAEditar] = useState<Pedido | null>(null)
-    const [showEditDialog, setShowEditDialog] = useState(false)
 
 
     const validateField = (fieldName: keyof NewOrderForm, value: unknown): string | null => {
@@ -56,7 +58,8 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
             
             case 'telefonoCliente':
                 if (!value || typeof value !== 'string' || value.trim() === "") return "El teléfono es obligatorio"
-                if (!/^\d{8,15}$/.test(value.replace(/[\s-]/g, ''))) return "El teléfono debe tener entre 8 y 15 dígitos"
+                const digitosLimpios = value.replace(/[+\s-]/g, '')
+                if (!/^\d{8,15}$/.test(digitosLimpios)) return "El teléfono debe tener entre 8 y 15 dígitos"
                 return null
             
             case 'emailCliente':
@@ -79,7 +82,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                 return null
             
             case 'tipoTransporte':
-                if (!value) return "Debe seleccionar un tipo de transporte"
+                if (!value) return "Debe tener el servicio de transporte contratado"
                 return null
             
             case 'fechaLimiteEntrega':
@@ -143,7 +146,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                 idSucursalDestino: orderData.idSucursalDestino,
                 dniCliente: orderData.dniCliente,
                 estadoPedido: "en_preparacion" as EstadoPedido,
-                precio: 0,
+                precio: result.data.precio || 0,
                 fechaEntrega: null,
                 fechaLimiteEntrega: `${orderData.fechaLimiteEntrega}T00:00:00+00:00`,
             }
@@ -198,18 +201,21 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
     }
 
     const handleEditOrder = (pedido: Pedido) => {
-        setPedidoAEditar(pedido)
+        setSelectedOrder(pedido)
         setShowEditDialog(true)
+        setError("")
+        setFieldErrors({})
     }
 
-    const handleUpdateOrder = async (orderData: NewOrderForm): Promise<boolean> => {
-        if (!pedidoAEditar) return false
-
+    const handleUpdateOrder = async (
+        orderId: number,
+        updates: { ciudadDestino: string; idSucursalDestino: number; fechaLimiteEntrega: string }
+    ): Promise<boolean> => {
         const errors: Record<string, string> = {}
-        const ciudadError = validateField('ciudadDestino', orderData.ciudadDestino)
+        const ciudadError = validateField('ciudadDestino', updates.ciudadDestino)
         if (ciudadError) errors['ciudadDestino'] = ciudadError
         
-        const fechaError = validateField('fechaLimiteEntrega', orderData.fechaLimiteEntrega)
+        const fechaError = validateField('fechaLimiteEntrega', updates.fechaLimiteEntrega)
         if (fechaError) errors['fechaLimiteEntrega'] = fechaError
         
         if (Object.keys(errors).length > 0) {
@@ -221,10 +227,10 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
         setLoading(true)
         try {
             const updateData = {
-                idPedido: pedidoAEditar.idPedido,
-                ciudadDestino: orderData.ciudadDestino,
-                idSucursalDestino: orderData.idSucursalDestino,
-                fechaLimiteEntrega: orderData.fechaLimiteEntrega
+                idPedido: orderId,
+                ciudadDestino: updates.ciudadDestino,
+                idSucursalDestino: updates.idSucursalDestino,
+                fechaLimiteEntrega: updates.fechaLimiteEntrega
             }
             
             const response = await fetch (`/api/pedidos/update`, {
@@ -243,11 +249,11 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
             }
 
             setOrders(orders.map(order =>
-                order.idPedido === pedidoAEditar.idPedido 
+                order.idPedido === orderId 
                     ? { 
                         ...order,
-                        idSucursalDestino: orderData.idSucursalDestino,
-                        fechaLimiteEntrega: `${orderData.fechaLimiteEntrega}T00:00:00+00:00`
+                        idSucursalDestino: updates.idSucursalDestino,
+                        fechaLimiteEntrega: `${updates.fechaLimiteEntrega}T00:00:00+00:00`
                     } 
                     : order
             ))
@@ -293,8 +299,9 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-foreground">Gestión de Pedidos</h1>
                     <p className="mt-2 text-muted-foreground">Crea y gestiona tus pedidos de entrega</p>
+                    
                     {comercio.estadoComercio === "deshabilitado" && (
-                        <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-400 rounded-md">
+                        <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-400 rounded-md dark:bg-red-950/50 dark:border-red-800">
                             <div className="flex">
                                 <div className="flex-shrink-0">
                                     <svg className="h-5 w-5 text-red-400" viewBox="0 0 20 20" fill="currentColor">
@@ -302,12 +309,33 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                                     </svg>
                                 </div>
                                 <div className="ml-3">
-                                    <h3 className="text-sm font-medium text-red-800">
+                                    <h3 className="text-sm font-medium text-red-800 dark:text-red-100">
                                         Comercio Deshabilitado
                                     </h3>
-                                    <div className="mt-2 text-sm text-red-700">
+                                    <div className="mt-2 text-sm text-red-700 dark:text-red-200">
                                         <p>Su cuenta está deshabilitada por facturas pendientes de pago. No puede registrar, cancelar o modificar pedidos hasta que sea reactivado.</p>
-                                        <p>Vaya a la sección <span className="font-bold" >Facturas</span> para realizar su pago y reactivar el servicio.</p>
+                                        <p>Vaya a la sección <span className="font-bold">Facturas</span> para realizar su pago y reactivar el servicio.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {comercio.estadoContrato !== "vigente" && (
+                        <div className="mt-4 p-4 bg-orange-50 border-l-4 border-orange-400 rounded-md dark:bg-orange-950/50 dark:border-orange-800">
+                            <div className="flex">
+                                <div className="flex-shrink-0">
+                                    <svg className="h-5 w-5 text-orange-400" viewBox="0 0 20 20" fill="currentColor">
+                                        <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                                    </svg>
+                                </div>
+                                <div className="ml-3">
+                                    <h3 className="text-sm font-medium text-orange-800 dark:text-orange-100">
+                                        Contrato no vigente
+                                    </h3>
+                                    <div className="mt-2 text-sm text-orange-700 dark:text-orange-200">
+                                        <p>No cuenta con un contrato vigente. No puede registrar, cancelar o modificar pedidos.</p>
+                                        <p>Vaya a la sección <span className="font-bold">Mi Contrato</span> para evaluar la situación de su contrato.</p>
                                     </div>
                                 </div>
                             </div>
@@ -321,11 +349,20 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                         <h2 className="text-2xl font-semibold text-foreground">Mis Pedidos</h2>
                         <CreateOrderDialog
                             onCreateOrder={handleCreateOrder}
-                            disabled={comercio.estadoComercio === "deshabilitado" || loading}
+                            disabled={comercio.estadoComercio === "deshabilitado" || comercio.estadoContrato !== "vigente" || loading || !servicioTransporte}
                             loading={loading}
                             error={error}
                             fieldErrors={fieldErrors}
                             onSuccess={handleOrderSuccess}
+                            onOpenChange={(open) => {
+                                if (open) {
+                                    setError("")
+                                    setFieldErrors({})
+                                }
+                            }}
+                            sucursales={sucursales}
+                            servicioTransporte={servicioTransporte}
+                            serviciosOpcionales={serviciosOpcionales}
                         />
                     </div>
 
@@ -334,31 +371,39 @@ export function PedidosContent({ pedidos: initialPedidos, comercio }: PedidosCon
                         onViewOrder={handleViewOrder}
                         onCancelOrder={handleCancelOrder}
                         onEditOrder={handleEditOrder}
-                        comercioHabilitado={comercio.estadoComercio === "habilitado"}
+                        comercioHabilitado={comercio.estadoComercio === "habilitado" && comercio.estadoContrato == "vigente"}
                     />
 
                     <OrderDetailsDialog
                         order={selectedOrder}
                         isOpen={showDetailsDialog}
                         onOpenChange={setShowDetailsDialog}
+                        sucursales={sucursales}
                     />
 
-                    <CreateOrderDialog
-                        open={showEditDialog}
-                        onOpenChange={setShowEditDialog}
-                        onCreateOrder={handleUpdateOrder}
-                        initialValues={pedidoAEditar}
-                        modoEdicion={true}
-                        disabled={loading}
-                        loading={loading}
-                        error={error}
-                        fieldErrors={fieldErrors}
-                        onSuccess={() => {
-                            setShowEditDialog(false)
-                            setPedidoAEditar(null)
-                            handleOrderSuccess()
-                        }}
-                    />
+                    {selectedOrder && showEditDialog && (
+                        <EditarPedidoDialog
+                            pedido={selectedOrder}
+                            open={showEditDialog}
+                            onOpenChange={(open) => {
+                                setShowEditDialog(open)
+                                if (!open) {
+                                    setError("")
+                                    setFieldErrors({})
+                                }
+                            }}
+                            onUpdateOrder={handleUpdateOrder}
+                            loading={loading}
+                            error={error}
+                            fieldErrors={fieldErrors}
+                            onSuccess={() => {
+                                setShowEditDialog(false)
+                                setSelectedOrder(null)
+                                handleOrderSuccess()
+                            }}
+                            sucursales={sucursales}
+                        />
+                    )}
 
                 </div>
             </div>

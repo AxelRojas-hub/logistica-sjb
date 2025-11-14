@@ -4,7 +4,7 @@ import { ContratoStatusBadge } from "./ContratoStatusBadge"
 import { DetalleContrato } from "./DetalleContrato"
 import { Button } from "@/components/ui/button"
 import Link from "next/link"
-import { Plus } from "lucide-react"
+import { Plus, RefreshCw, PlusCircle } from "lucide-react"
 
 interface ContratoCardProps {
     contrato: Contrato | null
@@ -44,12 +44,20 @@ export function ContratoCard({ contrato }: ContratoCardProps) {
             <CardContent className="space-y-6">
                 <DetalleContrato contrato={contrato} />
                 <div className="flex gap-2 pt-4 border-t">
-                    <Button className="dark:text-white bg-blue-600 hover:bg-blue-700">
+                    <Button
+                    className="dark:text-white bg-blue-600 hover:bg-blue-700"
+                    disabled={contrato.estadoContrato !== 'vencido'}>
+                        <RefreshCw className="h-4 w-4" /> 
                         Renovar Contrato
                     </Button>
-                    <Button variant="outline">
-                        Modificar Plan
-                    </Button>
+                    <Link href={`/comercio/contrato/ampliar`}>
+                        <Button
+                        variant="outline"
+                        disabled={contrato.estadoContrato !== 'vigente'}>
+                            <PlusCircle className="h-4 w-4" />
+                            Modificar Plan
+                        </Button>
+                    </Link>
                 </div>
             </CardContent>
         </Card>
