@@ -9,9 +9,18 @@ export default async function ComercioPedidosPage() {
     const supabase = await createClient()
     const user = await supabase.auth.getUser();
     const idCuentaComercio = user.data.user?.user_metadata.idCuentaComercio;
-    const { data: comercioData } = await supabase.from('comercio').select('*').eq('id_cuenta_comercio', idCuentaComercio).single();
+    const { data: comercioData } = await supabase
+        .from('comercio')
+        .select('*, contrato(estado_contrato)')
+        .eq('id_cuenta_comercio', idCuentaComercio)
+        .single();
     
     const comercio = mapRowToComercio(comercioData)
+    // Agregar estado del contrato si existe
+    if (comercioData?.contrato) {
+        const contrato = Array.isArray(comercioData.contrato) ? comercioData.contrato[0] : comercioData.contrato
+        comercio.estadoContrato = (contrato as { estado_contrato: string })?.estado_contrato as typeof comercio.estadoContrato
+    }
     const idComercio = comercio.idComercio;
 
     let pedidos: Pedido[] = []
