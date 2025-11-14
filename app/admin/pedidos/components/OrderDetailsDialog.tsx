@@ -17,6 +17,7 @@ interface OrderDetailsDialogProps {
 export default function OrderDetailsDialog({ order, children }: OrderDetailsDialogProps) {
     const pedidoConDetalles = order as PedidoConDetalles
     const direccionSucursal = pedidoConDetalles.direccionSucursalDestino || `ID Sucursal: ${order.idSucursalDestino}`
+    const nombreComercio = pedidoConDetalles.nombreComercio || 'Sin nombre'
     
     // Calcular si entrega tardía
     const entregaTardia = order.estadoPedido === 'entregado' && 
@@ -120,8 +121,12 @@ export default function OrderDetailsDialog({ order, children }: OrderDetailsDial
                         </h3>
                         <div className="grid grid-cols-1 gap-2 pl-7">
                             <div className="flex justify-between py-2 border-b">
+                                <span className="text-muted-foreground">Comercio</span>
+                                <span className="font-medium">{nombreComercio}</span>
+                            </div>
+                            <div className="flex justify-between py-2 border-b">
                                 <span className="text-muted-foreground">ID Comercio</span>
-                                <span className="font-medium">{order.idComercio}</span>
+                                <span className="font-medium">#{order.idComercio}</span>
                             </div>
                             <div className="flex justify-between py-2 border-b">
                                 <span className="text-muted-foreground">Sucursal Destino</span>
