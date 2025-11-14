@@ -4,6 +4,7 @@ import { SupabaseClient } from "@supabase/supabase-js"
 export interface PedidoConDetalles extends Pedido {
     nombreComercio?: string
     ciudadDestino?: string
+    direccionSucursalDestino?: string
 }
 
 
@@ -32,6 +33,7 @@ function mapRowToPedidoConDetalles(row: Record<string, unknown>): PedidoConDetal
         ...pedidoBase,
         nombreComercio: comercio?.nombre_comercio as string | undefined,
         ciudadDestino: sucursal?.ciudad_sucursal as string | undefined,
+        direccionSucursalDestino: sucursal?.direccion_sucursal as string | undefined,
     }
 }
 
@@ -266,4 +268,103 @@ export async function calcularPrecioPedido(
         precioSinDescuento,
         descuentoPorcentaje: descuento
     }
+}
+
+/**
+ * Obtiene todos los pedidos relevantes para un administrador de sucursal:
+ * - Todos los pedidos de comercios cuya sucursal de origen es la del admin (cualquier estado)
+ * - Pedidos con estado 'en_sucursal' cuya sucursal de destino es la del admin
+ * 
+ * @param supabase Cliente de Supabase (server)
+ * @returns Objeto con pedidos, idSucursalAdmin, y legajo del admin
+ */
+export async function getPedidosPorSucursalAdmin(
+    supabase: SupabaseClient
+): Promise<{ pedidos: PedidoConDetalles[], idSucursalAdmin: number | null, legajoAdmin: number | null }> {
+    const { data: { user }, error: authError } = await supabase.auth.getUser()
+    
+    if (authError || !user?.user_metadata?.legajo) {
+        console.error("Error al obtener usuario:", authError)
+        return { pedidos: [], idSucursalAdmin: null, legajoAdmin: null }
+    }
+
+    const legajoAdmin = user.user_metadata.legajo
+
+    const { data: adminData, error: adminError } = await supabase
+        .from("administrador")
+        .select("id_sucursal")
+        .eq("legajo_empleado", legajoAdmin)
+        .single()
+
+    if (adminError || !adminData) {
+        console.error("Error al obtener datos del administrador:", adminError)
+        return { pedidos: [], idSucursalAdmin: null, legajoAdmin }
+    }
+
+    const idSucursalAdmin = adminData.id_sucursal
+
+    const [
+        { data: pedidosOrigen, error: errorOrigen },
+        { data: pedidosDestino, error: errorDestino }
+    ] = await Promise.all([
+        supabase
+            .from("pedido")
+            .select(`
+                *,
+                comercio!inner(
+                    id_comercio,
+                    id_sucursal_origen,
+                    nombre_comercio
+                ),
+                sucursal(
+                    id_sucursal,
+                    ciudad_sucursal,
+                    direccion_sucursal
+                )
+            `)
+            .eq("comercio.id_sucursal_origen", idSucursalAdmin),
+        
+        supabase
+            .from("pedido")
+            .select(`
+                *,
+                comercio(
+                    id_comercio,
+                    id_sucursal_origen,
+                    nombre_comercio
+                ),
+                sucursal(
+                    id_sucursal,
+                    ciudad_sucursal,
+                    direccion_sucursal
+                )
+            `)
+            .in("estado_pedido", ["en_sucursal", "entregado"])
+            .eq("id_sucursal_destino", idSucursalAdmin)
+    ])
+
+    if (errorOrigen) {
+        console.error("Error al obtener pedidos por origen:", errorOrigen)
+    }
+
+    if (errorDestino) {
+        console.error("Error al obtener pedidos por destino:", errorDestino)
+    }
+
+    const pedidosMap = new Map<number, Record<string, unknown>>()
+    
+    ;(pedidosOrigen || []).forEach(pedido => {
+        pedidosMap.set(pedido.id_pedido, pedido)
+    })
+    
+    ;(pedidosDestino || []).forEach(pedido => {
+        pedidosMap.set(pedido.id_pedido, pedido)
+    })
+
+    const pedidosUnicos = Array.from(pedidosMap.values())
+    pedidosUnicos.sort((a, b) => (b.id_pedido as number) - (a.id_pedido as number))
+
+    const pedidos = pedidosUnicos.map(mapRowToPedidoConDetalles)
+
+    return { pedidos, idSucursalAdmin, legajoAdmin }
 }

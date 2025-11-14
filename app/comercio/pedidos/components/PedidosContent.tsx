@@ -349,7 +349,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                         <h2 className="text-2xl font-semibold text-foreground">Mis Pedidos</h2>
                         <CreateOrderDialog
                             onCreateOrder={handleCreateOrder}
-                            disabled={comercio.estadoComercio === "deshabilitado" || comercio.estadoContrato !== "vigente" || loading || !servicioTransporte}
+                            disabled={comercio.estadoComercio === "deshabilitado" || comercio.estadoContrato !== "vigente" || loading}
                             loading={loading}
                             error={error}
                             fieldErrors={fieldErrors}
