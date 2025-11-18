@@ -4,6 +4,7 @@ import { Card } from "@/components/ui/card"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Eye, X, Pencil } from "lucide-react"
 import type { Pedido } from "@/lib/types"
+import type { PedidoConDetalles } from "@/lib/models/Pedido"
 import { OrderStatusBadge } from "./PedidoStatusBadge"
 import { useState } from "react"
 import {
@@ -26,7 +27,7 @@ interface OrdersTableProps {
     comercioHabilitado?: boolean
 }
 
-export function OrdersTable({ orders, onViewOrder, onCancelOrder , onEditOrder, comercioHabilitado = true }: OrdersTableProps) {
+export function OrdersTable({ orders, onViewOrder, onCancelOrder, onEditOrder, comercioHabilitado = true }: OrdersTableProps) {
     const [cancelId, setCancelId] = useState<number | null>(null)
     return (
         <Card className="overflow-hidden">
@@ -38,94 +39,121 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder , onEditOrder, 
                         <TableHead className="w-[120px]">Estado</TableHead>
                         <TableHead className="w-[150px]">Entrega Límite</TableHead>
                         <TableHead className="w-[100px]">Precio</TableHead>
+                        <TableHead className="w-[180px]">Período Facturación</TableHead>
+                        <TableHead className="w-[120px]">Estado Pago</TableHead>
                         <TableHead className="w-[120px]">Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {orders.map((order) => (
-                        <TableRow key={order.idPedido} className="hover:bg-accent/50">
-                            <TableCell className="font-medium">#{order.idPedido}</TableCell>
-                            <TableCell>{order.dniCliente}</TableCell>
-                            <TableCell>
-                                <OrderStatusBadge status={order.estadoPedido} />
-                            </TableCell>
-                            <TableCell>
-                                {order.fechaLimiteEntrega ? (() => {
-                                    // Evitar problemas de zona horaria al mostrar fecha
-                                    const fechaString = order.fechaLimiteEntrega
-                                    if (fechaString.includes('T')) {
-                                        const fechaParte = fechaString.split('T')[0]
-                                        const [year, month, day] = fechaParte.split('-')
-                                        return `${day}/${month}/${year}`
-                                    }
-                                    return new Date(fechaString).toLocaleDateString()
-                                })() : "—"}
-                            </TableCell>
-                            <TableCell className="font-medium">
-                                ${order.precio.toLocaleString()}
-                            </TableCell>
-                            <TableCell>
-                                <div className="flex gap-1">
-                                    <Button
-                                        variant="outline"
-                                        size="sm"
-                                        onClick={() => onViewOrder(order)}
-                                    >
-                                        <Eye className="h-4 w-4" />
-                                    </Button>
-                                    {order.estadoPedido === "en_preparacion" && (
-                                    <Button
-                                    variant="secondary"
-                                    size="sm"
-                                    disabled={!comercioHabilitado}
-                                    onClick={()=> onEditOrder(order)}
-                                    >
-                                    <Pencil className="h-4 w-4" />
-                                    </Button>
-                                    ) } 
-                                    {order.estadoPedido === "en_preparacion" && (
-                                        <AlertDialog>
-                                            <AlertDialogTrigger asChild>
-                                                <Button
-                                                    variant="destructive"
-                                                    size="sm"
-                                                    disabled={!comercioHabilitado}
-                                                    onClick={() => setCancelId(order.idPedido)}
-                                                >
-                                                    <X className="h-4 w-4" />
-                                                </Button>
-                                            </AlertDialogTrigger>
-                                            <AlertDialogContent>
-                                                <AlertDialogHeader>
-                                                    <AlertDialogTitle>
-                                                        ¿Seguro que desea cancelar el pedido?
-                                                    </AlertDialogTitle>
-                                                    <AlertDialogDescription>
-                                                        Esta acción NO se puede deshacer.
-                                                    </AlertDialogDescription>
-                                                </AlertDialogHeader>
-                                                <AlertDialogFooter>
-                                                    <AlertDialogCancel onClick={() => setCancelId(null)}>
-                                                        No
-                                                    </AlertDialogCancel>
-                                                    <AlertDialogAction
-                                                        onClick={() => {
-                                                            if (cancelId !== null) {
-                                                                onCancelOrder(cancelId)
-                                                                setCancelId(null)
-                                                            }
-                                                        }}
-                                                    >
-                                                        Sí, cancelar
-                                                    </AlertDialogAction>
-                                                </AlertDialogFooter>
-                                            </AlertDialogContent>
-                                        </AlertDialog>
+                    {orders.map((order) => {
+                        const pedidoConDetalles = order as PedidoConDetalles
+                        return (
+                            <TableRow key={order.idPedido} className="hover:bg-accent/50">
+                                <TableCell className="font-medium">#{order.idPedido}</TableCell>
+                                <TableCell>{order.dniCliente}</TableCell>
+                                <TableCell>
+                                    <OrderStatusBadge status={order.estadoPedido} />
+                                </TableCell>
+                                <TableCell>
+                                    {order.fechaLimiteEntrega ? (() => {
+                                        // Evitar problemas de zona horaria al mostrar fecha
+                                        const fechaString = order.fechaLimiteEntrega
+                                        if (fechaString.includes('T')) {
+                                            const fechaParte = fechaString.split('T')[0]
+                                            const [year, month, day] = fechaParte.split('-')
+                                            return `${day}/${month}/${year}`
+                                        }
+                                        return new Date(fechaString).toLocaleDateString()
+                                    })() : "—"}
+                                </TableCell>
+                                <TableCell className="font-medium">
+                                    ${order.precio.toLocaleString()}
+                                </TableCell>
+                                <TableCell className="text-center text-sm">
+                                    {pedidoConDetalles.periodoFacturacion ? (
+                                        <span className="text-muted-foreground">
+                                            {pedidoConDetalles.periodoFacturacion}
+                                        </span>
+                                    ) : (
+                                        <span className="text-muted-foreground">—</span>
                                     )}
-                                </div>
-                            </TableCell>
-                        </TableRow>
-                    ))}
+                                </TableCell>
+                                <TableCell className="text-center">
+                                    {pedidoConDetalles.estadoPago ? (
+                                        <span className={`text-sm font-medium px-2 py-1 rounded-md ${pedidoConDetalles.estadoPago === 'pagado' ? 'bg-green-100 text-green-800' :
+                                                pedidoConDetalles.estadoPago === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
+                                                    pedidoConDetalles.estadoPago === 'vencido' ? 'bg-red-100 text-red-800' :
+                                                        'bg-gray-100 text-gray-800'
+                                            }`}>
+                                            {pedidoConDetalles.estadoPago.charAt(0).toUpperCase() + pedidoConDetalles.estadoPago.slice(1)}
+                                        </span>
+                                    ) : (
+                                        <span className="text-sm text-muted-foreground">—</span>
+                                    )}
+                                </TableCell>
+                                <TableCell>
+                                    <div className="flex gap-1">
+                                        <Button
+                                            variant="outline"
+                                            size="sm"
+                                            onClick={() => onViewOrder(order)}
+                                        >
+                                            <Eye className="h-4 w-4" />
+                                        </Button>
+                                        {order.estadoPedido === "en_preparacion" && (
+                                            <Button
+                                                variant="secondary"
+                                                size="sm"
+                                                disabled={!comercioHabilitado}
+                                                onClick={() => onEditOrder(order)}
+                                            >
+                                                <Pencil className="h-4 w-4" />
+                                            </Button>
+                                        )}
+                                        {order.estadoPedido === "en_preparacion" && (
+                                            <AlertDialog>
+                                                <AlertDialogTrigger asChild>
+                                                    <Button
+                                                        variant="destructive"
+                                                        size="sm"
+                                                        disabled={!comercioHabilitado}
+                                                        onClick={() => setCancelId(order.idPedido)}
+                                                    >
+                                                        <X className="h-4 w-4" />
+                                                    </Button>
+                                                </AlertDialogTrigger>
+                                                <AlertDialogContent>
+                                                    <AlertDialogHeader>
+                                                        <AlertDialogTitle>
+                                                            ¿Seguro que desea cancelar el pedido?
+                                                        </AlertDialogTitle>
+                                                        <AlertDialogDescription>
+                                                            Esta acción NO se puede deshacer.
+                                                        </AlertDialogDescription>
+                                                    </AlertDialogHeader>
+                                                    <AlertDialogFooter>
+                                                        <AlertDialogCancel onClick={() => setCancelId(null)}>
+                                                            No
+                                                        </AlertDialogCancel>
+                                                        <AlertDialogAction
+                                                            onClick={() => {
+                                                                if (cancelId !== null) {
+                                                                    onCancelOrder(cancelId)
+                                                                    setCancelId(null)
+                                                                }
+                                                            }}
+                                                        >
+                                                            Sí, cancelar
+                                                        </AlertDialogAction>
+                                                    </AlertDialogFooter>
+                                                </AlertDialogContent>
+                                            </AlertDialog>
+                                        )}
+                                    </div>
+                                </TableCell>
+                            </TableRow>
+                        )
+                    })}
                 </TableBody>
             </Table>
         </Card>

@@ -5,6 +5,8 @@ export interface PedidoConDetalles extends Pedido {
     nombreComercio?: string
     ciudadDestino?: string
     direccionSucursalDestino?: string
+    periodoFacturacion?: string // "fechaInicio - fechaFin"
+    estadoPago?: string
 }
 
 
@@ -28,19 +30,45 @@ function mapRowToPedidoConDetalles(row: Record<string, unknown>): PedidoConDetal
 
     const comercio = row.comercio as Record<string, unknown> | null
     const sucursal = row.sucursal as Record<string, unknown> | null
+    const factura = row.factura as Record<string, unknown> | null
+
+    let periodoFacturacion: string | undefined
+    let estadoPago: string | undefined
+
+    if (factura) {
+        const fechaInicio = factura.fecha_inicio as string | undefined
+        const fechaFin = factura.fecha_fin as string | undefined
+        const estadoPagoFactura = factura.estado_pago as string | undefined
+
+        if (fechaInicio && fechaFin) {
+            periodoFacturacion = `${fechaInicio} - ${fechaFin}`
+        }
+
+        estadoPago = estadoPagoFactura
+    }
 
     return {
         ...pedidoBase,
         nombreComercio: comercio?.nombre_comercio as string | undefined,
         ciudadDestino: sucursal?.ciudad_sucursal as string | undefined,
         direccionSucursalDestino: sucursal?.direccion_sucursal as string | undefined,
+        periodoFacturacion,
+        estadoPago,
     }
 }
 
 export async function getPedidosByComercio(supabase: SupabaseClient, idComercio: number): Promise<Pedido[]> {
     const { data, error } = await supabase
         .from("pedido")
-        .select("*")
+        .select(`
+            *,
+            factura(
+                id_factura,
+                fecha_inicio,
+                fecha_fin,
+                estado_pago
+            )
+        `)
         .eq("id_comercio", idComercio)
         .order("id_pedido", { ascending: false })
 
@@ -49,7 +77,25 @@ export async function getPedidosByComercio(supabase: SupabaseClient, idComercio:
         return []
     }
 
-    return (data || []).map(mapRowToPedido)
+    return (data || []).map(row => {
+        const pedido = mapRowToPedido(row)
+        const factura = row.factura as Record<string, unknown> | null
+
+        if (factura) {
+            const fechaInicio = factura.fecha_inicio as string | undefined
+            const fechaFin = factura.fecha_fin as string | undefined
+            const estadoPagoFactura = factura.estado_pago as string | undefined
+
+            // Agregar información de factura al pedido
+            const pedidoConFactura = pedido as PedidoConDetalles
+            if (fechaInicio && fechaFin) {
+                pedidoConFactura.periodoFacturacion = `${fechaInicio} - ${fechaFin}`
+            }
+            pedidoConFactura.estadoPago = estadoPagoFactura
+        }
+
+        return pedido
+    })
 }
 
 export async function getPedidos(supabase: SupabaseClient): Promise<Pedido[]> {
@@ -166,6 +212,12 @@ export async function getPedidosPendientesConSucursalAdmin(supabase: SupabaseCli
             sucursal(
                 id_sucursal,
                 ciudad_sucursal
+            ),
+            factura(
+                id_factura,
+                fecha_inicio,
+                fecha_fin,
+                estado_pago
             )
         `)
         .eq("estado_pedido", "en_preparacion")
@@ -255,14 +307,14 @@ export async function calcularPrecioPedido(
             .select("descuento")
             .eq("id_contrato", comercioData.id_contrato)
             .single()
-        
+
         descuento = contratoData?.descuento || 0
     }
 
     // Aplicar descuento solo al costo de transporte
     const costoTransporteConDescuento = costoTransporte * (1 - descuento / 100)
     const precioFinal = costoTransporteConDescuento + costoAdicionales
-    
+
     return {
         precioFinal,
         precioSinDescuento,
@@ -282,7 +334,7 @@ export async function getPedidosPorSucursalAdmin(
     supabase: SupabaseClient
 ): Promise<{ pedidos: PedidoConDetalles[], idSucursalAdmin: number | null, legajoAdmin: number | null }> {
     const { data: { user }, error: authError } = await supabase.auth.getUser()
-    
+
     if (authError || !user?.user_metadata?.legajo) {
         console.error("Error al obtener usuario:", authError)
         return { pedidos: [], idSucursalAdmin: null, legajoAdmin: null }
@@ -320,10 +372,16 @@ export async function getPedidosPorSucursalAdmin(
                     id_sucursal,
                     ciudad_sucursal,
                     direccion_sucursal
+                ),
+                factura(
+                    id_factura,
+                    fecha_inicio,
+                    fecha_fin,
+                    estado_pago
                 )
             `)
             .eq("comercio.id_sucursal_origen", idSucursalAdmin),
-        
+
         supabase
             .from("pedido")
             .select(`
@@ -337,6 +395,12 @@ export async function getPedidosPorSucursalAdmin(
                     id_sucursal,
                     ciudad_sucursal,
                     direccion_sucursal
+                ),
+                factura(
+                    id_factura,
+                    fecha_inicio,
+                    fecha_fin,
+                    estado_pago
                 )
             `)
             .in("estado_pedido", ["en_sucursal", "entregado"])
@@ -352,14 +416,14 @@ export async function getPedidosPorSucursalAdmin(
     }
 
     const pedidosMap = new Map<number, Record<string, unknown>>()
-    
-    ;(pedidosOrigen || []).forEach(pedido => {
-        pedidosMap.set(pedido.id_pedido, pedido)
-    })
-    
-    ;(pedidosDestino || []).forEach(pedido => {
-        pedidosMap.set(pedido.id_pedido, pedido)
-    })
+
+        ; (pedidosOrigen || []).forEach(pedido => {
+            pedidosMap.set(pedido.id_pedido, pedido)
+        })
+
+        ; (pedidosDestino || []).forEach(pedido => {
+            pedidosMap.set(pedido.id_pedido, pedido)
+        })
 
     const pedidosUnicos = Array.from(pedidosMap.values())
     pedidosUnicos.sort((a, b) => (b.id_pedido as number) - (a.id_pedido as number))
