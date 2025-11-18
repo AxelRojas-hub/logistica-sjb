@@ -11,6 +11,21 @@ interface ComercioInfo {
         direccionSucursal: string;
         ciudadSucursal: string;
     };
+    pedidos?: Array<{
+        id_pedido: number;
+        precio: number;
+        estado_pedido: string;
+        fecha_entrega?: string;
+        fecha_limite_entrega?: string;
+        sucursal?: {
+            ciudad_sucursal: string;
+        };
+        pedido_servicio?: Array<{
+            servicio?: {
+                nombre_servicio: string;
+            };
+        }>;
+    }>;
 }
 
 interface ComercioMoroso {
@@ -131,73 +146,178 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
     doc.text(`Nombre: ${comercio.nombreComercio}`, 120, 92);
     doc.text(`Dirección: ${comercio.direccion}`, 120, 99);
 
+    // Obtener datos de pedidos
+    const pedidosData = (comercio as unknown as Record<string, unknown>)?.pedidos || [];
+    const pedidosArray = Array.isArray(pedidosData) ? pedidosData : [];
 
-    // Tabla de servicios/conceptos
-    const tableStartY = 135;
+    // Función para formatear estado
+    const formatearEstado = (estado: string): string => {
+        const estadoMap: Record<string, string> = {
+            'en_camino': 'En camino',
+            'cancelado': 'Cancelado',
+            'en_sucursal': 'En sucursal',
+            'entregado': 'Entregado'
+        };
+        return estadoMap[estado.toLowerCase()] || estado;
+    };
 
-    //TODO: TRAER DATOS DE LA BD ACA
-    const tableData = [
-        ['Servicios de Logística', 'Mes ' + new Date(factura.fechaInicio).toLocaleDateString('es-AR', { month: 'long', year: 'numeric' }), '1', `$${(factura.importeTotal * 0.8).toLocaleString('es-AR')}`, `$${(factura.importeTotal * 0.8).toLocaleString('es-AR')}`],
-        ['Otros Servicios', 'Servicios adicionales', '1', `$${(factura.importeTotal * 0.2).toLocaleString('es-AR')}`, `$${(factura.importeTotal * 0.05).toLocaleString('es-AR')}`],
-    ];
+    let tableStartY = 135;
 
-    autoTable(doc, {
-        startY: tableStartY,
-        head: [['Concepto', 'Descripción', 'Cantidad', 'Precio Unitario', 'Importe']],
-        body: tableData,
-        theme: 'striped',
-        headStyles: {
-            fillColor: [0, 0, 0], // blue-500
-            textColor: 255,
-            fontSize: 10,
-            fontStyle: 'bold'
-        },
-        bodyStyles: {
-            fontSize: 9,
-            textColor: [31, 41, 55] // gray-800
-        },
-        alternateRowStyles: {
-            fillColor: [249, 250, 251] // gray-50
-        },
-        columnStyles: {
-            0: { cellWidth: 40 },
-            1: { cellWidth: 60 },
-            2: { cellWidth: 20, halign: 'center' },
-            3: { cellWidth: 30, halign: 'right' },
-            4: { cellWidth: 30, halign: 'right' }
-        },
-        margin: { left: 20, right: 20 }
-    });
-
-    // Obtener la posición Y después de la tabla
-    const finalY = doc.lastAutoTable.finalY || tableStartY + 60;
-
-    // Total
-    const totalsStartY = finalY + 10;
-
-    doc.setFont('helvetica', 'bold');
-    doc.setFontSize(14);
-    doc.setTextColor(accentColor);
-    doc.text('TOTAL:', 140, totalsStartY);
-    doc.text(`$${factura.importeTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 170, totalsStartY);
-
-    // Información de pago si está pagada
-    if (factura.estadoPago === 'pagado' && factura.fechaPago && factura.nroPago) {
-        doc.setTextColor(primaryColor);
+    // Resumen de servicios en la primera página
+    if (pedidosArray.length > 0) {
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(10);
-        doc.text('INFORMACIÓN DE PAGO', 20, totalsStartY + 25);
+        doc.setFontSize(12);
+        doc.setTextColor(primaryColor);
+        doc.text('RESUMEN DE SERVICIOS', 20, tableStartY);
+        tableStartY += 10;
 
-        doc.setFont('helvetica', 'normal');
-        doc.text(`Fecha de Pago: ${new Date(factura.fechaPago).toLocaleDateString('es-AR')}`, 20, totalsStartY + 32);
-        doc.text(`Número de Pago: ${factura.nroPago}`, 20, totalsStartY + 39);
+        // Contar servicios por tipo
+        const serviciosMap = new Map<string, { cantidad: number; monto: number }>();
+        let montoTotal = 0;
+
+        pedidosArray.forEach((pedido: Record<string, unknown>) => {
+            const pedidoServicios = pedido.pedido_servicio as unknown;
+            const precio = (pedido.precio as number) || 0;
+            montoTotal += precio;
+
+            if (Array.isArray(pedidoServicios) && pedidoServicios.length > 0) {
+                (pedidoServicios as Array<Record<string, unknown>>).forEach((ps: Record<string, unknown>) => {
+                    const servicio = ps.servicio as Record<string, unknown> | undefined;
+                    const nombreServicio = (servicio?.nombre_servicio as string) || 'Transporte';
+
+                    const current = serviciosMap.get(nombreServicio) || { cantidad: 0, monto: 0 };
+                    current.cantidad += 1;
+                    current.monto += precio;
+                    serviciosMap.set(nombreServicio, current);
+                });
+            } else {
+                // Sin servicios específicos = Transporte
+                const current = serviciosMap.get('Transporte') || { cantidad: 0, monto: 0 };
+                current.cantidad += 1;
+                current.monto += precio;
+                serviciosMap.set('Transporte', current);
+            }
+        });
+
+        const serviciosTableData = Array.from(serviciosMap.entries()).map(([nombre, datos]) => [
+            nombre,
+            datos.cantidad.toString(),
+            `$${datos.monto.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+        ]);
+
+        autoTable(doc, {
+            startY: tableStartY,
+            head: [['Servicio', '               Cantidad', '                           Costo Total']],
+            body: serviciosTableData,
+            theme: 'striped',
+            headStyles: {
+                fillColor: [0, 0, 0],
+                textColor: 255,
+                fontSize: 9,
+                fontStyle: 'bold'
+            },
+            bodyStyles: {
+                fontSize: 8,
+                textColor: [31, 41, 55]
+            },
+            alternateRowStyles: {
+                fillColor: [249, 250, 251]
+            },
+            columnStyles: {
+                0: { cellWidth: 80, halign: 'left' },
+                1: { cellWidth: 45, halign: 'center' },
+                2: { cellWidth: 45, halign: 'right' }
+            },
+            margin: { left: 20, right: 20 }
+        });
+
+        let finalY = doc.lastAutoTable.finalY || tableStartY + 40;
+        finalY += 15;
+
+        // Mostrar total de servicios
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(11);
+        doc.setTextColor(accentColor);
+        doc.text('TOTAL:', 120, finalY);
+        doc.text(`$${montoTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 150, finalY);
+
+        // Información de pago si está pagada (en la primera página)
+        if (factura.estadoPago === 'pagado' && factura.fechaPago && factura.nroPago) {
+            finalY += 20;
+            doc.setTextColor(primaryColor);
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(10);
+            doc.text('INFORMACIÓN DE PAGO', 20, finalY);
+
+            doc.setFont('helvetica', 'normal');
+            doc.text(`Fecha de Pago: ${new Date(factura.fechaPago).toLocaleDateString('es-AR')}`, 20, finalY + 7);
+            doc.text(`Número de Pago: ${factura.nroPago}`, 20, finalY + 14);
+        }
+
+        // Nueva página para detalle de pedidos
+        if (pedidosArray.length > 0) {
+            doc.addPage();
+
+            // Título de detalle de pedidos
+            doc.setFont('helvetica', 'bold');
+            doc.setFontSize(12);
+            doc.setTextColor(primaryColor);
+            doc.text('DETALLE DE PEDIDOS', 20, 20);
+
+            // Tabla de pedidos en la nueva página
+            const pedidosTableData = pedidosArray.map((pedido: Record<string, unknown>) => {
+                const sucursal = pedido.sucursal as Record<string, unknown> | undefined;
+                const destino = (sucursal?.ciudad_sucursal as string) || 'N/A';
+                const fechaEntrega = pedido.fecha_entrega as string | null;
+                const fechaLimite = pedido.fecha_limite_entrega as string | null;
+                const estado = (pedido.estado_pedido as string) || 'N/A';
+
+                return [
+                    (pedido.id_pedido as number).toString(),
+                    formatearEstado(estado),
+                    destino,
+                    fechaEntrega ? new Date(fechaEntrega).toLocaleDateString('es-AR') : 'N/A',
+                    fechaLimite ? new Date(fechaLimite).toLocaleDateString('es-AR') : 'N/A',
+                    (pedido.precio as number).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
+                ];
+            });
+
+            autoTable(doc, {
+                startY: 30,
+                head: [['ID Pedido', 'Estado', 'Destino', 'Fecha Entrega', 'Fecha Límite', '                            Monto']],
+                body: pedidosTableData,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: [0, 0, 0],
+                    textColor: 255,
+                    fontSize: 8,
+                    fontStyle: 'bold'
+                },
+                bodyStyles: {
+                    fontSize: 7,
+                    textColor: [31, 41, 55]
+                },
+                alternateRowStyles: {
+                    fillColor: [249, 250, 251]
+                },
+                columnStyles: {
+                    0: { cellWidth: 20, halign: 'center' },
+                    1: { cellWidth: 28, halign: 'left' },
+                    2: { cellWidth: 36, halign: 'left' },
+                    3: { cellWidth: 31, halign: 'left' },
+                    4: { cellWidth: 31, halign: 'left' },
+                    5: { cellWidth: 34, halign: 'right' }
+                },
+                margin: { left: 20, right: 20 }
+            });
+        }
     }
 
     // Footer
-    const pageHeight = doc.internal.pageSize.height;
+    const pageHeightForFooter = doc.internal.pageSize.height;
     doc.setFontSize(8);
     doc.setTextColor(secondaryColor);
-    doc.text('Este documento ha sido generado automáticamente por el Sistema Logística SJB', 20, pageHeight - 20);
+    doc.text('Este documento ha sido generado automáticamente por el Sistema Logística SJB', 20, pageHeightForFooter - 20);
 
     // Fecha y hora en zona horaria de Buenos Aires
     const now = new Date();
@@ -213,11 +333,11 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
         minute: '2-digit',
         hour12: false // Formato 24 horas
     });
-    doc.text(`Generado el: ${buenosAiresDate} a las ${buenosAiresTime}`, 20, pageHeight - 15);
+    doc.text(`Generado el: ${buenosAiresDate} a las ${buenosAiresTime}`, 20, pageHeightForFooter - 15);
 
     // Línea en el footer
     doc.setDrawColor(200, 200, 200);
-    doc.line(20, pageHeight - 25, 190, pageHeight - 25);
+    doc.line(20, pageHeightForFooter - 25, 190, pageHeightForFooter - 25);
 
     return doc;
 }
