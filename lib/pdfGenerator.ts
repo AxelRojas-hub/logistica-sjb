@@ -55,6 +55,14 @@ interface BillingReportData {
         ciudadSucursal: string;
         direccionSucursal: string;
     };
+    comerciosDetalle?: Array<{
+        nombreComercio: string;
+        servicios: Array<{
+            nombreServicio: string;
+            cantidadPedidos: number;
+            montoFacturado: number;
+        }>;
+    }>;
 }
 
 export async function generateInvoicePDF(factura: Factura, comercio: ComercioInfo) {
@@ -505,29 +513,88 @@ async function generateBillingReportPDF(data: BillingReportData): Promise<jsPDFC
     // Obtener la posición Y después de la tabla
     yPosition = (doc).lastAutoTable.finalY + 20;
 
-    // Notas adicionales al final de la página, antes del footer
-    const notasY = pageHeight - 55; // Posición fija cerca del footer
-    doc.setFont('helvetica', 'normal');
-    doc.setFontSize(10);
-    doc.text('NOTAS:', marginLeft, notasY);
-    doc.text('• Este reporte incluye todas las facturas del período seleccionado', marginLeft + 5, notasY + 8);
-    doc.text('• Los montos están expresados en pesos argentinos', marginLeft + 5, notasY + 14);
-    doc.text('• Las facturas vencidas requieren seguimiento para su cobro', marginLeft + 5, notasY + 20);
+    // Tabla de detalles por comercio y servicio
+    if (data.comerciosDetalle && data.comerciosDetalle.length > 0) {
+        // Verificar si hay espacio en la página actual, si no crear nueva página
+        if (yPosition > pageHeight - 100) {
+            doc.addPage();
+            yPosition = 20;
+        }
+
+        doc.setFont('helvetica', 'bold');
+        doc.setFontSize(12);
+        doc.text('DETALLE POR COMERCIO Y SERVICIO', marginLeft, yPosition);
+        yPosition += 10;
+
+        const comerciosTableData: string[][] = [];
+
+        data.comerciosDetalle?.forEach((comercio: { nombreComercio: string; servicios: Array<{ nombreServicio: string; cantidadPedidos: number; montoFacturado: number }> }) => {
+            comercio.servicios.forEach((servicio: { nombreServicio: string; cantidadPedidos: number; montoFacturado: number }, index: number) => {
+                comerciosTableData.push([
+                    index === 0 ? comercio.nombreComercio : '',
+                    servicio.nombreServicio,
+                    servicio.cantidadPedidos.toLocaleString('es-AR'),
+                    `$${servicio.montoFacturado.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                ]);
+            });
+        });
+
+        autoTable(doc, {
+            startY: yPosition,
+            head: [['Comercio', 'Servicio', 'Cantidad', 'Monto Facturado']],
+            body: comerciosTableData,
+            theme: 'striped',
+            headStyles: {
+                fillColor: [0, 0, 0],
+                textColor: [255, 255, 255],
+                fontSize: 8,
+                fontStyle: 'bold',
+                halign: 'left'
+            },
+            bodyStyles: {
+                fontSize: 7,
+                textColor: [0, 0, 0]
+            },
+            alternateRowStyles: {
+                fillColor: [240, 240, 240]
+            },
+            columnStyles: {
+                0: { halign: 'left', cellWidth: 60 },
+                1: { halign: 'left', cellWidth: 60 },
+                2: { halign: 'center', cellWidth: 20 },
+                3: { halign: 'right', cellWidth: 40 }
+            },
+            margin: { left: marginLeft, right: marginRight },
+            didParseCell: function (data) {
+                if (data.section === 'head' && data.column.index === 3) {
+                    data.cell.styles.halign = 'right';
+                }
+            }
+        });
+
+        yPosition = (doc).lastAutoTable.finalY + 10;
+    }
 
     // Footer
-    const buenosAiresDate = new Date().toLocaleDateString('es-AR', {
+    doc.setFontSize(8);
+    doc.setTextColor(secondaryColor);
+    doc.text('Este reporte ha sido generado automáticamente por el Sistema Logística SJB', 20, pageHeight - 20);
+
+    // Fecha y hora en zona horaria de Buenos Aires
+    const now = new Date();
+    const buenosAiresDate = now.toLocaleDateString('es-AR', {
         timeZone: 'America/Argentina/Buenos_Aires',
         day: '2-digit',
         month: '2-digit',
         year: 'numeric'
     });
-    const buenosAiresTime = new Date().toLocaleTimeString('es-AR', {
+    const buenosAiresTime = now.toLocaleTimeString('es-AR', {
         timeZone: 'America/Argentina/Buenos_Aires',
         hour: '2-digit',
         minute: '2-digit',
         hour12: false
     });
-    doc.text(`Generado el: ${buenosAiresDate} a las ${buenosAiresTime}`, marginLeft, pageHeight - 15);
+    doc.text(`Generado el: ${buenosAiresDate} a las ${buenosAiresTime}`, 20, pageHeight - 15);
 
     // Línea en el footer
     doc.setDrawColor(200, 200, 200);

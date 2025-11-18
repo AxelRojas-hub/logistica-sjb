@@ -24,6 +24,45 @@ interface BillingReportData {
         ciudadSucursal: string;
         direccionSucursal: string;
     };
+    comerciosDetalle: Array<{
+        nombreComercio: string;
+        servicios: Array<{
+            nombreServicio: string;
+            cantidadPedidos: number;
+            montoFacturado: number;
+        }>;
+    }>;
+}
+
+interface FacturaRow {
+    id_factura: number;
+    estado_pago: string;
+    importe_total: number;
+    fecha_inicio: string;
+    fecha_fin: string;
+    comercio: {
+        id_comercio: number;
+        id_sucursal_origen: number;
+        nombre_comercio: string;
+    } | {
+        id_comercio: number;
+        id_sucursal_origen: number;
+        nombre_comercio: string;
+    }[];
+}
+
+interface PedidoServicioRow {
+    servicio?: {
+        nombre_servicio: string;
+    } | {
+        nombre_servicio: string;
+    }[];
+}
+
+interface PedidoRow {
+    id_pedido: number;
+    precio: number;
+    pedido_servicio: PedidoServicioRow[] | { servicio: { nombre_servicio: string }[] }[];
 }
 
 export function BillingReportGenerator() {
@@ -62,16 +101,19 @@ export function BillingReportGenerator() {
                 throw new Error('No se pudo obtener información de la sucursal');
             }
 
-            // Construir query para facturas - siempre buscar todas
+            // Obtener facturas con detalles de comercio y pedidos
             const { data: facturasData, error: facturasError } = await supabaseClient
                 .from('factura')
                 .select(`
+                    id_factura,
                     estado_pago,
                     importe_total,
                     fecha_inicio,
                     fecha_fin,
                     comercio!inner (
-                        id_sucursal_origen
+                        id_comercio,
+                        id_sucursal_origen,
+                        nombre_comercio
                     )
                 `)
                 .eq('comercio.id_sucursal_origen', adminData.id_sucursal)
@@ -82,7 +124,7 @@ export function BillingReportGenerator() {
                 throw new Error('Error al obtener datos de facturas');
             }
 
-            // Procesar datos
+            // Procesar datos de resumen general
             let facturasPagadas = 0;
             let facturasPendientes = 0;
             let facturasVencidas = 0;
@@ -107,6 +149,84 @@ export function BillingReportGenerator() {
                 }
             });
 
+            // Obtener detalles por comercio y servicio
+            const comerciosMap = new Map<number, { nombreComercio: string; facturaIds: number[] }>();
+            (facturasData as unknown as Array<{ comercio: { id_comercio: number; nombre_comercio: string }; id_factura: number }>)?.forEach(factura => {
+                const comercioData = Array.isArray(factura.comercio) ? factura.comercio[0] : factura.comercio;
+                if (!comerciosMap.has(comercioData.id_comercio)) {
+                    comerciosMap.set(comercioData.id_comercio, {
+                        nombreComercio: comercioData.nombre_comercio,
+                        facturaIds: []
+                    });
+                }
+                comerciosMap.get(comercioData.id_comercio)!.facturaIds.push(factura.id_factura);
+            });
+
+            // Obtener pedidos y servicios por factura
+            const comerciosDetalle: Array<{
+                nombreComercio: string;
+                servicios: Array<{
+                    nombreServicio: string;
+                    cantidadPedidos: number;
+                    montoFacturado: number;
+                }>;
+            }> = [];
+
+            for (const [idComercio, comercioInfo] of comerciosMap) {
+                const serviciosMap = new Map<string, { cantidad: number; monto: number }>();
+
+                // Obtener pedidos asociados a las facturas
+                for (const idFactura of comercioInfo.facturaIds) {
+                    const { data: pedidosData } = await supabaseClient
+                        .from('pedido')
+                        .select(`
+                            id_pedido,
+                            precio,
+                            pedido_servicio (
+                                servicio (
+                                    nombre_servicio
+                                )
+                            )
+                        `)
+                        .eq('id_factura', idFactura);
+
+                    pedidosData?.forEach((pedido: PedidoRow) => {
+                        // Si no tiene servicios adicionales, contar como servicio "Transporte"
+                        if (!pedido.pedido_servicio || pedido.pedido_servicio.length === 0) {
+                            const key = 'Transporte';
+                            const current = serviciosMap.get(key) || { cantidad: 0, monto: 0 };
+                            serviciosMap.set(key, {
+                                cantidad: current.cantidad + 1,
+                                monto: current.monto + pedido.precio
+                            });
+                        } else {
+                            // Procesar cada servicio del pedido
+                            pedido.pedido_servicio.forEach((ps) => {
+                                const servicio = Array.isArray(ps.servicio) ? ps.servicio[0] : ps.servicio;
+                                const nombreServicio = servicio?.nombre_servicio || 'Sin especificar';
+                                const current = serviciosMap.get(nombreServicio) || { cantidad: 0, monto: 0 };
+                                serviciosMap.set(nombreServicio, {
+                                    cantidad: current.cantidad + 1,
+                                    monto: current.monto + pedido.precio
+                                });
+                            });
+                        }
+                    });
+                }
+
+                // Convertir serviciosMap a array
+                const servicios = Array.from(serviciosMap).map(([nombreServicio, data]) => ({
+                    nombreServicio,
+                    cantidadPedidos: data.cantidad,
+                    montoFacturado: data.monto
+                }));
+
+                comerciosDetalle.push({
+                    nombreComercio: comercioInfo.nombreComercio,
+                    servicios
+                });
+            }
+
             const montoTotal = montoPagado + montoPendiente + montoVencido;
 
             return {
@@ -123,7 +243,8 @@ export function BillingReportGenerator() {
                 sucursalAdministrador: {
                     ciudadSucursal: sucursalData.ciudad_sucursal,
                     direccionSucursal: sucursalData.direccion_sucursal
-                }
+                },
+                comerciosDetalle
             };
 
         } catch (error) {
