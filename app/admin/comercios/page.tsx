@@ -60,11 +60,23 @@ export default async function AdminComerciosPage() {
                 }
             }
 
-            const { data: facturas } = await supabase
+            const { data: facturasRaw } = await supabase
                 .from("factura")
                 .select("*")
                 .eq("id_comercio", comercio.id_comercio)
 
+            const facturas = (facturasRaw || []).map(f => ({
+                idFactura: f.id_factura,
+                idComercio: f.id_comercio,
+                nroFactura: f.nro_factura,
+                fechaInicio: f.fecha_inicio,
+                importeTotal: f.importe_total,
+                fechaFin: f.fecha_fin,
+                fechaEmision: f.fecha_emision,
+                nroPago: f.nro_pago,
+                estadoPago: f.estado_pago,
+                fechaPago: f.fecha_pago
+            }));
 
             const pedidos = await getPedidosByComercio(supabase, comercio.id_comercio)
 
