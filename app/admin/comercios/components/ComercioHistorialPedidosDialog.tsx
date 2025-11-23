@@ -42,7 +42,7 @@ export function ComercioHistorialPedidosDialog({
     }
 
     const formatDate = (dateString: string | null) => {
-        if (!dateString) return '-'
+        if (!dateString) return 'No entregado'
         return new Date(dateString).toLocaleDateString('es-AR')
     }
 
@@ -88,7 +88,6 @@ export function ComercioHistorialPedidosDialog({
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>N° Pedido</TableHead>
-                                            <TableHead>Fecha Registro</TableHead>
                                             <TableHead>Estado Actual</TableHead>
                                             <TableHead>Sucursal Origen</TableHead>
                                             <TableHead>Sucursal Destino</TableHead>
@@ -101,11 +100,6 @@ export function ComercioHistorialPedidosDialog({
                                                 <TableRow key={`pedido-${pedido.idPedido}`}>
                                                     <TableCell className="font-medium">
                                                         #{pedido.idPedido}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        -
-                                                        {/* {formatDate(pedido.fechaRegistro)} */}
-                                                        {/* TODO Hace falta un campo 'fecha_registro' en la BD  */}
                                                     </TableCell>
                                                     <TableCell>
                                                         <OrderStatusBadge status={pedido.estadoPedido} />
