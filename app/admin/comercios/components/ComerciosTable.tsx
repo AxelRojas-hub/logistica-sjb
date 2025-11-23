@@ -6,10 +6,11 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
-import { Eye, FileText, AlertTriangle } from "lucide-react"
+import { Eye, FileText, AlertTriangle, Receipt } from "lucide-react"
 import { Comercio, Contrato, Factura, Pedido } from "@/lib/types"
 import { ComercioDetailsDialog } from "./ComercioDetailsDialog"
 import { ComercioHistorialPedidosDialog } from "./ComercioHistorialPedidosDialog"
+import { ComercioHistorialFacturasDialog } from "./ComercioHistorialFacturasDialog"
 
 interface ComercioWithDetails extends Comercio {
     email?: string
@@ -27,6 +28,7 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
     const [selectedComercio, setSelectedComercio] = useState<ComercioWithDetails | null>(null)
     const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false)
     const [isHistorialPedidosDialogOpen, setIsHistorialPedidosDialogOpen] = useState(false)
+    const [isHistorialFacturasDialogOpen, setIsHistorialFacturasDialogOpen] = useState(false)
 
     const handleViewDetails = (comercio: ComercioWithDetails) => {
         setSelectedComercio(comercio)
@@ -36,6 +38,11 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
     const handleViewHistorialPedidos = (comercio: ComercioWithDetails) => {
         setSelectedComercio(comercio)
         setIsHistorialPedidosDialogOpen(true)
+    }
+
+    const handleViewHistorialFacturas = (comercio: ComercioWithDetails) => {
+        setSelectedComercio(comercio)
+        setIsHistorialFacturasDialogOpen(true)
     }
 
     const getStatusColor = (status: string) => {
@@ -176,6 +183,16 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                                                     <p>Historial de pedidos</p>
                                                 </TooltipContent>
                                             </Tooltip>
+                                            <Tooltip>
+                                                <TooltipTrigger asChild>
+                                                    <Button variant="outline" size="sm" onClick={() => handleViewHistorialFacturas(comercio)}>
+                                                        <Receipt className="h-4 w-4" />
+                                                    </Button>
+                                                </TooltipTrigger>
+                                                <TooltipContent>
+                                                    <p>Historial de facturas</p>
+                                                </TooltipContent>
+                                            </Tooltip>
                                         </div>
                                     </TableCell>
                                 </TableRow>
@@ -195,6 +212,13 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                 comercio={selectedComercio}
                 isOpen={isHistorialPedidosDialogOpen}
                 onOpenChange={setIsHistorialPedidosDialogOpen}
+            />
+
+            {/* Historial de Facturas */}
+            <ComercioHistorialFacturasDialog
+                comercio={selectedComercio}
+                isOpen={isHistorialFacturasDialogOpen}
+                onOpenChange={setIsHistorialFacturasDialogOpen}
             />
         </TooltipProvider>
     )
