@@ -8,23 +8,6 @@ interface EmailRecipient {
     name: string
 }
 
-interface OrderData {
-    idPedido: number
-    nombreCliente: string
-    emailCliente: string | null
-    direccionCliente: string
-    fechaEntrega?: string | null
-    fechaLimiteEntrega?: string | null
-}
-
-interface InvoiceData {
-    nroFactura: string
-    nombreComercio: string
-    emailComercio: string
-    importeTotal: number
-    fechaEmision: string
-}
-
 async function sendEmail(recipient: EmailRecipient, subject: string, htmlContent: string) {
     try {
         const message = new SendSmtpEmail()

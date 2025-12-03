@@ -20,11 +20,6 @@ interface ComercioMoroso {
     totalDeuda: number;
 }
 
-interface SucursalData {
-    ciudad_sucursal: string;
-    direccion_sucursal: string;
-}
-
 interface ReporteMorososData {
     comerciosMorosos: ComercioMoroso[];
     totalDeudaGeneral: number;

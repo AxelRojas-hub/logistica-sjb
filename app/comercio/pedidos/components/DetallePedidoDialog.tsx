@@ -11,6 +11,10 @@ interface OrderDetailsDialogProps {
     sucursales: Sucursal[]
 }
 
+interface PedidoConFactura extends Pedido {
+    nroFactura?: string
+}
+
 export function OrderDetailsDialog({ order, isOpen, onOpenChange, sucursales }: OrderDetailsDialogProps) {
     const getSucursalNombre = (idSucursal: number): string => {
         const sucursal = sucursales.find(s => s.idSucursal === idSucursal)
@@ -24,7 +28,7 @@ export function OrderDetailsDialog({ order, isOpen, onOpenChange, sucursales }: 
 
     return (
         <Dialog open={isOpen} onOpenChange={onOpenChange}>
-            <DialogContent 
+            <DialogContent
                 className="max-w-2xl max-h-[90vh] overflow-y-auto"
                 aria-describedby="order-details-description"
             >
@@ -98,7 +102,7 @@ export function OrderDetailsDialog({ order, isOpen, onOpenChange, sucursales }: 
                     {order.idFactura && (
                         <div>
                             <h4 className="font-medium mb-1">Factura Asociada</h4>
-                            <p className="text-sm">{(order as any).nroFactura || `ID: ${order.idFactura}`}</p>
+                            <p className="text-sm">{(order as PedidoConFactura).nroFactura || `ID: ${order.idFactura}`}</p>
                         </div>
                     )}
                 </div>

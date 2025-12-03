@@ -34,23 +34,6 @@ interface BillingReportData {
     }>;
 }
 
-interface FacturaRow {
-    id_factura: number;
-    estado_pago: string;
-    importe_total: number;
-    fecha_inicio: string;
-    fecha_fin: string;
-    comercio: {
-        id_comercio: number;
-        id_sucursal_origen: number;
-        nombre_comercio: string;
-    } | {
-        id_comercio: number;
-        id_sucursal_origen: number;
-        nombre_comercio: string;
-    }[];
-}
-
 interface PedidoServicioRow {
     servicio?: {
         nombre_servicio: string;
@@ -172,7 +155,7 @@ export function BillingReportGenerator() {
                 }>;
             }> = [];
 
-            for (const [idComercio, comercioInfo] of comerciosMap) {
+            for (const [, comercioInfo] of comerciosMap) {
                 const serviciosMap = new Map<string, { cantidad: number; monto: number }>();
 
                 // Obtener pedidos asociados a las facturas

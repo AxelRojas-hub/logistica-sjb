@@ -23,7 +23,7 @@ interface FacturaActionsCellProps {
 
 export function FacturaActionsCell({ invoice, onViewInvoice, comercioInfo }: FacturaActionsCellProps) {
     const { generatePDF, isGenerating } = useInvoicePDF()
-    const { redirectToPayment, isLoading: isLoadingPayment, error: paymentError } = useMercadoPago()
+    const { redirectToPayment, isLoading: isLoadingPayment } = useMercadoPago()
 
     const handleDownloadPDF = async () => {
         try {

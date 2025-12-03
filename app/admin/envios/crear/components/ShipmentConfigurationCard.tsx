@@ -76,7 +76,7 @@ export function ShipmentConfigurationCard({
             } else {
                 toast.error(`Error al crear envío: ${result.error}`)
             }
-        } catch (error) {
+        } catch {
             toast.error("Error de conexión. Por favor, intenta nuevamente.")
         } finally {
             setIsCreating(false)

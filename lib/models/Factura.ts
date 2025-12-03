@@ -12,11 +12,11 @@ export async function obtenerFacturaActual(supabase: SupabaseClient, idComercio:
 
     if (comercioError || !comercio) throw new Error("Comercio o contrato no encontrado")
 
-    // @ts-ignore
-    const tipoCobro = comercio.contrato?.tipo_cobro || 'mensual' // Default a mensual
+    const contratoData = Array.isArray(comercio.contrato) ? comercio.contrato[0] : comercio.contrato
+    const tipoCobro = contratoData?.tipo_cobro || 'mensual' // Default a mensual
 
     // 2. Obtener última factura
-    const { data: ultimaFactura, error: facturaError } = await supabase
+    const { data: ultimaFactura } = await supabase
         .from('factura')
         .select('*')
         .eq('id_comercio', idComercio)
@@ -100,7 +100,18 @@ async function crearFactura(supabase: SupabaseClient, idComercio: number, inicio
     return mapRowToFactura(data)
 }
 
-function mapRowToFactura(row: any): Factura {
+function mapRowToFactura(row: {
+    id_factura: number;
+    id_comercio: number;
+    nro_factura: string;
+    fecha_inicio: string;
+    importe_total: number;
+    fecha_fin: string;
+    fecha_emision: string;
+    nro_pago?: string;
+    estado_pago: 'pendiente' | 'pagado' | 'vencido';
+    fecha_pago?: string;
+}): Factura {
     return {
         idFactura: row.id_factura,
         idComercio: row.id_comercio,
@@ -109,8 +120,8 @@ function mapRowToFactura(row: any): Factura {
         importeTotal: row.importe_total,
         fechaFin: row.fecha_fin,
         fechaEmision: row.fecha_emision,
-        nroPago: row.nro_pago,
+        nroPago: row.nro_pago || null,
         estadoPago: row.estado_pago,
-        fechaPago: row.fecha_pago
+        fechaPago: row.fecha_pago || null
     }
 }

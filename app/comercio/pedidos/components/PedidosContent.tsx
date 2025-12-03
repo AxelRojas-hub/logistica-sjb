@@ -44,6 +44,10 @@ interface PedidosContentProps {
     serviciosOpcionales: Servicio[]
 }
 
+interface PedidoConPeriodo extends Pedido {
+    periodoFacturacion?: string
+}
+
 export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, servicioTransporte, serviciosOpcionales }: PedidosContentProps) {
     const router = useRouter()
     const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null)
@@ -61,11 +65,11 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
     }, [initialPedidos])
 
     // Get unique periods
-    const periods = Array.from(new Set(orders.map(o => (o as any).periodoFacturacion).filter(Boolean))).sort().reverse() as string[]
+    const periods = Array.from(new Set(orders.map(o => (o as PedidoConPeriodo).periodoFacturacion).filter(Boolean))).sort().reverse() as string[]
 
     const filteredOrders = orders.filter(order => {
         const matchesStatus = statusFilter === "all" || order.estadoPedido === statusFilter
-        const matchesPeriod = periodFilter === "all" || (order as any).periodoFacturacion === periodFilter
+        const matchesPeriod = periodFilter === "all" || (order as PedidoConPeriodo).periodoFacturacion === periodFilter
         return matchesStatus && matchesPeriod
     })
 

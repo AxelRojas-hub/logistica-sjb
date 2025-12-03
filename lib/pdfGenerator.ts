@@ -291,7 +291,7 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
         // Información de pago si está pagada (en la primera página)
         if (factura.estadoPago === 'pagado' && factura.fechaPago && factura.nroPago) {
             // Reset Y to start of totals block to align vertically
-            let paymentY = startYTotals;
+            const paymentY = startYTotals;
 
             doc.setTextColor(primaryColor);
             doc.setFont('helvetica', 'bold');
@@ -689,7 +689,6 @@ async function generateBillingReportPDF(data: BillingReportData): Promise<jsPDFC
     doc.text(data.sucursalAdministrador.direccionSucursal, 120, 106);
 
     // Configuración de página
-    const pageWidth = 210;
     const pageHeight = 297;
     const marginLeft = 20;
     const marginRight = 20;

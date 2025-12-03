@@ -6,7 +6,7 @@ import { calcularDistanciaEntreSucursales } from '@/lib/models/Ruta'
 export async function POST(request: NextRequest) {
     try {
         const supabase = await createClient()
-        const { idPedido, idSucursalDestino, fechaLimiteEntrega, peso } = await request.json()
+        const { idPedido, idSucursalDestino, fechaLimiteEntrega } = await request.json()
 
         if (!idPedido || !idSucursalDestino || !fechaLimiteEntrega) {
             return NextResponse.json(

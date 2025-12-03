@@ -57,7 +57,7 @@ export function CheckinContent({ initialRoute }: CheckinContentProps) {
         }
     })
     const [pendingSucursal, setPendingSucursal] = useState<number | null>(null)
-    const [isPending, startTransition] = useTransition()
+    const [, startTransition] = useTransition()
 
     // Estados para los modales de confirmación
     const [showCheckinDialog, setShowCheckinDialog] = useState(false)
