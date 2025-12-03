@@ -1,11 +1,15 @@
 import { Calendar, Package } from "lucide-react"
 import type { Contrato } from "@/lib/types"
+import { format, differenceInDays } from "date-fns"
 
 interface DetalleContratoProps {
     contrato: Contrato
 }
 
 export function DetalleContrato({ contrato }: DetalleContratoProps) {
+    const fechaFin = contrato.fechaFinContrato ? new Date(contrato.fechaFinContrato) : null
+    const diasRestantes = fechaFin ? differenceInDays(fechaFin, new Date()) : 0
+
     return (
         <div className="grid md:grid-cols-3 gap-4">
             <div>
@@ -28,12 +32,12 @@ export function DetalleContrato({ contrato }: DetalleContratoProps) {
                     {contrato.descuento}%
                 </p>
             </div>
-            {contrato.fechaFinContrato && (
+            {fechaFin && (
                 <div className="md:col-span-3">
                     <p className="text-sm text-gray-500">Fecha de vencimiento</p>
                     <p className="font-medium flex items-center gap-2">
                         <Calendar className="h-4 w-4" />
-                        {new Date(contrato.fechaFinContrato).toLocaleDateString()}
+                        {format(fechaFin, "dd/MM/yyyy")} ({diasRestantes} días restantes)
                     </p>
                 </div>
             )}

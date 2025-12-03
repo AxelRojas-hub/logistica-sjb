@@ -7,6 +7,7 @@ import type { Pedido } from "@/lib/types"
 import type { PedidoConDetalles } from "@/lib/models/Pedido"
 import { OrderStatusBadge } from "./PedidoStatusBadge"
 import { useState } from "react"
+import { formatPeriod } from "@/lib/utils"
 import {
     AlertDialog,
     AlertDialogTrigger,
@@ -39,8 +40,7 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder, onEditOrder, c
                         <TableHead className="w-[120px]">Estado</TableHead>
                         <TableHead className="w-[150px]">Entrega Límite</TableHead>
                         <TableHead className="w-[100px]">Precio</TableHead>
-                        <TableHead className="w-[180px]">Período Facturación</TableHead>
-                        <TableHead className="w-[120px]">Estado Pago</TableHead>
+                        <TableHead className="w-[180px] text-center">Período Facturación</TableHead>
                         <TableHead className="w-[120px]">Acciones</TableHead>
                     </TableRow>
                 </TableHeader>
@@ -72,23 +72,10 @@ export function OrdersTable({ orders, onViewOrder, onCancelOrder, onEditOrder, c
                                 <TableCell className="text-center text-sm">
                                     {pedidoConDetalles.periodoFacturacion ? (
                                         <span className="text-muted-foreground">
-                                            {pedidoConDetalles.periodoFacturacion}
+                                            {formatPeriod(pedidoConDetalles.periodoFacturacion)}
                                         </span>
                                     ) : (
                                         <span className="text-muted-foreground">—</span>
-                                    )}
-                                </TableCell>
-                                <TableCell className="text-center">
-                                    {pedidoConDetalles.estadoPago ? (
-                                        <span className={`text-sm font-medium px-2 py-1 rounded-md ${pedidoConDetalles.estadoPago === 'pagado' ? 'bg-green-100 text-green-800' :
-                                                pedidoConDetalles.estadoPago === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                                                    pedidoConDetalles.estadoPago === 'vencido' ? 'bg-red-100 text-red-800' :
-                                                        'bg-gray-100 text-gray-800'
-                                            }`}>
-                                            {pedidoConDetalles.estadoPago.charAt(0).toUpperCase() + pedidoConDetalles.estadoPago.slice(1)}
-                                        </span>
-                                    ) : (
-                                        <span className="text-sm text-muted-foreground">—</span>
                                     )}
                                 </TableCell>
                                 <TableCell>

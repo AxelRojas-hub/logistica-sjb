@@ -39,7 +39,6 @@ export function FacturasTable({ invoices, comercioInfo }: FacturasTableProps) {
                     <TableHeader>
                         <TableRow>
                             <TableHead className="text-center">Nro Factura</TableHead>
-                            <TableHead className="text-center">Fecha Emisión</TableHead>
                             <TableHead className="text-center">Periodo</TableHead>
                             <TableHead className="text-center">Estado Pago</TableHead>
                             <TableHead >Importe Total</TableHead>
@@ -50,7 +49,6 @@ export function FacturasTable({ invoices, comercioInfo }: FacturasTableProps) {
                         {invoices.map((invoice) => (
                             <TableRow key={invoice.idFactura} className="hover:bg-accent/50">
                                 <TableCell className="text-center font-medium">{invoice.nroFactura}</TableCell>
-                                <TableCell className="text-center">{new Date(invoice.fechaEmision).toLocaleDateString()}</TableCell>
                                 <TableCell className="text-center">
                                     {new Date(invoice.fechaInicio).toLocaleDateString()} - {new Date(invoice.fechaFin).toLocaleDateString()}
                                 </TableCell>

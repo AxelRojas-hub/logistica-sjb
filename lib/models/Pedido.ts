@@ -7,6 +7,7 @@ export interface PedidoConDetalles extends Pedido {
     direccionSucursalDestino?: string
     periodoFacturacion?: string // "fechaInicio - fechaFin"
     estadoPago?: string
+    nroFactura?: string
 }
 
 
@@ -64,6 +65,7 @@ export async function getPedidosByComercio(supabase: SupabaseClient, idComercio:
             *,
             factura(
                 id_factura,
+                nro_factura,
                 fecha_inicio,
                 fecha_fin,
                 estado_pago
@@ -85,6 +87,7 @@ export async function getPedidosByComercio(supabase: SupabaseClient, idComercio:
             const fechaInicio = factura.fecha_inicio as string | undefined
             const fechaFin = factura.fecha_fin as string | undefined
             const estadoPagoFactura = factura.estado_pago as string | undefined
+            const nroFactura = factura.nro_factura as string | undefined
 
             // Agregar información de factura al pedido
             const pedidoConFactura = pedido as PedidoConDetalles
@@ -92,6 +95,7 @@ export async function getPedidosByComercio(supabase: SupabaseClient, idComercio:
                 pedidoConFactura.periodoFacturacion = `${fechaInicio} - ${fechaFin}`
             }
             pedidoConFactura.estadoPago = estadoPagoFactura
+            pedidoConFactura.nroFactura = nroFactura
         }
 
         return pedido
@@ -238,24 +242,39 @@ export async function getPedidosPendientesConSucursalAdmin(supabase: SupabaseCli
 /**
  * Calcula el costo por kilómetro según el peso del pedido consultando la tabla tarifario
  * @param supabase Cliente de Supabase
- * @param peso Peso en kilogramos
+ * @param peso Peso en kilogramos. Si es null, calcula el promedio de todas las tarifas.
  * @returns Costo por kilómetro en la moneda base
  */
-export async function calcularCostoPorKm(supabase: SupabaseClient, peso: number): Promise<number> {
-    const { data, error } = await supabase
-        .from("tarifario")
-        .select("precio_por_km")
-        .gte("peso_hasta", peso)
-        .order("peso_hasta", { ascending: true })
-        .limit(1)
-        .single()
+export async function calcularCostoPorKm(supabase: SupabaseClient, peso: number | null): Promise<number> {
+    if (peso === null) {
+        // Calcular promedio de todas las tarifas
+        const { data, error } = await supabase
+            .from("tarifario")
+            .select("precio_por_km")
 
-    if (error || !data) {
-        console.error("Error al obtener tarifa por peso:", error)
-        return -1
+        if (error || !data || data.length === 0) {
+            console.error("Error al obtener tarifas para promedio:", error)
+            return -1
+        }
+
+        const total = data.reduce((sum, item) => sum + Number(item.precio_por_km), 0)
+        return total / data.length
+    } else {
+        const { data, error } = await supabase
+            .from("tarifario")
+            .select("precio_por_km")
+            .gte("peso_hasta", peso)
+            .order("peso_hasta", { ascending: true })
+            .limit(1)
+            .single()
+
+        if (error || !data) {
+            console.error("Error al obtener tarifa por peso:", error)
+            return -1
+        }
+
+        return data.precio_por_km as number
     }
-
-    return data.precio_por_km as number
 }
 
 export interface CalculoPrecio {
@@ -272,7 +291,7 @@ export interface CalculoPrecio {
  * @param params.costoBaseTransporte Costo base del servicio de transporte
  * @param params.costosServiciosAdicionales Array de costos de servicios adicionales
  * @param params.distanciaKm Distancia en kilómetros entre origen y destino
- * @param params.peso Peso del pedido en kilogramos
+ * @param params.peso Peso del pedido en kilogramos. Si es null, se usa el promedio del tarifario.
  * @returns Objeto con precio final, precio sin descuento y porcentaje de descuento
  */
 export async function calcularPrecioPedido(
@@ -282,7 +301,7 @@ export async function calcularPrecioPedido(
         costoBaseTransporte: number
         costosServiciosAdicionales: number[]
         distanciaKm: number
-        peso: number
+        peso: number | null
     }
 ): Promise<CalculoPrecio> {
     const { idComercio, costoBaseTransporte, costosServiciosAdicionales, distanciaKm, peso } = params

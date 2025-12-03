@@ -98,7 +98,7 @@ export function OrderDetailsDialog({ order, isOpen, onOpenChange, sucursales }: 
                     {order.idFactura && (
                         <div>
                             <h4 className="font-medium mb-1">Factura Asociada</h4>
-                            <p className="text-sm">ID Factura: {order.idFactura}</p>
+                            <p className="text-sm">{(order as any).nroFactura || `ID: ${order.idFactura}`}</p>
                         </div>
                     )}
                 </div>

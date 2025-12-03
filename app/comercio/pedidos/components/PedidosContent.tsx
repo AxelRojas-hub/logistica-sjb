@@ -1,11 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { ArrowLeft } from "lucide-react"
 import Link from "next/link"
+import { useRouter } from "next/navigation"
 import type { Pedido, EstadoPedido, Comercio, Sucursal, Servicio } from "@/lib/types"
 import { CreateOrderDialog, EditarPedidoDialog, OrderDetailsDialog, OrdersTable } from "."
+import { formatPeriod } from "@/lib/utils"
+import { toast } from "sonner"
+import {
+    Select,
+    SelectContent,
+    SelectItem,
+    SelectTrigger,
+    SelectValue,
+} from "@/components/ui/select"
 
 interface NewOrderForm {
     // Datos del destinatario
@@ -14,15 +24,15 @@ interface NewOrderForm {
     telefonoCliente: string
     emailCliente: string
     direccionCliente: string
-    
+
     // Datos del pedido
     ciudadDestino: string
     idSucursalDestino: number
     peso: number
     fechaLimiteEntrega: string
-    
+
     // Datos para pedido_servicio
-    tipoTransporte: number | null 
+    tipoTransporte: number | null
     serviciosOpcionales: number[]
 }
 
@@ -35,6 +45,7 @@ interface PedidosContentProps {
 }
 
 export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, servicioTransporte, serviciosOpcionales }: PedidosContentProps) {
+    const router = useRouter()
     const [selectedOrder, setSelectedOrder] = useState<Pedido | null>(null)
     const [orders, setOrders] = useState<Pedido[]>(initialPedidos)
     const [showDetailsDialog, setShowDetailsDialog] = useState(false)
@@ -42,6 +53,21 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
     const [loading, setLoading] = useState(false)
     const [error, setError] = useState("")
     const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({})
+    const [statusFilter, setStatusFilter] = useState<string>("all")
+    const [periodFilter, setPeriodFilter] = useState<string>("all")
+
+    useEffect(() => {
+        setOrders(initialPedidos)
+    }, [initialPedidos])
+
+    // Get unique periods
+    const periods = Array.from(new Set(orders.map(o => (o as any).periodoFacturacion).filter(Boolean))).sort().reverse() as string[]
+
+    const filteredOrders = orders.filter(order => {
+        const matchesStatus = statusFilter === "all" || order.estadoPedido === statusFilter
+        const matchesPeriod = periodFilter === "all" || (order as any).periodoFacturacion === periodFilter
+        return matchesStatus && matchesPeriod
+    })
 
 
     const validateField = (fieldName: keyof NewOrderForm, value: unknown): string | null => {
@@ -50,48 +76,48 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                 if (!value || value === 0) return "El DNI es obligatorio"
                 if (value.toString().length < 7 || value.toString().length > 8) return "El DNI debe tener entre 7 y 8 dígitos"
                 return null
-            
+
             case 'nombreCliente':
                 if (!value || typeof value !== 'string' || value.trim() === "") return "El nombre del cliente es obligatorio"
                 if (value.length < 2) return "El nombre debe tener al menos 2 caracteres"
                 return null
-            
+
             case 'telefonoCliente':
                 if (!value || typeof value !== 'string' || value.trim() === "") return "El teléfono es obligatorio"
                 const digitosLimpios = value.replace(/[+\s-]/g, '')
                 if (!/^\d{8,15}$/.test(digitosLimpios)) return "El teléfono debe tener entre 8 y 15 dígitos"
                 return null
-            
+
             case 'emailCliente':
                 if (!value || typeof value !== 'string' || value.trim() === "") return "El email es obligatorio"
                 if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value)) return "Ingrese un email válido"
                 return null
-            
+
             case 'direccionCliente':
                 if (!value || typeof value !== 'string' || value.trim() === "") return "La dirección es obligatoria"
                 if (value.length < 5) return "La dirección debe tener al menos 5 caracteres"
                 return null
-            
+
             case 'ciudadDestino':
                 if (!value || typeof value !== 'string' || value.trim() === "") return "Debe seleccionar una ciudad de destino"
                 return null
-            
+
             case 'peso':
                 if (!value || typeof value !== 'number' || value <= 0) return "El peso debe ser mayor a 0 kg"
                 if (value > 1000) return "El peso no puede superar los 1000 kg"
                 return null
-            
+
             case 'tipoTransporte':
                 if (!value) return "Debe tener el servicio de transporte contratado"
                 return null
-            
+
             case 'fechaLimiteEntrega':
                 if (!value || typeof value !== 'string' || value.trim() === "") return "La fecha límite de entrega es obligatoria"
                 const today = new Date()
                 const selectedDate = new Date(value)
                 if (selectedDate <= today) return "La fecha debe ser posterior a hoy"
                 return null
-            
+
             default:
                 return null
         }
@@ -99,28 +125,28 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
 
     const handleCreateOrder = async (orderData: NewOrderForm): Promise<boolean> => {
         const errors: Record<string, string> = {}
-        
+
         Object.entries(orderData).forEach(([key, value]) => {
             const error = validateField(key as keyof NewOrderForm, value)
             if (error) {
                 errors[key] = error
             }
         })
-        
+
         if (Object.keys(errors).length > 0) {
             setFieldErrors(errors)
             setError("Por favor corrija los errores en el formulario")
             return false
         }
-        
+
         setLoading(true)
-        
+
         try {
             const apiData = {
                 ...orderData,
                 idComercio: comercio.idComercio
             }
-            
+
             const response = await fetch('/api/pedidos/create', {
                 method: 'POST',
                 headers: {
@@ -128,15 +154,15 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                 },
                 body: JSON.stringify(apiData)
             })
-            
+
             const result = await response.json()
-            
+
             if (!response.ok || !result.success) {
                 console.error("Error de la API:", result.message || result.error)
                 setError(result.message || "Error al crear el pedido")
                 return false
             }
-            
+
             // Crear pedido local para la UI
             const nuevoPedido: Pedido = {
                 idPedido: result.data.pedidoId,
@@ -152,12 +178,12 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
             }
 
             setOrders(prev => [...prev, nuevoPedido])
-            
+
             setError("")
             setFieldErrors({})
-            
+
             return true
-            
+
         } catch (error) {
             console.error("Error de conexión:", error)
             setError("Error de conexión. Intente nuevamente.")
@@ -168,9 +194,9 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
     }
 
     const handleCancelOrder = async (orderId: number) => {
-        
+
         setLoading(true)
-        
+
         try {
             const response = await fetch('/api/pedidos/cancel', {
                 method: 'POST',
@@ -179,19 +205,19 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                 },
                 body: JSON.stringify({ idPedido: orderId })
             })
-            
+
             const result = await response.json()
-            
+
             if (!response.ok || !result.success) {
                 console.error("Error al cancelar pedido:", result.message)
                 setError(`Error al cancelar el pedido: ${result.message}`)
                 return
             }
-            
+
             setOrders(orders.map(order =>
                 order.idPedido === orderId ? { ...order, estadoPedido: "cancelado" as EstadoPedido } : order
             ))
-            
+
         } catch (error) {
             console.error("Error de conexión al cancelar pedido:", error)
             setError("Error de conexión al cancelar el pedido. Intente nuevamente.")
@@ -209,15 +235,15 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
 
     const handleUpdateOrder = async (
         orderId: number,
-        updates: { ciudadDestino: string; idSucursalDestino: number; fechaLimiteEntrega: string }
+        updates: { ciudadDestino: string; idSucursalDestino: number; fechaLimiteEntrega: string; peso?: number }
     ): Promise<boolean> => {
         const errors: Record<string, string> = {}
         const ciudadError = validateField('ciudadDestino', updates.ciudadDestino)
         if (ciudadError) errors['ciudadDestino'] = ciudadError
-        
+
         const fechaError = validateField('fechaLimiteEntrega', updates.fechaLimiteEntrega)
         if (fechaError) errors['fechaLimiteEntrega'] = fechaError
-        
+
         if (Object.keys(errors).length > 0) {
             setFieldErrors(errors)
             setError("Por favor corrija los errores en el formulario")
@@ -230,41 +256,42 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                 idPedido: orderId,
                 ciudadDestino: updates.ciudadDestino,
                 idSucursalDestino: updates.idSucursalDestino,
-                fechaLimiteEntrega: updates.fechaLimiteEntrega
+                fechaLimiteEntrega: updates.fechaLimiteEntrega,
+                peso: updates.peso
             }
-            
-            const response = await fetch (`/api/pedidos/update`, {
+
+            const response = await fetch(`/api/pedidos/update`, {
                 method: 'POST',
-                headers:{
-                    'Content-Type':'application/json',
+                headers: {
+                    'Content-Type': 'application/json',
                 },
                 body: JSON.stringify(updateData)
             })
 
             const result = await response.json()
 
-            if(!response.ok || !result.success) {
+            if (!response.ok || !result.success) {
                 setError(result.message || "Error al actualizar el pedido")
                 return false
             }
 
             setOrders(orders.map(order =>
-                order.idPedido === orderId 
-                    ? { 
+                order.idPedido === orderId
+                    ? {
                         ...order,
                         idSucursalDestino: updates.idSucursalDestino,
                         fechaLimiteEntrega: `${updates.fechaLimiteEntrega}T00:00:00+00:00`,
                         precio: result.data?.nuevoPrecio ?? order.precio
-                    } 
+                    }
                     : order
             ))
-            
+
             setError("")
             setFieldErrors({})
-            
+
             return true
 
-        } catch (error){
+        } catch (error) {
             console.error("Error al actualizar pedido:", error)
             setError("Error de conexión. Intente nuevamente.")
             return false
@@ -281,6 +308,8 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
     const handleOrderSuccess = () => {
         setError("")
         setFieldErrors({})
+        toast.success("Pedido creado exitosamente")
+        router.refresh()
     }
 
     return (
@@ -300,7 +329,7 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                 <div className="mb-8">
                     <h1 className="text-3xl font-bold text-foreground">Gestión de Pedidos</h1>
                     <p className="mt-2 text-muted-foreground">Crea y gestiona tus pedidos de entrega</p>
-                    
+
                     {comercio.estadoComercio === "deshabilitado" && (
                         <div className="mt-4 p-4 bg-red-50 border-l-4 border-red-400 rounded-md dark:bg-red-950/50 dark:border-red-800">
                             <div className="flex">
@@ -367,8 +396,41 @@ export function PedidosContent({ pedidos: initialPedidos, comercio, sucursales, 
                         />
                     </div>
 
+                    <div className="flex flex-col sm:flex-row gap-4">
+                        <div className="w-full sm:w-[200px]">
+                            <Select value={statusFilter} onValueChange={setStatusFilter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Filtrar por estado" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Todos los estados</SelectItem>
+                                    <SelectItem value="en_preparacion">En preparación</SelectItem>
+                                    <SelectItem value="en_camino">En camino</SelectItem>
+                                    <SelectItem value="en_sucursal">En sucursal</SelectItem>
+                                    <SelectItem value="entregado">Entregado</SelectItem>
+                                    <SelectItem value="cancelado">Cancelado</SelectItem>
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="w-full sm:w-[250px]">
+                            <Select value={periodFilter} onValueChange={setPeriodFilter}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Filtrar por período" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="all">Todos los períodos</SelectItem>
+                                    {periods.map((period) => (
+                                        <SelectItem key={period} value={period}>
+                                            {formatPeriod(period)}
+                                        </SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                    </div>
+
                     <OrdersTable
-                        orders={orders}
+                        orders={filteredOrders}
                         onViewOrder={handleViewOrder}
                         onCancelOrder={handleCancelOrder}
                         onEditOrder={handleEditOrder}

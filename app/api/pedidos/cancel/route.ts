@@ -17,6 +17,37 @@ export async function POST(request: NextRequest) {
 
         const supabase = await createClient()
 
+        // Obtener datos del pedido antes de cancelar
+        const { data: pedido, error: pedidoError } = await supabase
+            .from('pedido')
+            .select('precio, id_factura')
+            .eq('id_pedido', idPedido)
+            .single()
+
+        if (pedidoError || !pedido) {
+            return NextResponse.json(
+                { success: false, message: "Pedido no encontrado" },
+                { status: 404 }
+            )
+        }
+
+        // Actualizar factura si existe
+        if (pedido.id_factura) {
+            const { data: factura, error: facturaError } = await supabase
+                .from('factura')
+                .select('importe_total')
+                .eq('id_factura', pedido.id_factura)
+                .single()
+
+            if (!facturaError && factura) {
+                const nuevoTotal = Math.max(0, Number(factura.importe_total) - Number(pedido.precio))
+
+                await supabase
+                    .from('factura')
+                    .update({ importe_total: nuevoTotal })
+                    .eq('id_factura', pedido.id_factura)
+            }
+        }
 
         const { error: updateError } = await supabase
             .from('pedido')

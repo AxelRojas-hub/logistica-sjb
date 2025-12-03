@@ -129,20 +129,18 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
     doc.setFont('helvetica', 'bold');
     doc.setTextColor(primaryColor);
     doc.text('Número de Factura:', 20, 85);
-    doc.text('Fecha de Emisión:', 20, 92);
-    doc.text('Período Facturado:', 20, 99);
-    doc.text('Estado de Pago:', 20, 106);
+    doc.text('Período Facturado:', 20, 92);
+    doc.text('Estado de Pago:', 20, 99);
 
     doc.setFont('helvetica', 'normal');
     doc.text(factura.nroFactura, 70, 85);
-    doc.text(new Date(factura.fechaEmision).toLocaleDateString('es-AR'), 70, 92);
-    doc.text(`${new Date(factura.fechaInicio).toLocaleDateString('es-AR')} - ${new Date(factura.fechaFin).toLocaleDateString('es-AR')}`, 70, 99);
+    doc.text(`${new Date(factura.fechaInicio).toLocaleDateString('es-AR')} - ${new Date(factura.fechaFin).toLocaleDateString('es-AR')}`, 70, 92);
 
     // Estado de pago con color
     const estadoColor = factura.estadoPago === 'pagado' ? '#10b981' :
         factura.estadoPago === 'pendiente' ? '#f59e0b' : '#ef4444';
     doc.setTextColor(estadoColor);
-    doc.text(factura.estadoPago.toUpperCase(), 70, 106);
+    doc.text(factura.estadoPago.toUpperCase(), 70, 99);
 
     // Información del comercio (lado derecho)
     doc.setTextColor(primaryColor);
@@ -162,7 +160,8 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
             'en_camino': 'En camino',
             'cancelado': 'Cancelado',
             'en_sucursal': 'En sucursal',
-            'entregado': 'Entregado'
+            'entregado': 'Entregado',
+            'en_preparacion': 'En preparación'
         };
         return estadoMap[estado.toLowerCase()] || estado;
     };
@@ -297,12 +296,12 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
             doc.setTextColor(primaryColor);
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(10);
-            doc.text('INFORMACIÓN DE PAGO', 20, paymentY);
+            doc.text('INFORMACIÓN DE PAGO', 120, paymentY);
 
             doc.setFont('helvetica', 'normal');
             doc.setFontSize(9);
-            doc.text(`Fecha de Pago: ${new Date(factura.fechaPago).toLocaleDateString('es-AR')}`, 20, paymentY + 6);
-            doc.text(`Número de Pago: ${factura.nroPago}`, 20, paymentY + 12);
+            doc.text(`Fecha de Pago: ${new Date(factura.fechaPago).toLocaleDateString('es-AR')}`, 120, paymentY + 6);
+            doc.text(`Número de Pago: ${factura.nroPago}`, 120, paymentY + 12);
         }
 
         // Tarifario en el pie de la primera página o en nueva página si no cabe

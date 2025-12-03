@@ -6,7 +6,7 @@ import { calcularDistanciaEntreSucursales } from '@/lib/models/Ruta'
 export async function POST(request: NextRequest) {
     try {
         const supabase = await createClient()
-        const { idPedido, idSucursalDestino, fechaLimiteEntrega } = await request.json()
+        const { idPedido, idSucursalDestino, fechaLimiteEntrega, peso } = await request.json()
 
         if (!idPedido || !idSucursalDestino || !fechaLimiteEntrega) {
             return NextResponse.json(
@@ -17,7 +17,7 @@ export async function POST(request: NextRequest) {
 
         const { data: pedidoExistente, error: pedidoError } = await supabase
             .from('pedido')
-            .select('id_pedido, estado_pedido, id_comercio, id_sucursal_destino')
+            .select('id_pedido, estado_pedido, id_comercio, id_sucursal_destino, id_factura, precio')
             .eq('id_pedido', idPedido)
             .single()
 
@@ -68,16 +68,13 @@ export async function POST(request: NextRequest) {
                 idSucursalDestino
             )
 
-            // Peso aleatorio entre 1-10kg
-            const pesoAleatorio = Math.floor(Math.random() * 10) + 1
-
-            // Calcular nuevo precio
+            // Calcular nuevo precio usando promedio de tarifario (peso = null)
             const calculoPrecio = await calcularPrecioPedido(supabase, {
                 idComercio: pedidoExistente.id_comercio,
                 costoBaseTransporte,
                 costosServiciosAdicionales: costosAdicionales,
                 distanciaKm,
-                peso: pesoAleatorio
+                peso: null
             })
 
             nuevoPrecio = calculoPrecio.precioFinal
@@ -91,6 +88,26 @@ export async function POST(request: NextRequest) {
 
         if (nuevoPrecio !== null) {
             updateData.precio = nuevoPrecio
+
+            // Actualizar factura si el precio cambió
+            if (pedidoExistente.id_factura && pedidoExistente.precio !== nuevoPrecio) {
+                const { data: currentFactura } = await supabase
+                    .from('factura')
+                    .select('importe_total')
+                    .eq('id_factura', pedidoExistente.id_factura)
+                    .single()
+
+                if (currentFactura) {
+                    const precioAnterior = Number(pedidoExistente.precio || 0)
+                    const precioNuevo = Number(nuevoPrecio)
+                    const nuevoTotalFactura = Number(currentFactura.importe_total || 0) - precioAnterior + precioNuevo
+
+                    await supabase
+                        .from('factura')
+                        .update({ importe_total: nuevoTotalFactura })
+                        .eq('id_factura', pedidoExistente.id_factura)
+                }
+            }
         }
 
         const { error: updateError } = await supabase

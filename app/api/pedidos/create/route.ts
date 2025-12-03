@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabaseServer"
 import { calcularPrecioPedido } from "@/lib/models/Pedido"
 import { calcularDistanciaEntreSucursales } from "@/lib/models/Ruta"
+import { obtenerFacturaActual } from "@/lib/models/Factura"
 
 interface CreatePedidoRequest {
     // Datos del destinatario
@@ -10,13 +11,13 @@ interface CreatePedidoRequest {
     telefonoCliente: string
     emailCliente: string
     direccionCliente: string
-    
+
     // Datos del pedido
     idComercio: number
     idSucursalDestino: number
     peso: number
     fechaLimiteEntrega: string
-    
+
     // Servicios
     tipoTransporte: number | null
     serviciosOpcionales: number[]
@@ -25,7 +26,7 @@ interface CreatePedidoRequest {
 export async function POST(request: NextRequest) {
     try {
         const orderData: CreatePedidoRequest = await request.json()
-    const supabase = await createClient()
+        const supabase = await createClient()
 
         if (!orderData.dniCliente || !orderData.nombreCliente || !orderData.idSucursalDestino) {
             return NextResponse.json(
@@ -44,9 +45,9 @@ export async function POST(request: NextRequest) {
 
         const { error: clienteError } = await supabase
             .from('cliente_destinatario')
-            .upsert(clienteData, { 
+            .upsert(clienteData, {
                 onConflict: 'dni_cliente',
-                ignoreDuplicates: false 
+                ignoreDuplicates: false
             })
 
         if (clienteError) {
@@ -109,13 +110,27 @@ export async function POST(request: NextRequest) {
             peso: orderData.peso
         })
 
+        // Obtener o crear factura correspondiente al periodo actual
+        let idFactura: number | null = null
+        try {
+            const factura = await obtenerFacturaActual(supabase, orderData.idComercio)
+            idFactura = factura.idFactura
+        } catch (e) {
+            console.error("Error gestionando factura:", e)
+            return NextResponse.json(
+                { success: false, message: "Error al generar la factura del pedido" },
+                { status: 500 }
+            )
+        }
+
         const pedidoData = {
             id_comercio: orderData.idComercio,
             id_sucursal_destino: orderData.idSucursalDestino,
             dni_cliente: orderData.dniCliente,
             estado_pedido: 'en_preparacion',
             precio: calculoPrecio.precioFinal,
-            fecha_limite_entrega: orderData.fechaLimiteEntrega
+            fecha_limite_entrega: orderData.fechaLimiteEntrega,
+            id_factura: idFactura
         }
 
         const { data: pedidoResult, error: pedidoError } = await supabase
@@ -132,6 +147,24 @@ export async function POST(request: NextRequest) {
         }
 
         const idPedidoCreado = pedidoResult.id_pedido
+
+        // Actualizar el importe total de la factura
+        if (idFactura) {
+            const { data: currentFactura } = await supabase
+                .from('factura')
+                .select('importe_total')
+                .eq('id_factura', idFactura)
+                .single()
+
+            if (currentFactura) {
+                const nuevoTotal = Number(currentFactura.importe_total || 0) + Number(calculoPrecio.precioFinal)
+
+                await supabase
+                    .from('factura')
+                    .update({ importe_total: nuevoTotal })
+                    .eq('id_factura', idFactura)
+            }
+        }
 
         const serviciosData = []
         if (orderData.tipoTransporte) {
