@@ -37,17 +37,35 @@ export function useInvoicePDF() {
                     ),
                     pedido_servicio (
                         servicio (
-                            nombre_servicio
+                            nombre_servicio,
+                            costo_servicio
                         )
                     )
                 `)
                 .eq('id_factura', factura.idFactura)
                 .order('id_pedido', { ascending: true });
 
-            // Ampliar comercio con pedidos
+            // Traer el costo del servicio de transporte por defecto
+            const { data: servicioTransporte } = await supabaseClient
+                .from('servicio')
+                .select('costo_servicio')
+                .eq('nombre_servicio', 'Transporte')
+                .single();
+
+            const costoTransporte = servicioTransporte?.costo_servicio || 0;
+
+            // Traer el tarifario
+            const { data: tarifario } = await supabaseClient
+                .from('tarifario')
+                .select('peso_hasta, precio_por_km')
+                .order('peso_hasta', { ascending: true });
+
+            // Ampliar comercio con pedidos, costo de transporte y tarifario
             const comercioConPedidos = {
                 ...comercio,
-                pedidos: pedidos as unknown as Array<Record<string, unknown>> || []
+                pedidos: pedidos as unknown as Array<Record<string, unknown>> || [],
+                costoTransporte,
+                tarifario: tarifario || []
             };
 
             downloadInvoicePDF(factura, comercioConPedidos as ComercioInfo);

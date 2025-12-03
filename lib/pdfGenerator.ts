@@ -7,6 +7,11 @@ interface ComercioInfo {
     direccion: string;
     telefono?: string;
     email?: string;
+    costoTransporte?: number;
+    tarifario?: Array<{
+        peso_hasta: number;
+        precio_por_km: number;
+    }>;
     sucursalOrigen?: {
         direccionSucursal: string;
         ciudadSucursal: string;
@@ -23,6 +28,7 @@ interface ComercioInfo {
         pedido_servicio?: Array<{
             servicio?: {
                 nombre_servicio: string;
+                costo_servicio?: number;
             };
         }>;
     }>;
@@ -161,7 +167,7 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
         return estadoMap[estado.toLowerCase()] || estado;
     };
 
-    let tableStartY = 135;
+    let tableStartY = 115;
 
     // Resumen de servicios en la primera página
     if (pedidosArray.length > 0) {
@@ -172,7 +178,7 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
         tableStartY += 10;
 
         // Contar servicios por tipo
-        const serviciosMap = new Map<string, { cantidad: number; monto: number }>();
+        const serviciosMap = new Map<string, { cantidad: number; costoUnitario: number; monto: number }>();
         let montoTotal = 0;
 
         pedidosArray.forEach((pedido: Record<string, unknown>) => {
@@ -181,40 +187,52 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
             montoTotal += precio;
 
             if (Array.isArray(pedidoServicios) && pedidoServicios.length > 0) {
-                (pedidoServicios as Array<Record<string, unknown>>).forEach((ps: Record<string, unknown>) => {
+                const servicios = pedidoServicios as Array<Record<string, unknown>>;
+
+                servicios.forEach((ps) => {
                     const servicio = ps.servicio as Record<string, unknown> | undefined;
                     const nombreServicio = (servicio?.nombre_servicio as string) || 'Transporte';
+                    const costoServicio = Number(servicio?.costo_servicio) || 0;
 
-                    const current = serviciosMap.get(nombreServicio) || { cantidad: 0, monto: 0 };
+                    const current = serviciosMap.get(nombreServicio) || { cantidad: 0, costoUnitario: costoServicio, monto: 0 };
                     current.cantidad += 1;
-                    current.monto += precio;
+                    current.monto = current.cantidad * current.costoUnitario;
                     serviciosMap.set(nombreServicio, current);
                 });
             } else {
                 // Sin servicios específicos = Transporte
-                const current = serviciosMap.get('Transporte') || { cantidad: 0, monto: 0 };
+                const current = serviciosMap.get('Transporte') || { cantidad: 0, costoUnitario: 0, monto: 0 };
                 current.cantidad += 1;
-                current.monto += precio;
+
+                // Usar el costo de transporte pasado en comercioInfo, o fallback a 0
+                const costoTransporte = Number(comercio.costoTransporte) || 0;
+                current.costoUnitario = costoTransporte;
+
+                // El monto total de este servicio es cantidad * costo unitario
+                current.monto = current.cantidad * current.costoUnitario;
+
                 serviciosMap.set('Transporte', current);
             }
         });
 
         const serviciosTableData = Array.from(serviciosMap.entries()).map(([nombre, datos]) => [
             nombre,
+            `$${datos.costoUnitario.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`,
             datos.cantidad.toString(),
             `$${datos.monto.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
         ]);
 
         autoTable(doc, {
             startY: tableStartY,
-            head: [['Servicio', '               Cantidad', '                           Costo Total']],
+            head: [['Servicio', 'Costo Unitario', 'Cantidad', 'Costo Total']],
             body: serviciosTableData,
             theme: 'striped',
             headStyles: {
                 fillColor: [0, 0, 0],
                 textColor: 255,
                 fontSize: 9,
-                fontStyle: 'bold'
+                fontStyle: 'bold',
+                halign: 'center' // Alinear headers al centro por defecto
             },
             bodyStyles: {
                 fontSize: 8,
@@ -224,34 +242,135 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
                 fillColor: [249, 250, 251]
             },
             columnStyles: {
-                0: { cellWidth: 80, halign: 'left' },
-                1: { cellWidth: 45, halign: 'center' },
-                2: { cellWidth: 45, halign: 'right' }
+                0: { cellWidth: 60, halign: 'left' },
+                1: { cellWidth: 40, halign: 'right' },
+                2: { cellWidth: 30, halign: 'center' },
+                3: { cellWidth: 40, halign: 'right' }
             },
-            margin: { left: 20, right: 20 }
+            margin: { left: 20, right: 20 },
+            didParseCell: function (data) {
+                // Alinear headers específicamente
+                if (data.section === 'head') {
+                    if (data.column.index === 0) { // Servicio
+                        data.cell.styles.halign = 'left';
+                    } else if (data.column.index === 1) { // Costo Unitario
+                        data.cell.styles.halign = 'right';
+                    } else if (data.column.index === 2) { // Cantidad
+                        data.cell.styles.halign = 'center';
+                    } else if (data.column.index === 3) { // Costo Total
+                        data.cell.styles.halign = 'right';
+                    }
+                }
+            }
         });
 
         let finalY = doc.lastAutoTable.finalY || tableStartY + 40;
         finalY += 15;
 
-        // Mostrar total de servicios
+        // Calcular subtotal de servicios
+        let subtotalServicios = 0;
+        serviciosMap.forEach(item => subtotalServicios += item.monto);
+
+        const startYTotals = finalY;
+
+        // Totals Section (Left Side)
+        doc.setFontSize(10);
+        doc.setTextColor(primaryColor);
         doc.setFont('helvetica', 'bold');
-        doc.setFontSize(11);
+        doc.text('Total Servicios:', 20, finalY);
+        doc.setFont('helvetica', 'normal');
+        doc.text(`$${subtotalServicios.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 90, finalY, { align: 'right' });
+
+        finalY += 8;
+
+        doc.setFontSize(12);
+        doc.setFont('helvetica', 'bold');
         doc.setTextColor(accentColor);
-        doc.text('TOTAL:', 120, finalY);
-        doc.text(`$${montoTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 150, finalY);
+        doc.text('TOTAL A PAGAR:', 20, finalY);
+        doc.text(`$${montoTotal.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, 90, finalY, { align: 'right' });
 
         // Información de pago si está pagada (en la primera página)
         if (factura.estadoPago === 'pagado' && factura.fechaPago && factura.nroPago) {
-            finalY += 20;
+            // Reset Y to start of totals block to align vertically
+            let paymentY = startYTotals;
+
             doc.setTextColor(primaryColor);
             doc.setFont('helvetica', 'bold');
             doc.setFontSize(10);
-            doc.text('INFORMACIÓN DE PAGO', 20, finalY);
+            doc.text('INFORMACIÓN DE PAGO', 20, paymentY);
 
             doc.setFont('helvetica', 'normal');
-            doc.text(`Fecha de Pago: ${new Date(factura.fechaPago).toLocaleDateString('es-AR')}`, 20, finalY + 7);
-            doc.text(`Número de Pago: ${factura.nroPago}`, 20, finalY + 14);
+            doc.setFontSize(9);
+            doc.text(`Fecha de Pago: ${new Date(factura.fechaPago).toLocaleDateString('es-AR')}`, 20, paymentY + 6);
+            doc.text(`Número de Pago: ${factura.nroPago}`, 20, paymentY + 12);
+        }
+
+        // Tarifario en el pie de la primera página o en nueva página si no cabe
+        if (comercio.tarifario && comercio.tarifario.length > 0) {
+            const pageHeight = doc.internal.pageSize.height;
+            // Calcular posición Y para el tarifario (encima del footer)
+            // Footer ocupa ~25 unidades desde abajo
+            // Tarifario necesitará espacio según cantidad de filas
+            // Estimamos altura: header (10) + filas (5 * N)
+            const tarifarioHeight = 15 + (comercio.tarifario.length * 6);
+
+            // Opción 1: Anclar al fondo (estilo footer)
+            let tarifarioY = pageHeight - 35 - tarifarioHeight;
+
+            // Verificar si hay espacio suficiente en la primera página para anclar al fondo
+            const hayEspacioAlFondo = tarifarioY > finalY + 10;
+
+            if (!hayEspacioAlFondo) {
+                // Opción 2: Si no cabe al fondo, probar justo después de los totales
+                const tarifarioY_flotante = finalY + 10;
+                const cabeFlotante = (tarifarioY_flotante + tarifarioHeight) < (pageHeight - 25);
+
+                if (cabeFlotante) {
+                    tarifarioY = tarifarioY_flotante;
+                } else {
+                    // Opción 3: Nueva página
+                    doc.addPage();
+                    tarifarioY = 20;
+                }
+            }
+
+            doc.setFontSize(10);
+            doc.setFont('helvetica', 'bold');
+            doc.setTextColor(primaryColor);
+            doc.text('TARIFARIO VIGENTE', 20, tarifarioY);
+
+            const tarifarioData = comercio.tarifario.map(t => [
+                t.peso_hasta >= 99999 ? 'Más de 50 kg' : `${t.peso_hasta.toLocaleString('es-AR')} kg`,
+                `$${t.precio_por_km.toLocaleString('es-AR', { minimumFractionDigits: 2 })}`
+            ]);
+
+            autoTable(doc, {
+                startY: tarifarioY + 5,
+                head: [['Peso Hasta', 'Precio por KM']],
+                body: tarifarioData,
+                theme: 'striped',
+                headStyles: {
+                    fillColor: [0, 0, 0],
+                    textColor: 255,
+                    fontSize: 8,
+                    fontStyle: 'bold',
+                    halign: 'center'
+                },
+                bodyStyles: {
+                    fontSize: 7,
+                    textColor: [31, 41, 55],
+                    halign: 'center'
+                },
+                alternateRowStyles: {
+                    fillColor: [249, 250, 251]
+                },
+                columnStyles: {
+                    0: { cellWidth: 40 },
+                    1: { cellWidth: 40 }
+                },
+                margin: { left: 20 },
+                tableWidth: 80 // Tabla compacta
+            });
         }
 
         // Nueva página para detalle de pedidos
@@ -276,7 +395,7 @@ export async function generateInvoicePDF(factura: Factura, comercio: ComercioInf
                     (pedido.id_pedido as number).toString(),
                     formatearEstado(estado),
                     destino,
-                    fechaEntrega ? new Date(fechaEntrega).toLocaleDateString('es-AR') : 'N/A',
+                    fechaEntrega ? new Date(fechaEntrega).toLocaleDateString('es-AR') : 'Entrega pendiente',
                     fechaLimite ? new Date(fechaLimite).toLocaleDateString('es-AR') : 'N/A',
                     (pedido.precio as number).toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
                 ];
