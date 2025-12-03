@@ -2,6 +2,7 @@ import { SendSmtpEmail } from '@getbrevo/brevo'
 import { transactionalEmailsApi, BREVO_CONFIG } from '../brevoConfig'
 import { EmailTemplates } from '../brevoTemplates'
 import { createClient } from '../supabaseServer'
+import { SupabaseClient } from '@supabase/supabase-js'
 
 interface EmailRecipient {
     email: string
@@ -191,9 +192,9 @@ export const BrevoService = {
     },
 
     // Notificar nueva factura generada  
-    async notifyInvoiceGenerated(invoiceId: number) {
+    async notifyInvoiceGenerated(invoiceId: number, supabaseClient?: SupabaseClient) {
         try {
-            const supabase = await createClient()
+            const supabase = supabaseClient || await createClient()
             const { data: invoiceData, error } = await supabase
                 .from('factura')
                 .select(`
