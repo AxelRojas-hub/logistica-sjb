@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabaseServer"
 import { BrevoService } from "@/lib/services/brevoService"
+import { Pedido } from "@/lib/types"
 
 export async function POST(request: NextRequest) {
     try {
@@ -14,6 +15,28 @@ export async function POST(request: NextRequest) {
             return NextResponse.json(
                 { error: "Faltan datos requeridos: legajoChofer, pedidosIncluidos, idRuta, idSucursalOrigen" },
                 { status: 400 }
+            )
+        }
+
+        // 0. Validar que los pedidos no estén ya en un envío activo
+        const idsPedidos = pedidosIncluidos.map((pedido: Pedido) => pedido.idPedido)
+
+        const { data: pedidosExistentes, error: errorValidacion } = await supabase
+            .from("pedido")
+            .select("id_pedido, estado_pedido")
+            .in("id_pedido", idsPedidos)
+
+        if (errorValidacion) {
+            console.error("Error validando pedidos:", errorValidacion)
+            return NextResponse.json({ error: "Error al validar estado de los pedidos" }, { status: 500 })
+        }
+
+        const pedidosYaEnviados = pedidosExistentes?.filter(p => p.estado_pedido === 'en_camino' || p.estado_pedido === 'entregado') || []
+
+        if (pedidosYaEnviados.length > 0) {
+            return NextResponse.json(
+                { error: `Algunos pedidos ya han sido enviados o entregados. Por favor actualice la página.` },
+                { status: 409 }
             )
         }
 
@@ -38,9 +61,6 @@ export async function POST(request: NextRequest) {
         }
 
         const idEnvioCreado = envioCreado.id_envio
-
-        // 2. Extraer los IDs de los pedidos incluidos
-        const idsPedidos = pedidosIncluidos.map(pedido => pedido.idPedido)
 
         // 3. Actualizar los pedidos: asignar id_envio y cambiar estado a 'en_camino'
         const { error: errorPedidos } = await supabase

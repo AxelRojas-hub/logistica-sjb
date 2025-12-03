@@ -21,7 +21,6 @@ export function PedidosAdminContent({ pedidos: initialPedidos, idSucursalAdmin }
     const [orders, setOrders] = useState<Pedido[]>(initialPedidos)
     const [searchTerm, setSearchTerm] = useState("")
     const [statusFilter, setStatusFilter] = useState("all")
-    const [paymentStatusFilter, setPaymentStatusFilter] = useState("all")
     const [invoiceStartMonth, setInvoiceStartMonth] = useState("")
     const [invoiceStartYear, setInvoiceStartYear] = useState("")
     const [invoiceEndMonth, setInvoiceEndMonth] = useState("")
@@ -53,9 +52,6 @@ export function PedidosAdminContent({ pedidos: initialPedidos, idSucursalAdmin }
             pedidoConDetalles.nombreComercio?.toLowerCase().includes(searchTerm.toLowerCase())
 
         const matchesStatus = statusFilter === "all" || order.estadoPedido === statusFilter
-
-        const matchesPaymentStatus = paymentStatusFilter === "all" ||
-            pedidoConDetalles.estadoPago === paymentStatusFilter
 
         // Filtro de período de facturación
         let matchesInvoicePeriod = true
@@ -95,7 +91,7 @@ export function PedidosAdminContent({ pedidos: initialPedidos, idSucursalAdmin }
             }
         }
 
-        return matchesSearch && matchesStatus && matchesPaymentStatus && matchesInvoicePeriod
+        return matchesSearch && matchesStatus && matchesInvoicePeriod
     })
 
     const handleUpdateOrderStatus = async (orderId: number, newStatus: EstadoPedido) => {
@@ -183,23 +179,8 @@ export function PedidosAdminContent({ pedidos: initialPedidos, idSucursalAdmin }
                                 </div>
                             </div>
 
-                            {/* Fila 2: Estado de pago y período de facturación */}
+                            {/* Fila 2: Período de facturación */}
                             <div className="flex gap-4 items-end">
-                                <div className="flex flex-col gap-1">
-                                    <label className="text-xs font-medium text-muted-foreground">Estado Pago</label>
-                                    <Select value={paymentStatusFilter} onValueChange={setPaymentStatusFilter}>
-                                        <SelectTrigger className="w-52">
-                                            <SelectValue placeholder="Filtrar por estado de pago" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            <SelectItem value="all">Todos los pagos</SelectItem>
-                                            <SelectItem value="pagado">Pagado</SelectItem>
-                                            <SelectItem value="pendiente">Pendiente</SelectItem>
-                                            <SelectItem value="vencido">Vencido</SelectItem>
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
                                 {/* Período de facturación - Fecha inicio */}
                                 <div className="flex gap-2">
                                     <div className="flex flex-col gap-1">

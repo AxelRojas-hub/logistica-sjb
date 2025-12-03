@@ -31,6 +31,14 @@ interface BillingReportData {
             cantidadPedidos: number;
             montoFacturado: number;
         }>;
+        pedidos: Array<{
+            idPedido: number;
+            fechaEntrega: string | null;
+            estado: string;
+            monto: number;
+            destino: string;
+            servicio: string;
+        }>;
     }>;
 }
 
@@ -45,6 +53,9 @@ interface PedidoServicioRow {
 interface PedidoRow {
     id_pedido: number;
     precio: number;
+    estado_pedido: string;
+    fecha_entrega: string | null;
+    sucursal: { ciudad_sucursal: string } | null;
     pedido_servicio: PedidoServicioRow[] | { servicio: { nombre_servicio: string }[] }[];
 }
 
@@ -52,6 +63,8 @@ export function BillingReportGenerator() {
     const [startDate, setStartDate] = useState<string>('');
     const [endDate, setEndDate] = useState<string>('');
     const [isGenerating, setIsGenerating] = useState(false);
+
+    const today = new Date().toISOString().split('T')[0];
 
     const fetchBillingData = async (): Promise<BillingReportData | null> => {
         try {
@@ -153,10 +166,26 @@ export function BillingReportGenerator() {
                     cantidadPedidos: number;
                     montoFacturado: number;
                 }>;
+                pedidos: Array<{
+                    idPedido: number;
+                    fechaEntrega: string | null;
+                    estado: string;
+                    monto: number;
+                    destino: string;
+                    servicio: string;
+                }>;
             }> = [];
 
             for (const [, comercioInfo] of comerciosMap) {
                 const serviciosMap = new Map<string, { cantidad: number; monto: number }>();
+                const pedidosList: Array<{
+                    idPedido: number;
+                    fechaEntrega: string | null;
+                    estado: string;
+                    monto: number;
+                    destino: string;
+                    servicio: string;
+                }> = [];
 
                 // Obtener pedidos asociados a las facturas
                 for (const idFactura of comercioInfo.facturaIds) {
@@ -165,6 +194,11 @@ export function BillingReportGenerator() {
                         .select(`
                             id_pedido,
                             precio,
+                            estado_pedido,
+                            fecha_entrega,
+                            sucursal (
+                                ciudad_sucursal
+                            ),
                             pedido_servicio (
                                 servicio (
                                     nombre_servicio
@@ -173,27 +207,41 @@ export function BillingReportGenerator() {
                         `)
                         .eq('id_factura', idFactura);
 
-                    pedidosData?.forEach((pedido: PedidoRow) => {
-                        // Si no tiene servicios adicionales, contar como servicio "Transporte"
-                        if (!pedido.pedido_servicio || pedido.pedido_servicio.length === 0) {
+
+                    pedidosData?.forEach((pedido: unknown) => {
+                        const pedidoTyped = pedido as PedidoRow;
+                        const serviciosDelPedido: string[] = [];                        // Si no tiene servicios adicionales, contar como servicio "Transporte"
+                        if (!pedidoTyped.pedido_servicio || pedidoTyped.pedido_servicio.length === 0) {
                             const key = 'Transporte';
                             const current = serviciosMap.get(key) || { cantidad: 0, monto: 0 };
                             serviciosMap.set(key, {
                                 cantidad: current.cantidad + 1,
-                                monto: current.monto + pedido.precio
+                                monto: current.monto + pedidoTyped.precio
                             });
+                            serviciosDelPedido.push('Transporte');
                         } else {
                             // Procesar cada servicio del pedido
-                            pedido.pedido_servicio.forEach((ps) => {
+                            pedidoTyped.pedido_servicio.forEach((ps) => {
                                 const servicio = Array.isArray(ps.servicio) ? ps.servicio[0] : ps.servicio;
                                 const nombreServicio = servicio?.nombre_servicio || 'Sin especificar';
                                 const current = serviciosMap.get(nombreServicio) || { cantidad: 0, monto: 0 };
                                 serviciosMap.set(nombreServicio, {
                                     cantidad: current.cantidad + 1,
-                                    monto: current.monto + pedido.precio
+                                    monto: current.monto + pedidoTyped.precio
                                 });
+                                serviciosDelPedido.push(nombreServicio);
                             });
                         }
+
+                        // Agregar a la lista de pedidos detallados
+                        pedidosList.push({
+                            idPedido: pedidoTyped.id_pedido,
+                            fechaEntrega: pedidoTyped.fecha_entrega,
+                            estado: pedidoTyped.estado_pedido,
+                            monto: pedidoTyped.precio,
+                            destino: pedidoTyped.sucursal?.ciudad_sucursal || 'N/A',
+                            servicio: serviciosDelPedido.join(', ')
+                        });
                     });
                 }
 
@@ -206,7 +254,8 @@ export function BillingReportGenerator() {
 
                 comerciosDetalle.push({
                     nombreComercio: comercioInfo.nombreComercio,
-                    servicios
+                    servicios,
+                    pedidos: pedidosList
                 });
             }
 
@@ -275,6 +324,7 @@ export function BillingReportGenerator() {
                     <Input
                         type="date"
                         value={startDate}
+                        max={endDate || today}
                         onChange={(e) => setStartDate(e.target.value)}
                     />
                 </div>
@@ -283,6 +333,8 @@ export function BillingReportGenerator() {
                     <Input
                         type="date"
                         value={endDate}
+                        min={startDate}
+                        max={today}
                         onChange={(e) => setEndDate(e.target.value)}
                     />
                 </div>

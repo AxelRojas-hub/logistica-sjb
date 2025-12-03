@@ -83,6 +83,14 @@ interface BillingReportData {
             cantidadPedidos: number;
             montoFacturado: number;
         }>;
+        pedidos?: Array<{
+            idPedido: number;
+            fechaEntrega: string | null;
+            estado: string;
+            monto: number;
+            destino: string;
+            servicio: string;
+        }>;
     }>;
 }
 
@@ -635,6 +643,21 @@ export function downloadDebtReportPDF(data: ReporteMorososData) {
 async function generateBillingReportPDF(data: BillingReportData): Promise<jsPDFConstructor> {
     const doc: jsPDFConstructor = new jsPDF();
 
+    // Fecha y hora en zona horaria de Buenos Aires
+    const now = new Date();
+    const buenosAiresDate = now.toLocaleDateString('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric'
+    });
+    const buenosAiresTime = now.toLocaleTimeString('es-AR', {
+        timeZone: 'America/Argentina/Buenos_Aires',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    });
+
     // Configuración de fuentes y colores
     const primaryColor = '#1f2937'; // gray-800
     const secondaryColor = '#6b7280'; // gray-500
@@ -812,30 +835,102 @@ async function generateBillingReportPDF(data: BillingReportData): Promise<jsPDFC
         yPosition = (doc).lastAutoTable.finalY + 10;
     }
 
-    // Footer
-    doc.setFontSize(8);
-    doc.setTextColor(secondaryColor);
-    doc.text('Este reporte ha sido generado automáticamente por el Sistema Logística SJB', 20, pageHeight - 20);
+    // Páginas detalladas por comercio
+    if (data.comerciosDetalle && data.comerciosDetalle.length > 0) {
+        data.comerciosDetalle.forEach((comercio) => {
+            if (comercio.pedidos && comercio.pedidos.length > 0) {
+                doc.addPage();
 
-    // Fecha y hora en zona horaria de Buenos Aires
-    const now = new Date();
-    const buenosAiresDate = now.toLocaleDateString('es-AR', {
-        timeZone: 'America/Argentina/Buenos_Aires',
-        day: '2-digit',
-        month: '2-digit',
-        year: 'numeric'
-    });
-    const buenosAiresTime = now.toLocaleTimeString('es-AR', {
-        timeZone: 'America/Argentina/Buenos_Aires',
-        hour: '2-digit',
-        minute: '2-digit',
-        hour12: false
-    });
-    doc.text(`Generado el: ${buenosAiresDate} a las ${buenosAiresTime}`, 20, pageHeight - 15);
+                // Header del comercio
+                doc.setFontSize(14);
+                doc.setFont('helvetica', 'bold');
+                doc.setTextColor(primaryColor);
+                doc.text(`DETALLE DE PEDIDOS: ${comercio.nombreComercio.toUpperCase()}`, marginLeft, 20);
 
-    // Línea en el footer
-    doc.setDrawColor(200, 200, 200);
-    doc.line(20, pageHeight - 25, 190, pageHeight - 25);
+                // Subtítulo con resumen del comercio
+                doc.setFontSize(10);
+                doc.setFont('helvetica', 'normal');
+                doc.setTextColor(secondaryColor);
+                const totalComercio = comercio.pedidos.reduce((sum, p) => sum + p.monto, 0);
+                doc.text(`Total Pedidos: ${comercio.pedidos.length} | Monto Total: $${totalComercio.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, marginLeft, 28);
+
+                // Tabla de pedidos
+                const pedidosTableData = comercio.pedidos.map(pedido => [
+                    pedido.idPedido.toString(),
+                    pedido.servicio,
+                    pedido.destino,
+                    pedido.estado.replace('_', ' ').toUpperCase(),
+                    pedido.fechaEntrega ? new Date(pedido.fechaEntrega).toLocaleDateString('es-AR') : '-',
+                    `$${pedido.monto.toLocaleString('es-AR', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`
+                ]);
+
+                autoTable(doc, {
+                    startY: 35,
+                    head: [['ID', 'Servicio', 'Destino', 'Estado', 'Fecha Entrega', 'Monto']],
+                    body: pedidosTableData,
+                    theme: 'striped',
+                    headStyles: {
+                        fillColor: [0, 0, 0],
+                        textColor: [255, 255, 255],
+                        fontSize: 8,
+                        fontStyle: 'bold',
+                        halign: 'center' // Default center, override in didParseCell
+                    },
+                    bodyStyles: {
+                        fontSize: 7,
+                        textColor: [0, 0, 0]
+                    },
+                    alternateRowStyles: {
+                        fillColor: [240, 240, 240]
+                    },
+                    columnStyles: {
+                        0: { halign: 'center', cellWidth: 15 },
+                        1: { halign: 'left', cellWidth: 50 }, // Aumentado para múltiples servicios
+                        2: { halign: 'left', cellWidth: 25 },
+                        3: { halign: 'center', cellWidth: 25 },
+                        4: { halign: 'center', cellWidth: 25 },
+                        5: { halign: 'right', cellWidth: 30 }
+                    },
+                    margin: { left: marginLeft, right: marginRight },
+                    didParseCell: function (data) {
+                        if (data.section === 'head') {
+                            if (data.column.index === 0) data.cell.styles.halign = 'center';
+                            if (data.column.index === 1) data.cell.styles.halign = 'left';
+                            if (data.column.index === 2) data.cell.styles.halign = 'left';
+                            if (data.column.index === 3) data.cell.styles.halign = 'center';
+                            if (data.column.index === 4) data.cell.styles.halign = 'center';
+                            if (data.column.index === 5) data.cell.styles.halign = 'right';
+                        }
+                    }
+                });
+
+                // Footer en cada página de detalle
+                doc.setFontSize(8);
+                doc.setTextColor(secondaryColor);
+                doc.text('Este reporte ha sido generado automáticamente por el Sistema Logística SJB', 20, pageHeight - 20);
+                doc.text(`Generado el: ${buenosAiresDate} a las ${buenosAiresTime}`, 20, pageHeight - 15);
+                doc.setDrawColor(200, 200, 200);
+                doc.line(20, pageHeight - 25, 190, pageHeight - 25);
+            }
+        });
+    }
+
+    // Footer (para la última página si no es de detalle, aunque el loop anterior maneja sus propios footers)
+    // Si la última página fue agregada por el loop, ya tiene footer.
+    // Si no hubo comerciosDetalle, el footer original se aplica a la página de resumen.
+    // Para evitar duplicar footer en la página de resumen si no se agregaron páginas extra:
+    if (!data.comerciosDetalle || data.comerciosDetalle.length === 0) {
+        doc.setFontSize(8);
+        doc.setTextColor(secondaryColor);
+        doc.text('Este reporte ha sido generado automáticamente por el Sistema Logística SJB', 20, pageHeight - 20);
+
+        // Fecha y hora en zona horaria de Buenos Aires
+        doc.text(`Generado el: ${buenosAiresDate} a las ${buenosAiresTime}`, 20, pageHeight - 15);
+
+        // Línea en el footer
+        doc.setDrawColor(200, 200, 200);
+        doc.line(20, pageHeight - 25, 190, pageHeight - 25);
+    }
 
     return doc;
 }

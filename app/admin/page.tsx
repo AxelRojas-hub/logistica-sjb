@@ -12,15 +12,15 @@ import Link from "next/link"
 export default function AdminPage() {
     return (
         <TooltipProvider>
-            <div className="min-h-[85dvh] bg-background pt-4 flex flex-col">
-                <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8">
+            <div className="min-h-[85dvh] bg-background pt-4 flex flex-col justify-center">
+                <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 py-8 w-full">
                     <div className="mb-8 text-center">
                         <h1 className="text-3xl font-bold text-foreground">Panel de Administración</h1>
                         <p className="mt-2 text-muted-foreground">Selecciona una opción para continuar</p>
                     </div>
 
-                    <div className="flex-1 flex items-center justify-center">
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-6 max-w-6xl mx-auto">
+                    <div className="flex items-center justify-center">
+                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 max-w-6xl mx-auto">
                             <Link href="/admin/envios">
                                 <Card className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-blue-500 h-full">
                                     <CardContent className="flex flex-col items-center justify-center p-8 text-center h-full">
@@ -51,7 +51,7 @@ export default function AdminPage() {
                                 </Card>
                             </Link>
 
-                            <Link href="/admin/cuentas">
+                            {/* <Link href="/admin/cuentas">
                                 <Card className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-red-500 h-full">
                                     <CardContent className="flex flex-col items-center justify-center p-8 text-center h-full">
                                         <Users className="h-12 w-12 text-red-600 mb-4" />
@@ -59,7 +59,7 @@ export default function AdminPage() {
                                         <p className="text-muted-foreground">Gestiona cuentas de choferes y administradores</p>
                                     </CardContent>
                                 </Card>
-                            </Link>
+                            </Link> */}
 
                             <Link href="/admin/reportes">
                                 <Card className="cursor-pointer transition-all duration-200 hover:shadow-lg hover:scale-105 border-2 hover:border-purple-500 h-full">

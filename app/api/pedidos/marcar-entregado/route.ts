@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server"
 import { createClient } from "@/lib/supabaseServer"
+import { BrevoService } from "@/lib/services/brevoService"
 
 export async function POST(request: NextRequest) {
     try {
@@ -65,8 +66,8 @@ export async function POST(request: NextRequest) {
 
         const { error: updateError } = await supabase
             .from("pedido")
-            .update({ 
-                estado_pedido: "entregado", 
+            .update({
+                estado_pedido: "entregado",
                 fecha_entrega: fechaEntrega.toISOString(),
                 precio: precioFinal
             })
@@ -80,7 +81,10 @@ export async function POST(request: NextRequest) {
             )
         }
 
-        return NextResponse.json({ success: true })
+        // Enviar notificación por correo
+        await BrevoService.notifyOrderDelivered(idPedido)
+
+        return NextResponse.json({ success: true, precioFinal })
 
     } catch (error) {
         console.error("Error interno:", error)

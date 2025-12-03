@@ -48,7 +48,6 @@ export default function OrdersTable({ orders, onUpdateStatus, onSelectOrder, idS
                             <TableHead className="text-center">Cliente DNI</TableHead>
                             <TableHead className="text-right">Precio</TableHead>
                             <TableHead className="text-center">Período Facturación</TableHead>
-                            <TableHead className="text-center">Estado Pago</TableHead>
                             <TableHead className="text-center">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
@@ -72,19 +71,6 @@ export default function OrdersTable({ orders, onUpdateStatus, onSelectOrder, idS
                                         {pedidoConDetalles.periodoFacturacion ? (
                                             <span className="text-sm text-muted-foreground">
                                                 {pedidoConDetalles.periodoFacturacion}
-                                            </span>
-                                        ) : (
-                                            <span className="text-sm text-muted-foreground">—</span>
-                                        )}
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        {pedidoConDetalles.estadoPago ? (
-                                            <span className={`text-sm font-medium px-2 py-1 rounded-md ${pedidoConDetalles.estadoPago === 'pagado' ? 'bg-green-100 text-green-800' :
-                                                    pedidoConDetalles.estadoPago === 'pendiente' ? 'bg-yellow-100 text-yellow-800' :
-                                                        pedidoConDetalles.estadoPago === 'vencido' ? 'bg-red-100 text-red-800' :
-                                                            'bg-gray-100 text-gray-800'
-                                                }`}>
-                                                {pedidoConDetalles.estadoPago.charAt(0).toUpperCase() + pedidoConDetalles.estadoPago.slice(1)}
                                             </span>
                                         ) : (
                                             <span className="text-sm text-muted-foreground">—</span>
