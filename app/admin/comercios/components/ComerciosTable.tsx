@@ -4,6 +4,7 @@ import { useState } from "react"
 import { Card } from "@/components/ui/card"
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
+import { Input } from "@/components/ui/input"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip"
 import { Eye, FileText, AlertTriangle } from "lucide-react"
@@ -27,6 +28,13 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
     const [selectedComercio, setSelectedComercio] = useState<ComercioWithDetails | null>(null)
     const [isDetailsDialogOpen, setIsDetailsDialogOpen] = useState(false)
     const [isHistorialPedidosDialogOpen, setIsHistorialPedidosDialogOpen] = useState(false)
+    const [searchTerm, setSearchTerm] = useState("")
+
+    const filteredComercios = comercios.filter(comercio =>
+        comercio.nombreComercio.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        comercio.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        comercio.domicilioFiscal.toLowerCase().includes(searchTerm.toLowerCase())
+    )
 
     const handleViewDetails = (comercio: ComercioWithDetails) => {
         setSelectedComercio(comercio)
@@ -56,23 +64,25 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                 return "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
             case "cancelado":
                 return "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
+            case "habilitado":
+                return "bg-green-100 text-green-800 dark:bg-green-900/50 dark:text-green-300"
+            case "deshabilitado":
+                return "bg-red-100 text-red-800 dark:bg-red-900/50 dark:text-red-300"
             default:
                 return "bg-muted text-muted-foreground"
         }
     }
 
-    const calculateDeudaTotal = (facturas: Factura[]) => {
-        return facturas
-            .filter((f) => f.estadoPago !== "pagado")
-            .reduce((sum, f) => sum + f.importeTotal, 0)
-    }
-
-    const calculateFacturasVencidas = (facturas: Factura[]) => {
-        return facturas.filter((f) => f.estadoPago === "vencido").length
-    }
-
     return (
         <TooltipProvider>
+            <div className="flex justify-start mb-4">
+                <Input
+                    placeholder="Buscar por nombre, email o domicilio..."
+                    className="w-full sm:w-80"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
             <Card className="overflow-hidden w-full">
                 <div className="overflow-x-auto">
                     <Table className="w-full">
@@ -82,12 +92,11 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                                 <TableHead>Contacto</TableHead>
                                 <TableHead className="text-center">Contrato</TableHead>
                                 <TableHead className="text-center">Estado Comercio</TableHead>
-                                <TableHead className="text-center">Deuda</TableHead>
                                 <TableHead className="text-center">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
-                            {comercios.map((comercio) => (
+                            {filteredComercios.map((comercio) => (
                                 <TableRow key={comercio.idComercio} className="hover:bg-accent/50">
                                     <TableCell>
                                         <div>
@@ -133,21 +142,6 @@ export function ComerciosTable({ comercios }: ComerciosTableProps) {
                                             >
                                                 {comercio.estadoComercio}
                                             </Badge>
-                                        </div>
-                                    </TableCell>
-                                    <TableCell className="text-center">
-                                        <div className="flex flex-col items-center">
-                                            <p className="text-sm font-medium">
-                                                ${calculateDeudaTotal(comercio.facturas).toLocaleString()}
-                                            </p>
-                                            <div className="flex items-center gap-1 mt-1">
-                                                {calculateFacturasVencidas(comercio.facturas) > 0 && (
-                                                    <Badge variant="destructive" className="text-xs">
-                                                        <AlertTriangle className="h-3 w-3 mr-1" />
-                                                        {calculateFacturasVencidas(comercio.facturas)}
-                                                    </Badge>
-                                                )}
-                                            </div>
                                         </div>
                                     </TableCell>
                                     <TableCell className="text-center">

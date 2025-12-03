@@ -107,9 +107,6 @@ export default async function AdminComerciosPage() {
                 <div className="space-y-6">
                     <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-center">
                         <h2 className="text-2xl font-semibold text-foreground">Lista de Comercios</h2>
-                        <div className="flex gap-2 w-full sm:w-auto">
-                            <Input placeholder="Buscar comercio..." className="w-full sm:w-64" />
-                        </div>
                     </div>
 
                     <div className="bg-accent/50 p-3 rounded-lg">

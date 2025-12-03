@@ -42,7 +42,7 @@ export function ComercioHistorialPedidosDialog({
     }
 
     const formatDate = (dateString: string | null) => {
-        if (!dateString) return '-'
+        if (!dateString) return 'Entrega pendiente'
         return new Date(dateString).toLocaleDateString('es-AR')
     }
 
@@ -73,9 +73,9 @@ export function ComercioHistorialPedidosDialog({
                             </div>
                             <div className="text-center">
                                 <div className="text-2xl font-bold text-blue-600">
-                                    {comercio.pedidos?.filter(p => 
-                                        p.estadoPedido === 'en_preparacion' || 
-                                        p.estadoPedido === 'en_camino' || 
+                                    {comercio.pedidos?.filter(p =>
+                                        p.estadoPedido === 'en_preparacion' ||
+                                        p.estadoPedido === 'en_camino' ||
                                         p.estadoPedido === 'en_sucursal'
                                     ).length || 0}
                                 </div>
@@ -88,7 +88,6 @@ export function ComercioHistorialPedidosDialog({
                                     <TableHeader>
                                         <TableRow>
                                             <TableHead>N° Pedido</TableHead>
-                                            <TableHead>Fecha Registro</TableHead>
                                             <TableHead>Estado Actual</TableHead>
                                             <TableHead>Sucursal Origen</TableHead>
                                             <TableHead>Sucursal Destino</TableHead>
@@ -101,11 +100,6 @@ export function ComercioHistorialPedidosDialog({
                                                 <TableRow key={`pedido-${pedido.idPedido}`}>
                                                     <TableCell className="font-medium">
                                                         #{pedido.idPedido}
-                                                    </TableCell>
-                                                    <TableCell>
-                                                        -
-                                                        {/* {formatDate(pedido.fechaRegistro)} */}
-                                                        {/* TODO Hace falta un campo 'fecha_registro' en la BD  */}
                                                     </TableCell>
                                                     <TableCell>
                                                         <OrderStatusBadge status={pedido.estadoPedido} />
@@ -123,7 +117,7 @@ export function ComercioHistorialPedidosDialog({
                                             ))
                                         ) : (
                                             <TableRow key="no-pedidos">
-                                                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
+                                                <TableCell colSpan={5} className="text-center py-8 text-muted-foreground">
                                                     Este comercio no tiene pedidos registrados
                                                 </TableCell>
                                             </TableRow>
